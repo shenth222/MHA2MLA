@@ -1,0 +1,5 @@
+partial_rope_version: 3
+top_k_rope_dim: 16
+last_k_rope_dim: 48
+uniform_start_point: 0
+uniform_step: 8
