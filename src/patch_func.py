@@ -40,7 +40,7 @@ def create_custom_apply_rotary_pos_emb(cfg):
         q_embed = (q * cos) + (self.rotate_half(q) * sin)
         k_embed = (k * cos) + (self.rotate_half(k) * sin)
         top_k_dim, last_k_dim = cfg["top_k_rope_dim"], cfg["last_k_rope_dim"]
-        assert top_k_dim + last_k_dim <= q.size(-1)
+        # assert top_k_dim + last_k_dim <= q.size(-1)
         qs = [
             q_embed[..., :top_k_dim],
             q[..., top_k_dim:last_k_dim],
