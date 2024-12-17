@@ -55,12 +55,27 @@ def create_custom_apply_rotary_pos_emb(cfg):
         k_embed = torch.cat([k for k in ks if k!=[]], -1)
         return q_embed, k_embed
 
+    def apply_rotary_pos_emb_v5(self, q, k, cos, sin, unsqueeze_dim=2):
+        cos = cos.unsqueeze(unsqueeze_dim)
+        sin = sin.unsqueeze(unsqueeze_dim)
+        q_embed = (q * cos) + (self.rotate_half(q) * sin)
+        k_embed = (k * cos) + (self.rotate_half(k) * sin)
+        keep_dim = cfg["last_k_rope_dim"]
+        if keep_dim >= q.size(-1):
+            return q, k
+        elif keep_dim <= 0:
+            return q_embed, k_embed
+        q_embed = torch.cat((q[..., :keep_dim], q_embed[..., keep_dim:]), -1)
+        k_embed = torch.cat((k[..., :keep_dim], k_embed[..., keep_dim:]), -1)
+        return q_embed, k_embed
+
     version = cfg["partial_rope_version"]
     versions = {
         0: apply_rotary_pos_emb_v0,
         1: apply_rotary_pos_emb_v1,
         2: apply_rotary_pos_emb_v2,
         3: apply_rotary_pos_emb_v3,
+        5: apply_rotary_pos_emb_v5,
     }
     return versions.get(version, apply_rotary_pos_emb_v0)
 

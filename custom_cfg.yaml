@@ -1,4 +1,4 @@
-partial_rope_version: 3  # 0 1 2 3
+partial_rope_version: 5  # 0 1 2 3
 top_k_rope_dim: 16
 last_k_rope_dim: 48
 uniform_start_point: 0
