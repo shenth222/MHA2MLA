@@ -7,13 +7,23 @@ export CUDA_DEVICE_MAX_CONNECTIONS=1 # important for some distributed operations
 torchrun --nproc_per_node=8 run_train.py --config-file examples/config_tiny_llama.yaml
 ```
 """
+
 import argparse
 import yaml
 from typing import Dict, cast
+from types import MethodType
+import seaborn as sns
+import torch
 
 import numpy as np
+import matplotlib.pyplot as plt
 from nanotron import logging
-from nanotron.config import DataArgs, DatasetStageArgs, NanosetDatasetsArgs, PretrainDatasetsArgs
+from nanotron.config import (
+    DataArgs,
+    DatasetStageArgs,
+    NanosetDatasetsArgs,
+    PretrainDatasetsArgs,
+)
 from nanotron.data.dataloader_builder import build_nanoset_dataloader
 from nanotron.dataloader import (
     clm_process,
@@ -55,15 +65,21 @@ def get_dataloader_from_data_stage(
     consumed_train_samples: The number of samples consumed by the model in the this stage (each stage starts from zero).
     num_remaining_train_steps: The number of remaining training steps for this stage.
     """
-    assert consumed_train_samples >= 0, "consumed_train_samples should be greater than 0"
-    assert num_remaining_train_steps >= 0, "num_remaining_train_steps should be greater than 0"
+    assert (
+        consumed_train_samples >= 0
+    ), "consumed_train_samples should be greater than 0"
+    assert (
+        num_remaining_train_steps >= 0
+    ), "num_remaining_train_steps should be greater than 0"
 
     # First, we need to know which ranks to feed the dataloader to
     input_pp_rank, output_pp_rank = get_input_output_pp_ranks(model=trainer.model)
 
     # Case 1: Dummy data generator
     if data.dataset is None:
-        log_rank("Using dummy data generator", logger=logger, level=logging.INFO, rank=0)
+        log_rank(
+            "Using dummy data generator", logger=logger, level=logging.INFO, rank=0
+        )
         dataloader = dummy_infinite_data_generator(
             micro_batch_size=trainer.micro_batch_size,
             sequence_length=trainer.sequence_length,
@@ -133,7 +149,9 @@ def get_dataloader_from_data_stage(
             # Check if we have enough samples for train_steps
             total_tokens_dataset = len(dataloader.dataset) * trainer.sequence_length
             num_tokens_needed_for_training = (
-                num_remaining_train_steps * trainer.global_batch_size * trainer.sequence_length
+                num_remaining_train_steps
+                * trainer.global_batch_size
+                * trainer.sequence_length
             )
             assert num_tokens_needed_for_training <= total_tokens_dataset, (
                 f"Dataset is too small for steps ({total_tokens_dataset} < {num_tokens_needed_for_training}), "
@@ -143,7 +161,9 @@ def get_dataloader_from_data_stage(
     # Case 3: Nanosets
     elif isinstance(data.dataset, NanosetDatasetsArgs):
         # Get tokenizer cardinality
-        tokenizer = AutoTokenizer.from_pretrained(trainer.config.tokenizer.tokenizer_name_or_path)
+        tokenizer = AutoTokenizer.from_pretrained(
+            trainer.config.tokenizer.tokenizer_name_or_path
+        )
         token_size = 4 if len(tokenizer) > np.iinfo(np.uint16).max + 1 else 2
         del tokenizer
         # Create Nanoset
@@ -155,7 +175,8 @@ def get_dataloader_from_data_stage(
                 dataset_weights=data.dataset.dataset_weights,
                 sequence_length=trainer.sequence_length,
                 token_size=token_size,
-                train_split_num_samples=trainer.config.tokens.train_steps * trainer.global_batch_size,
+                train_split_num_samples=trainer.config.tokens.train_steps
+                * trainer.global_batch_size,
                 random_seed=data.seed,
             )
 
@@ -174,7 +195,9 @@ def get_dataloader_from_data_stage(
 
         return train_dataloader
     else:
-        raise ValueError(f"Unhandled case of `self.config.data.dataset`. Got: {data.dataset}")
+        raise ValueError(
+            f"Unhandled case of `self.config.data.dataset`. Got: {data.dataset}"
+        )
 
     return dataloader
 
@@ -186,7 +209,9 @@ def get_dataloader(trainer: DistributedTrainer) -> Dict[str, DataLoader]:
         # NOTE: we only create the dataloader for the first stage,
         # then we lazy initialize the dataloader for the other stages
         stage = cast(DatasetStageArgs, stage)
-        consumed_train_samples = get_consumed_train_samples_of_a_data_stage_from_ckp(stage, trainer.metadata)
+        consumed_train_samples = get_consumed_train_samples_of_a_data_stage_from_ckp(
+            stage, trainer.metadata
+        )
         assert (
             consumed_train_samples is not None
         ), f"Cannot find consumed_train_samples for stage {stage.start_training_step} in the checkpoint"
@@ -222,28 +247,221 @@ def get_dataloader(trainer: DistributedTrainer) -> Dict[str, DataLoader]:
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config-file", type=str, required=True, help="Path to the YAML or python config file")
+    parser.add_argument(
+        "--config-file",
+        type=str,
+        required=True,
+        help="Path to the YAML or python config file",
+    )
     return parser.parse_args()
+
+
+query_states_dict = {}
+key_states_dict = {}
+
+from typing import Optional, Tuple, Union
+
+
+def get_rotary_forward(module_name):
+    def my_rotary_forward(
+        self,
+        qkv: torch.Tensor,
+        kv: Optional[torch.Tensor] = None,
+        seqlen_offset: Union[int, torch.Tensor] = 0,
+        max_seqlen: Optional[int] = None,
+        num_heads_q: Optional[int] = None,
+    ) -> Union[torch.Tensor, Tuple[torch.Tensor, torch.Tensor]]:
+        global query_states_dict
+        global key_states_dict
+        query_states_dict[module_name] = qkv
+        key_states_dict[module_name] = torch.split(kv, 1, dim=2)[0]
+        return self._forward(qkv, kv, seqlen_offset, max_seqlen, num_heads_q)
+
+    return my_rotary_forward
+
+
+def flatten_avg_query_key_states(query_states: dict, key_states: dict):
+    max_num_heads = max(
+        list(query_states_dict.values())[0].shape[2],
+        list(key_states_dict.values())[0].shape[2],
+    )
+
+    def flatten_dict(states: dict):
+        f_states = []
+        for k, v in states.items():
+            item = []
+            v = v.squeeze()
+            v = torch.norm(
+                v.reshape(v.shape[0], v.shape[1], v.shape[2], 2, -1).transpose(-1, -2),
+                p=2,
+                dim=4,
+            )
+            block_size = max_num_heads // v.shape[2]
+            for i in range(max_num_heads):
+                idx = i // block_size
+                head_i = v[:, :, idx, :]
+                item.append(
+                    torch.mean(
+                        head_i.reshape(v.shape[0] * v.shape[1], -1),
+                        dim=0,
+                        keepdim=False,
+                    )
+                    .to(dtype=torch.float32)
+                    .cpu()
+                )
+            k = k.split(".")[2]
+            f_states.append(torch.stack(item))
+        return torch.stack(f_states)
+
+    return flatten_dict(query_states), flatten_dict(key_states)
+
+
+def old_visualize(query_states, key_states):
+    dir = "/home/binguo/data/MLA-FN/iamges/2-norm"
+    for k1, v in key_states.items():
+        for k2, t in v.items():
+            print(t.shape)
+            t = t.to(torch.float32).detach().cpu().numpy()
+            plt.bar(range(1, len(t) + 1), t)
+            plt.xlabel("d_dim")  # x 轴标签
+            plt.ylabel("2-norm")  # y 轴标签
+            plt.savefig(f"{dir}/key_layer{k1}_head{k2}.png")
+            plt.xticks(range(1, t.size + 1))  # 从1开始递增，假设 bins=30
+            plt.close()
+
+    for k1, v in query_states.items():
+        for k2, t in v.items():
+            t = t.to(torch.float32).detach().cpu().numpy()
+            plt.bar(range(1, len(t) + 1), t)
+            plt.xlabel("d_dim")
+            plt.ylabel("2-norm")
+            plt.savefig(f"{dir}/query_layer{k1}_head{k2}.png")
+            plt.xticks(range(1, t.size + 1))  # 从1开始递增，假设 bins=30
+            plt.close()
+
+
+def get_fig_ax():
+    r, c = 4, 3
+    fig, axes = plt.subplots(r, c, figsize=(c * 4, r * 2))
+    axes = axes.flatten()
+    return fig, axes
+
+
+def visualize(query_states, key_states):
+    dir = "/home/binguo/data/MLA-FN/iamges/2-norm"
+    num_layers = query_states.shape[0]
+    # query
+    for idx in range(0, num_layers, 12):
+        st, ed = idx, min(idx + 12, num_layers)
+        fig, axes = get_fig_ax()
+        for i in range(0, 12):
+            if i + st >= ed:
+                break
+            # 获取数据
+            data = query_states[i + st].numpy()
+            sns.heatmap(
+                data,
+                ax=axes[i],
+                cmap="Greens",
+                xticklabels=False,  # 关闭默认横轴标签
+                yticklabels=False,  # 关闭默认纵轴标签
+            )
+            axes[i].set_title(f"Layer {i + 1}")
+
+            # 自定义横轴刻度标签，显示每隔一定间隔的刻度
+            xticks = range(
+                0, data.shape[1], max(1, data.shape[1] // 6)
+            )  # 每隔若干步显示一个
+            axes[i].set_xticks(xticks)
+            axes[i].set_xticklabels([str(x) for x in xticks], rotation=45)
+
+            # 自定义纵轴刻度标签，使其从上到下递减
+            yticks = range(data.shape[0])
+            axes[i].set_yticks(yticks)
+            axes[i].set_yticklabels([str(y) for y in reversed(yticks)])  # 倒序显示
+
+        fig.suptitle("Query x:n_dim y:head")
+        fig.tight_layout()  # 自动调整子图的间距
+        fig.savefig(f"{dir}/query_layer{st}_{ed}.png")
+
+    # key
+    for idx in range(0, num_layers, 12):
+        st, ed = idx, min(idx + 12, num_layers)
+        fig, axes = get_fig_ax()
+        for i in range(0, 12):
+            if i + st >= ed:
+                break
+            # 获取数据
+            data = key_states[i + st].numpy()
+            sns.heatmap(
+                data,
+                ax=axes[i],
+                cmap="Greens",
+                xticklabels=False,  # 关闭默认横轴标签
+                yticklabels=False,  # 关闭默认纵轴标签
+            )
+            axes[i].set_title(f"Layer {i + 1}")
+
+            # 自定义横轴刻度标签，显示每隔一定间隔的刻度
+            xticks = range(
+                0, data.shape[1], max(1, data.shape[1] // 6)
+            )  # 每隔若干步显示一个
+            axes[i].set_xticks(xticks)
+            axes[i].set_xticklabels([str(x) for x in xticks], rotation=45)
+
+            # 自定义纵轴刻度标签，使其从上到下递减
+            yticks = range(data.shape[0])
+            axes[i].set_yticks(yticks)
+            axes[i].set_yticklabels([str(y) for y in reversed(yticks)])  # 倒序显示
+
+        fig.suptitle("Key x:n_dim y:head")
+        fig.tight_layout()  # 自动调整子图的间距
+        fig.savefig(f"{dir}/key_layer{st}_{ed}.png")
 
 
 if __name__ == "__main__":
     args = get_args()
     config_file = args.config_file
 
-    # Monkey patch
-    from nanotron.models.llama import CausalSelfAttention, LlamaRotaryEmbedding
-    from src.patch_func import custom_llama_forward, create_custom_apply_rotary_pos_emb
-    with open('custom_cfg.yaml', 'r') as f:
-        cfg = yaml.safe_load(f)
-    
-    LlamaRotaryEmbedding.apply_rotary_pos_emb = create_custom_apply_rotary_pos_emb(cfg)
-    #(cfg['partial_rope_version'])
-    CausalSelfAttention.forward = custom_llama_forward
-    # Load trainer and data
     trainer = DistributedTrainer(config_file)
-    # print(trainer.unwrapped_model.config.rope_interleaved)
+    model = trainer.model
     dataloader = get_dataloader(trainer)
+    dataloader = list(dataloader.values())[0]
+    model.eval()
+    model.to("cuda")
+    from flash_attn.layers.rotary import RotaryEmbedding as FlashRotaryEmbedding
+
+    for name, module in model.named_modules():
+        module.to("cuda")
+        if not isinstance(module, FlashRotaryEmbedding):
+            continue
+        module._forward = module.forward
+        module.forward = MethodType(get_rotary_forward(module_name=name), module)
+
+    num=128
+    query_states=[]
+    key_states=[]
+    with torch.no_grad():
+        for batch in dataloader:
+            batch = {key: value.to("cuda") for key, value in batch.items()}
+            print(model(**batch))
+            query, key = flatten_avg_query_key_states(
+                query_states_dict, key_states_dict
+            )
+            query_states.append(query)
+            key_states.append(key)
+            query_states_dict.clear()
+            key_states_dict.clear()
+            num -= 1
+            if num == 0:
+                break
+    # hidden_states:[bsz, seqlen, num_heads, head_dim] 8 2048 9 64
+
     
-    # LlamaRotaryEmbedding.partial_rope_cfg = cfg
-    # Train
-    trainer.train(dataloader)
+    query_states = torch.stack(query_states)
+    key_states = torch.stack(key_states)
+    print(query_states.shape)
+    print(key_states.shape)
+    query_states = torch.mean(query_states, dim=0,keepdim=False)
+    key_states = torch.mean(key_states, dim=0,keepdim=False)
+    visualize(query_states, key_states)
