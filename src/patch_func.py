@@ -25,8 +25,25 @@ def create_custom_apply_rotary_pos_emb(cfg):
             return q, k
         elif keep_dim >= q.size(-1):
             return q_embed, k_embed
-        q_embed = torch.cat((q_embed[..., :keep_dim], q[..., keep_dim:]), -1)
-        k_embed = torch.cat((k_embed[..., :keep_dim], k[..., keep_dim:]), -1)
+        half = q.size(-1) // 2
+        q_embed = torch.cat(
+            (
+                q_embed[..., :keep_dim],
+                q[..., keep_dim:half],
+                q_embed[..., half : half + keep_dim],
+                q[..., half + keep_dim :],
+            ),
+            -1,
+        )
+        k_embed = torch.cat(
+            (
+                k_embed[..., :keep_dim],
+                k[..., keep_dim:half],
+                k_embed[..., half : half + keep_dim],
+                k[..., half + keep_dim :],
+            ),
+            -1,
+        )
         return q_embed, k_embed
 
     def apply_rotary_pos_emb_v2(self, q, k, cos, sin, unsqueeze_dim=2):
@@ -48,15 +65,20 @@ def create_custom_apply_rotary_pos_emb(cfg):
         k_embed = (k * cos) + (self.rotate_half(k) * sin)
         top_k_dim, last_k_dim = cfg["top_k_rope_dim"], cfg["last_k_rope_dim"]
         # assert top_k_dim + last_k_dim <= q.size(-1)
+        half = q.size(-1) // 2
         qs = [
             q_embed[..., :top_k_dim],
-            q[..., top_k_dim:last_k_dim],
-            q_embed[..., last_k_dim:],
+            q[..., top_k_dim : half - last_k_dim],
+            q_embed[..., half - last_k_dim : half + top_k_dim],
+            q[..., half + top_k_dim : half + half - last_k_dim],
+            q_embed[..., half + half - last_k_dim :],
         ]
         ks = [
             k_embed[..., :top_k_dim],
-            k[..., top_k_dim:last_k_dim],
-            k_embed[..., last_k_dim:],
+            k[..., top_k_dim : half - last_k_dim],
+            k_embed[..., half - last_k_dim : half + top_k_dim],
+            k[..., half + top_k_dim : half + half - last_k_dim],
+            k_embed[..., half + half - last_k_dim :],
         ]
         q_embed = torch.cat([q for q in qs if q != []], -1)
         k_embed = torch.cat([k for k in ks if k != []], -1)
