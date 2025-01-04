@@ -1,0 +1,3 @@
+[submodule "modules/nanotron"]
+	path = modules/nanotron
+	url = https://github.com/huggingface/nanotron.git
