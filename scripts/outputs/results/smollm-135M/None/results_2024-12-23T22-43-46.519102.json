@@ -1,0 +1,102 @@
+{
+  "config_general": {
+    "lighteval_sha": "?",
+    "num_fewshot_seeds": 1,
+    "override_batch_size": 8,
+    "max_samples": null,
+    "job_id": 0,
+    "start_time": 12651491.344519816,
+    "end_time": 12651519.096960405,
+    "total_evaluation_time_secondes": "27.75244058854878",
+    "model_name": "smollm-135M/None",
+    "model_sha": null,
+    "model_dtype": null,
+    "model_size": null
+  },
+  "results": {
+    "custom|openbook_qa|0": {
+      "acc_norm": 0.296,
+      "acc_norm_stderr": 0.020435342091896135
+    },
+    "all": {
+      "acc_norm": 0.296,
+      "acc_norm_stderr": 0.020435342091896135
+    }
+  },
+  "versions": {
+    "custom|openbook_qa|0": 0
+  },
+  "config_tasks": {
+    "custom|openbook_qa": {
+      "name": "openbook_qa",
+      "prompt_function": "openbookqa",
+      "hf_repo": "allenai/openbookqa",
+      "hf_subset": "main",
+      "metric": [
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": "388097ea7776314e93a529163e0fea805b8a6454",
+      "hf_filter": null,
+      "hf_avail_splits": [
+        "train",
+        "validation",
+        "test"
+      ],
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "validation"
+      ],
+      "few_shots_split": null,
+      "few_shots_select": null,
+      "generation_size": null,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 500,
+      "effective_num_docs": 500,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    }
+  },
+  "summary_tasks": {
+    "custom|openbook_qa|0": {
+      "hashes": {
+        "hash_examples": "fd427af2ef0577e3",
+        "hash_full_prompts": "fd427af2ef0577e3",
+        "hash_input_tokens": "8ef3cb752e8b2270",
+        "hash_cont_tokens": "fb053ea5ab84f3c6"
+      },
+      "truncated": 0,
+      "non_truncated": 500,
+      "padded": 1999,
+      "non_padded": 1,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    }
+  },
+  "summary_general": {
+    "hashes": {
+      "hash_examples": "fba92cf7da1c140f",
+      "hash_full_prompts": "fba92cf7da1c140f",
+      "hash_input_tokens": "b1aad7b1196fb9ca",
+      "hash_cont_tokens": "7bae137f423f1f8a"
+    },
+    "truncated": 0,
+    "non_truncated": 500,
+    "padded": 1999,
+    "non_padded": 1,
+    "num_truncated_few_shots": 0
+  }
+}
