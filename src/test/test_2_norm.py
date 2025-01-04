@@ -12,6 +12,7 @@ import argparse
 import yaml
 from typing import Dict, cast
 from types import MethodType
+import pickle
 import seaborn as sns
 import torch
 
@@ -288,9 +289,10 @@ def flatten_avg_query_key_states(query_states: dict, key_states: dict):
 
     def flatten_dict(states: dict):
         f_states = []
-        for k, v in states.items():
+        for k, v in states.items(): # states: {module_name: hidden_states}
             item = []
-            v = v.squeeze()
+            v = v.squeeze() # bsz,seqlen,head,head_dim
+            v = v[:, :4, :, :]
             v = torch.norm(
                 v.reshape(v.shape[0], v.shape[1], v.shape[2], 2, -1).transpose(-1, -2),
                 p=2,
@@ -309,35 +311,10 @@ def flatten_avg_query_key_states(query_states: dict, key_states: dict):
                     .to(dtype=torch.float32)
                     .cpu()
                 )
-            k = k.split(".")[2]
             f_states.append(torch.stack(item))
         return torch.stack(f_states)
 
     return flatten_dict(query_states), flatten_dict(key_states)
-
-
-def old_visualize(query_states, key_states):
-    dir = "/home/binguo/data/MLA-FN/iamges/2-norm"
-    for k1, v in key_states.items():
-        for k2, t in v.items():
-            print(t.shape)
-            t = t.to(torch.float32).detach().cpu().numpy()
-            plt.bar(range(1, len(t) + 1), t)
-            plt.xlabel("d_dim")  # x 轴标签
-            plt.ylabel("2-norm")  # y 轴标签
-            plt.savefig(f"{dir}/key_layer{k1}_head{k2}.png")
-            plt.xticks(range(1, t.size + 1))  # 从1开始递增，假设 bins=30
-            plt.close()
-
-    for k1, v in query_states.items():
-        for k2, t in v.items():
-            t = t.to(torch.float32).detach().cpu().numpy()
-            plt.bar(range(1, len(t) + 1), t)
-            plt.xlabel("d_dim")
-            plt.ylabel("2-norm")
-            plt.savefig(f"{dir}/query_layer{k1}_head{k2}.png")
-            plt.xticks(range(1, t.size + 1))  # 从1开始递增，假设 bins=30
-            plt.close()
 
 
 def get_fig_ax():
@@ -348,7 +325,7 @@ def get_fig_ax():
 
 
 def visualize(query_states, key_states):
-    dir = "/home/binguo/data/MLA-FN/iamges/2-norm"
+    dir = "/home/binguo/data/MLA-FT/images/2-norm"
     num_layers = query_states.shape[0]
     # query
     for idx in range(0, num_layers, 12):
@@ -419,10 +396,12 @@ def visualize(query_states, key_states):
         fig.savefig(f"{dir}/key_layer{st}_{ed}.png")
 
 
-if __name__ == "__main__":
+
+
+
+def main():
     args = get_args()
     config_file = args.config_file
-
     trainer = DistributedTrainer(config_file)
     model = trainer.model
     dataloader = get_dataloader(trainer)
@@ -437,7 +416,6 @@ if __name__ == "__main__":
             continue
         module._forward = module.forward
         module.forward = MethodType(get_rotary_forward(module_name=name), module)
-
     num=128
     query_states=[]
     key_states=[]
@@ -462,6 +440,54 @@ if __name__ == "__main__":
     key_states = torch.stack(key_states)
     print(query_states.shape)
     print(key_states.shape)
+    query_states = torch.mean(query_states, dim=0,keepdim=False) # [n_layer][n_head][n_dim/2]
+    key_states = torch.mean(key_states, dim=0,keepdim=False)
+    visualize(query_states, key_states)
+    qk_states = query_states+key_states
+    with open("/home/binguo/data/MLA-FT/images/2-norm/qk_tensor.pkl", "wb") as f:
+        pickle.dump(qk_states, f)
+
+
+def main_llama3():
+    args = get_args()
+    config_file = args.config_file
+    trainer = DistributedTrainer(config_file)
+    dataloader = get_dataloader(trainer)
+    dataloader = list(dataloader.values())[0]
+    del trainer
+    from transformers import AutoModelForCausalLM
+    model=AutoModelForCausalLM.from_pretrained("/home/binguo/data/models/meta-llama/Llama-3.1-8B",device="auto",dtype=torch.bfloat16).eval()
+    tokenizer_smollm=AutoTokenizer.from_pretrained("EleutherAI/smollm")
+    tokenizer_llama=AutoTokenizer.from_pretrained("/home/binguo/data/models/meta-llama/Llama-3.1-8B")
+    num=128
+    query_states=[]
+    key_states=[]
+    with torch.no_grad():
+        for batch in dataloader:
+            batch["input_ids"]=tokenizer_smollm.decode(batch["input_ids"])
+            batch["input_ids"]=tokenizer_llama(batch["input_ids"],return_tensors="pt")["input_ids"]
+            batch = {key: value.to("cuda") for key, value in batch.items()}
+            print(model(batch["input_ids"]))
+            query, key = flatten_avg_query_key_states(
+                query_states_dict, key_states_dict
+            )
+            query_states.append(query)
+            key_states.append(key)
+            query_states_dict.clear()
+            key_states_dict.clear()
+            num -= 1
+            if num == 0:
+                break
+    # hidden_states:[bsz, seqlen, num_heads, head_dim] 8 2048 9 64
+
+    query_states = torch.stack(query_states)
+    key_states = torch.stack(key_states)
+    print(query_states.shape)
+    print(key_states.shape)
     query_states = torch.mean(query_states, dim=0,keepdim=False)
     key_states = torch.mean(key_states, dim=0,keepdim=False)
     visualize(query_states, key_states)
+
+
+if __name__ == "__main__":
+    main()

@@ -23,7 +23,7 @@ def run(current_path: Path):
     def compute_avg_acc_of_a_benchmark(data, benchmark_prefix):
         sum_acc, sum_acc_norm, sum_acc_stderr, sum_acc_norm_stderr, count = 0, 0, 0, 0, 0
         for key, values in data.items():
-            if f"{benchmark_prefix}:" in key:
+            if f"{benchmark_prefix}:" in key or f"{benchmark_prefix}_" in key:
                 # sum_acc += values["acc"]
                 sum_acc_norm += values["acc_norm"]
                 # sum_acc_stderr += values["acc_stderr"]
@@ -35,11 +35,8 @@ def run(current_path: Path):
 
     def compute_avg_acc_of_all_tasks(data):
         sum_acc_norm, count = 0, 0
-        for _, values in data.items():
-            if "acc_norm" in values:
-                sum_acc_norm += values["acc_norm"]
-            else:
-                sum_acc_norm += values["qem"]
+        for _, value in data.items():
+            sum_acc_norm += value
             count += 1
 
         average_acc_norm = sum_acc_norm / count if count else 0
@@ -49,6 +46,8 @@ def run(current_path: Path):
         if path.endswith("_hf"):
             path=path[:-3]
         match = re.search(r"(\d+)$", path)
+        if not match:
+            return 0
         number = match.group(1)
         return int(number)
 
@@ -74,6 +73,8 @@ def run(current_path: Path):
                         for k, v in eval_data["results"].items()
                     }
                     for name, data in eval_data["results"].items():
+                        if name.startswith("mmlu") or name.startswith("arc") or name.startswith("all"):
+                            continue
                         if "acc_norm" in data:
                             logging_results[f"{name}_acc_norm"] = data["acc_norm"]
                         else:
@@ -81,7 +82,8 @@ def run(current_path: Path):
 
                     logging_results["mmlu:average_acc_norm"] = compute_avg_acc_of_a_benchmark(eval_data["results"], "mmlu")
                     logging_results["arc:average_acc_norm"] = compute_avg_acc_of_a_benchmark(eval_data["results"], "arc")
-                    logging_results["all:average_acc_norm"] = compute_avg_acc_of_all_tasks(eval_data["results"])
+                    logging_results["all:average_acc_norm"] = compute_avg_acc_of_all_tasks(logging_results)
+                    print(logging_results)
 
                     wandb.log(
                         {

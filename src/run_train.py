@@ -264,7 +264,7 @@ if __name__ == "__main__":
 
     # Monkey patch
     from nanotron.models.llama import CausalSelfAttention, LlamaRotaryEmbedding
-    from patch_func import custom_llama_forward, create_custom_apply_rotary_pos_emb
+    from .patch_func import custom_llama_forward, create_custom_apply_rotary_pos_emb
 
     with open(args.rope_cfg, "r") as f:
         cfg = yaml.safe_load(f)
@@ -273,7 +273,7 @@ if __name__ == "__main__":
     # (cfg['partial_rope_version'])
     CausalSelfAttention.forward = custom_llama_forward
     if cfg["partial_rope_version"] == 4:
-        from patch_func import (
+        from .patch_func import (
             custom_forward_with_hidden_states_for_v4,
             custom_decoder_forward_for_v4,
             custom_decoder_core_forward_for_v4,

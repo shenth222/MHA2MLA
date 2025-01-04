@@ -7,6 +7,7 @@ import sys
 from nanotron.parallel.pipeline_parallel.block import TensorPointer
 
 
+
 def create_custom_apply_rotary_pos_emb(cfg):
     def apply_rotary_pos_emb_v0(self, q, k, cos, sin, unsqueeze_dim=2):
         cos = cos.unsqueeze(unsqueeze_dim)
@@ -90,13 +91,14 @@ def create_custom_apply_rotary_pos_emb(cfg):
         q_embed = (q * cos) + (self.rotate_half(q) * sin)
         k_embed = (k * cos) + (self.rotate_half(k) * sin)
         top_k_dim = cfg["top_k_rope_dim"]
+        qk_tensor[layer_id] = qk_tensor[layer_id].to(q.device)
         topk_indices = torch.topk(qk_tensor[layer_id], k=top_k_dim, dim=1)[1]
         mask = torch.zeros_like(qk_tensor[layer_id])
         mask.scatter_(1, topk_indices, 1)
-        mask_for_k = torch.cat((mask, mask), dim=1).unsqueeze(0).unsqueeze(1)
+        mask_for_k = torch.cat((mask, mask), dim=1).unsqueeze(0).unsqueeze(1).to(q.device)
         mask_for_q = torch.repeat_interleave(
             input=mask_for_k, repeats=cfg["n_gqa_group"], dim=2
-        )
+        ).to(q.device)
         q_embed = torch.where(mask_for_q == 1, q_embed, q)
         k_embed = torch.where(mask_for_k == 1, k_embed, k)
         return q_embed, k_embed
@@ -106,13 +108,22 @@ def create_custom_apply_rotary_pos_emb(cfg):
         sin = sin.unsqueeze(unsqueeze_dim)
         q_embed = (q * cos) + (self.rotate_half(q) * sin)
         k_embed = (k * cos) + (self.rotate_half(k) * sin)
-        keep_dim = cfg["last_k_rope_dim"]
-        if keep_dim >= q.size(-1):
-            return q, k
-        elif keep_dim <= 0:
-            return q_embed, k_embed
-        q_embed = torch.cat((q[..., :keep_dim], q_embed[..., keep_dim:]), -1)
-        k_embed = torch.cat((k[..., :keep_dim], k_embed[..., keep_dim:]), -1)
+        last_k_dim = cfg["last_k_rope_dim"]
+        half = q.size(-1) // 2
+        qs = [
+            q[..., : half - last_k_dim],
+            q_embed[..., half - last_k_dim : half],
+            q[..., half : half + half - last_k_dim],
+            q_embed[..., half + half - last_k_dim :],
+        ]
+        ks = [
+            k[..., : half - last_k_dim],
+            k_embed[..., half - last_k_dim : half],
+            k[..., half : half + half - last_k_dim],
+            k_embed[..., half + half - last_k_dim :],
+        ]
+        q_embed = torch.cat([q for q in qs if q != []], -1)
+        k_embed = torch.cat([k for k in ks if k != []], -1)
         return q_embed, k_embed
 
     version = cfg["partial_rope_version"]
