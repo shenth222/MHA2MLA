@@ -172,6 +172,7 @@ cython_debug/
 /datasets
 /test_dbg
 wandb/
+/images
 
 # debug setting
 /.vscode
