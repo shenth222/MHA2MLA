@@ -1,5 +1,5 @@
 #!/bin/bash
-export CUDA_VISIBLE_DEVICES="1"
+export CUDA_VISIBLE_DEVICES="2"
 export CUDA_DEVICE_MAX_CONNECTIONS=1
 # export MASTER_PORT="auto"
 export HF_HOME="~/data/hf-home"
