@@ -5,7 +5,7 @@ from lighteval.tasks.lighteval_task import LightevalTaskConfig
 from lighteval.tasks.requests import Doc
 from lighteval.metrics.metrics import Metrics, SampleLevelMetric, MetricCategory, MetricUseCase, ExactMatches
 import lighteval.tasks.default_prompts as prompt
-from .math_utils import math_normalizer
+from .math_utils import parse_math_answer
 
 
 def prompt_hellaswag(line, task_name: str = None):
@@ -52,6 +52,20 @@ def mmlu_pro_mc_prompt(line, task_name: str = None):
         instruction=f"The following are multiple choice questions (with answers) about {topic}.\n\n",
     )
 
+def mmlu_cloze_prompt(line, task_name: str = None):
+    """MMLU prompt without choices"""
+    topic = line["subject"]
+    prompt = f"The following are questions about {topic.replace('_', ' ')}.\nQuestion: "
+    prompt += line["question"] + "\nAnswer:"
+
+    return Doc(
+        task_name=task_name,
+        query=prompt,
+        choices=[f" {c}" for c in line["choices"]],
+        gold_index=int(line["answer"]),
+        instruction=f"The following are questions about {topic.replace('_', ' ')}.\n",
+    )
+
 def bbh_prompt(line, task_name: str = None):
     return Doc(
         task_name=task_name,
@@ -63,9 +77,9 @@ def bbh_prompt(line, task_name: str = None):
 def prompt_math(line, task_name: str = None):
     return Doc(
         task_name=task_name,
-        query=f"Problem:\n{line['problem']}\n\nSolution:\n",
+        query=f"{line['problem']}\nPlease reason step by step, and put your final answer within \\boxed{{}}.\n\n",
         gold_index=0,
-        choices=[f"{line['solution']}\n"],
+        choices=[f"{line['solution']}\n\n"],
     )
 
 
@@ -76,7 +90,7 @@ TASKS_TABLE = [
         suite=["custom"],
         hf_repo="ai2_arc",
         hf_revision="210d026faf9955653af8916fad021475a3f00453",
-        hf_subset=f"ARC-Easy",
+        hf_subset="ARC-Easy",
         evaluation_splits=["test"],
         metric=[Metrics.loglikelihood_acc_norm_nospace],
     ),
@@ -86,7 +100,7 @@ TASKS_TABLE = [
         suite=["custom"],
         hf_repo="ai2_arc",
         hf_revision="210d026faf9955653af8916fad021475a3f00453",
-        hf_subset=f"ARC-Challenge",
+        hf_subset="ARC-Challenge",
         evaluation_splits=["test"],
         metric=[Metrics.loglikelihood_acc_norm_nospace],
     ),
@@ -151,7 +165,6 @@ TASKS_TABLE = [
         generation_size=20,
         trust_dataset=True,
         stop_sequence=["\n", ".", ","],
-        # stop_sequence=["Question:", "Question"],
         few_shots_select="random_sampling_from_train",
     ),
     LightevalTaskConfig(
@@ -178,7 +191,31 @@ TASKS_TABLE = [
         generation_size=256,
         stop_sequence=["Question:", "Question"],
         few_shots_select="random_sampling_from_train",
-    )
+    ),
+    LightevalTaskConfig(
+        name="mmlu_stem",
+        prompt_function=mmlu_cloze_prompt,
+        suite=["custom"],
+        hf_repo="TIGER-Lab/MMLU-STEM",
+        hf_subset="default",
+        hf_revision="78a4b40757f31688d00426d1372dbbc6070d33a8",
+        hf_avail_splits=["test"],
+        evaluation_splits=["test"],
+        metric=[Metrics.loglikelihood_acc_norm_nospace],
+        generation_size=-1,
+    ),
+    LightevalTaskConfig(
+        name="mmlu",
+        prompt_function=mmlu_cloze_prompt,
+        suite=["custom"],
+        hf_repo="cais/mmlu",
+        hf_subset="all",
+        hf_revision="c30699e8356da336a370243923dbaf21066bb9fe",
+        hf_avail_splits=["test"],
+        evaluation_splits=["test"],
+        metric=[Metrics.loglikelihood_acc_norm_nospace],
+        generation_size=-1,
+    ),
 ]
 
 BBH_TASKS = [
@@ -231,45 +268,75 @@ BBH_TASKS = [
 TASKS_TABLE.extend(BBH_TASKS)
 
 quasi_exact_match_math = SampleLevelMetric(
-        metric_name="qem",
-        sample_level_fn=ExactMatches(
-            strip_strings=True, normalize_pred=math_normalizer, normalize_gold=math_normalizer
-        ).compute,
-        category=MetricCategory.GENERATIVE,
-        use_case=MetricUseCase.MATH,
-        corpus_level_fn=np.mean,
-        higher_is_better=True,
-    )
+    metric_name="qem",
+    sample_level_fn=ExactMatches(
+        strip_strings=True,
+        normalize_pred=lambda text: parse_math_answer(text, "math"),
+        normalize_gold=lambda text: parse_math_answer(text, "math")
+    ).compute,
+    category=MetricCategory.GENERATIVE,
+    use_case=MetricUseCase.MATH,
+    corpus_level_fn=np.mean,
+    higher_is_better=True,
+)
 
 MATH_TASKS = [
     LightevalTaskConfig(
-        name=f"math:{subset}",
+        name="math",
         prompt_function=prompt_math,
         suite=["custom"],
-        hf_repo="HuggingFaceTB/MATH",
-        hf_subset=subset,
-        hf_revision="140a673f1f7182daf7923fdc7108e8cdbf97df46",
-        hf_avail_splits=["train", "test"],
+        hf_repo="HuggingFaceTB/math_tasks",
+        hf_subset="math",
+        hf_revision="3d34f1076f279000b9315583dcdacfd288898283",
+        hf_avail_splits=["train", "test", "demo"],
         evaluation_splits=["test"],
         metric=[quasi_exact_match_math],
         generation_size=1024,
-        stop_sequence=["Problem:"],
-        few_shots_split="fewshot",
+        stop_sequence=["\n\n"],
+        few_shots_split="demo",
         few_shots_select="sequential",
         trust_dataset=True,
     )
-    for subset in [
-        "algebra",
-        "counting_and_probability",
-        "geometry",
-        "intermediate_algebra",
-        "number_theory",
-        "prealgebra",
-        "precalculus",
-    ]
 ]
 
 TASKS_TABLE.extend(MATH_TASKS)
+
+## MMLU ##
+class CustomMMLUEvaluationTask(LightevalTaskConfig):
+    def __init__(
+        self,
+        name,
+        prompt_function=None,
+        hf_repo="lighteval/mmlu",
+        hf_subset=None,
+        #  metric=[Metrics.loglikelihood_acc_single_token],
+        metric=[Metrics.loglikelihood_acc, Metrics.loglikelihood_acc_norm_nospace],
+        hf_avail_splits=None,
+        evaluation_splits=["test"],
+        few_shots_split="dev",
+        few_shots_select=None,
+        suite=["custom"],
+        generation_size=-1,
+        stop_sequence=None,
+        output_regex=None,
+        frozen=False,
+    ):
+        super().__init__(
+            name=name,
+            prompt_function=prompt_function,
+            suite=suite,
+            hf_repo=hf_repo,
+            hf_subset=hf_subset,
+            metric=metric,
+            hf_avail_splits=hf_avail_splits,
+            evaluation_splits=evaluation_splits,
+            few_shots_split=few_shots_split,
+            few_shots_select=few_shots_select,
+            generation_size=generation_size,
+            stop_sequence=stop_sequence,
+            output_regex=output_regex,
+            frozen=frozen,
+        )
 
 
 if __name__ == "__main__":

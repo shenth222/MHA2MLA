@@ -96,15 +96,15 @@ def create_custom_apply_rotary_pos_emb_hf(cfg):
         return q_embed, k_embed
 
     def apply_rotary_pos_emb_v4(
-        q, k, cos, sin, position_ids=None, layer_id=0, unsqueeze_dim=1
+        q, k, cos, sin, position_ids=None, layer_idx=0, unsqueeze_dim=1
     ):
         cos = cos.unsqueeze(unsqueeze_dim)
         sin = sin.unsqueeze(unsqueeze_dim)
         q_embed = (q * cos) + (rotate_half(q) * sin)
         k_embed = (k * cos) + (rotate_half(k) * sin)
         top_k_dim = cfg["top_k_rope_dim"]
-        topk_indices = torch.topk(qk_tensor[layer_id], k=top_k_dim, dim=1)[1]
-        mask = torch.zeros_like(qk_tensor[layer_id])
+        topk_indices = torch.topk(qk_tensor[layer_idx], k=top_k_dim, dim=1)[1]
+        mask = torch.zeros_like(qk_tensor[layer_idx])
         mask.scatter_(1, topk_indices, 1)
         mask_for_k = torch.cat((mask, mask), dim=1).unsqueeze(0).unsqueeze(2).to(k.device)
         mask_for_q = torch.repeat_interleave(
@@ -140,8 +140,7 @@ def create_custom_apply_rotary_pos_emb_hf(cfg):
     version = cfg["partial_rope_version"]
     if version == 4:
         with open(cfg["qk_tensor_path"], "rb") as fin:
-            qk_tensor = pickle.load(fin).cuda()
-            qk_tensor = qk_tensor.view(30, 3, 3, 32).sum(dim=2)
+            qk_tensor = torch.load(fin)
     versions = {
         0: apply_rotary_pos_emb_v0,
         1: apply_rotary_pos_emb_v1,
@@ -225,7 +224,7 @@ def custom_forward_LlamaAttention(
     else:
         cos, sin = position_embeddings
     query_states, key_states = apply_rotary_pos_emb(
-        query_states, key_states, cos, sin, layer_id=self.layer_idx
+        query_states, key_states, cos, sin, layer_idx=self.layer_idx
     )
 
     if past_key_value is not None:
@@ -339,7 +338,7 @@ def custom_forward_LlamaFlashAttention2(
     else:
         cos, sin = position_embeddings
     query_states, key_states = apply_rotary_pos_emb(
-        query_states, key_states, cos, sin, layer_id=self.layer_idx
+        query_states, key_states, cos, sin, layer_idx=self.layer_idx
     )
 
     if past_key_value is not None:
@@ -465,7 +464,7 @@ def custom_forward_LlamaSdpaAttention(
     else:
         cos, sin = position_embeddings
     query_states, key_states = apply_rotary_pos_emb(
-        query_states, key_states, cos, sin, layer_id=self.layer_idx
+        query_states, key_states, cos, sin, layer_idx=self.layer_idx
     )
 
     if past_key_value is not None:

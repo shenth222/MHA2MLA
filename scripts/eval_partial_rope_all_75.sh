@@ -1,7 +1,7 @@
 #!/bin/bash
 #################### 环境变量 ####################
 
-export CUDA_VISIBLE_DEVICES="2,3,4,5,6,7"
+export CUDA_VISIBLE_DEVICES="0,1,2,3"
 export HF_HOME="/home/binguo/data/hf-home"
 export NUM_GPUS=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
 export MASTER_PORT="auto"
@@ -49,14 +49,4 @@ eval_all() {
 #################### 任务执行 ####################
 
 
-eval_all ../checkpoints/v4_topk4_rope_alter v4_topk4_rope_alter ../configs/rope/v4_topk4_rope.yaml
-
-
-# accelerate launch --multi_gpu --num_processes=${NUM_GPUS} --main_process_port=29575 \
-#     -m lighteval \
-#     accelerate \
-#     --model_args "pretrained=/home/binguo/data/models/HuggingFaceTB/SmolLM-135M,revision=main,dtype=bfloat16,max_length=2048" \
-#     --override_batch_size 96 \
-#     --custom_tasks "../src/evaluation/tasks.py" \
-#     --tasks "../src/evaluation/smollm1_base_v2.txt" \
-#     --output_dir "../eval_results/hf_test"
+eval_all ../checkpoints/lr_1e-4_cooldown_10 lr_1e-4_cooldown_10 ../configs/continue_pretraining/rope_v0.yaml

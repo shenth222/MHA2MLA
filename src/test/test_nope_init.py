@@ -43,7 +43,7 @@ def get_rope_config(model, rope_scale=8):
             "last_k_rope_dim": 0,
             "uniform_start_point": 0,
             "uniform_step": rope_scale,
-            "qk_tensor_path": "/home/taoji/data/MLA-FT/utils/qk_tensor_135M.pkl",
+            "qk_tensor_path": "/home/binguo/data/MLA-FT/utils/qk_tensor_135M.pth",
             "n_gqa_group": 3,
         },
         {
@@ -52,7 +52,7 @@ def get_rope_config(model, rope_scale=8):
             "last_k_rope_dim": 0,
             "uniform_start_point": 0,
             "uniform_step": rope_scale,
-            "qk_tensor_path": "/home/taoji/data/MLA-FT/utils/qk_tensor_135M.pkl",
+            "qk_tensor_path": "/home/binguo/data/MLA-FT/utils/qk_tensor_135M.pth",
             "n_gqa_group": 3,
         },
         {
@@ -61,7 +61,7 @@ def get_rope_config(model, rope_scale=8):
             "last_k_rope_dim": head_dim//(4*rope_scale),
             "uniform_start_point": 0,
             "uniform_step": rope_scale,
-            "qk_tensor_path": "/home/taoji/data/MLA-FT/utils/qk_tensor_135M.pkl",
+            "qk_tensor_path": "/home/binguo/data/MLA-FT/utils/qk_tensor_135M.pth",
             "n_gqa_group": 3,
         },
         {
@@ -70,7 +70,7 @@ def get_rope_config(model, rope_scale=8):
             "last_k_rope_dim": 0,
             "uniform_start_point": 0,
             "uniform_step": rope_scale,
-            "qk_tensor_path": "/home/taoji/data/MLA-FT/utils/qk_tensor_135M.pkl",
+            "qk_tensor_path": "/home/binguo/data/MLA-FT/utils/qk_tensor_135M.pth",
             "n_gqa_group": 3,
         },
         {
@@ -79,7 +79,7 @@ def get_rope_config(model, rope_scale=8):
             "last_k_rope_dim": head_dim//(2*rope_scale),
             "uniform_start_point": 0,
             "uniform_step": rope_scale,
-            "qk_tensor_path": "/home/taoji/data/MLA-FT/utils/qk_tensor_135M.pkl",
+            "qk_tensor_path": "/home/binguo/data/MLA-FT/utils/qk_tensor_135M.pth",
             "n_gqa_group": 3,
         },
     ]
@@ -140,10 +140,7 @@ class IndexForNope:
     @staticmethod
     def get_index_for_nope_v4(rope_cfg, **kwargs):
         with open(rope_cfg["qk_tensor_path"], "rb") as fin:
-            import pickle
-
-            qk_tensor = pickle.load(fin).cuda()  # [layer_num, k_head_num, head_dim//2]
-            qk_tensor = qk_tensor.view(30, 3, 3, 32).sum(dim=2)
+            qk_tensor = torch.load(fin).cuda()  # [layer_num, k_head_num, head_dim//2]
             assert len(qk_tensor.size()) == 3
         layer_id = kwargs["layer_id"]
         top_k_dim = rope_cfg["top_k_rope_dim"]
@@ -378,6 +375,7 @@ if __name__ == "__main__":
         ["r","rope_scale"]+["K","V","KV"]*7
     )
     for r in [8,16]:
+        r = r*3
         for rope_scale in [4,8]:
             model=AutoModel.from_pretrained(model_path, device_map="auto")
             kwargs, rope_cfgs = get_rope_config(model, rope_scale=rope_scale)

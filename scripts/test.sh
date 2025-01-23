@@ -19,14 +19,14 @@ export PYTHONPATH=..:$PYTHONPATH
 
 torchrun --master_port=29564 --nproc_per_node=1 \
     -m src.conversation.convert_hf_to_nanotron \
-    --checkpoint_path="../checkpoints/rope_v4_topk4_svd_method2_rank8_hf/checkpoint-18000" \
+    --checkpoint_path="../checkpoints/rope_v4_topk4_svd_method7_rank8/18000_hf" \
     --save_path="../checkpoints/test_nt" \
     --is_mla
 
 torchrun --master_port=29564 --nproc_per_node=1 \
     -m src.conversation.convert_nanotron_to_hf \
     --checkpoint_path="../checkpoints/test_nt" \
-    --tokenizer_name="../checkpoints/rope_v4_topk4_svd_method2_rank8_hf/checkpoint-18000" \
+    --tokenizer_name="../checkpoints/rope_v4_topk4_svd_method7_rank8/18000_hf" \
     --save_path="../checkpoints/test_hf" \
     --is_mla
 

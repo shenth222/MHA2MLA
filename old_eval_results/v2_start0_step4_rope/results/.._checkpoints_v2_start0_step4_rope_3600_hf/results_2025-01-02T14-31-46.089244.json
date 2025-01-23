@@ -1,0 +1,4366 @@
+{
+  "config_general": {
+    "lighteval_sha": "?",
+    "num_fewshot_seeds": 1,
+    "override_batch_size": 96,
+    "max_samples": null,
+    "job_id": "",
+    "start_time": 174103.675163579,
+    "end_time": 174718.493117827,
+    "total_evaluation_time_secondes": "614.817954247992",
+    "model_name": ".._checkpoints_v2_start0_step4_rope_3600_hf",
+    "model_sha": "",
+    "model_dtype": "torch.bfloat16",
+    "model_size": "256.57 MB"
+  },
+  "results": {
+    "custom|arc:challenge|0": {
+      "acc": 0.25170648464163825,
+      "acc_stderr": 0.012682496334042961,
+      "acc_norm": 0.28071672354948807,
+      "acc_norm_stderr": 0.013131238126975584
+    },
+    "custom|arc:easy|0": {
+      "acc": 0.5959595959595959,
+      "acc_stderr": 0.010069061649549545,
+      "acc_norm": 0.5391414141414141,
+      "acc_norm_stderr": 0.010228298200766131
+    },
+    "custom|hellaswag|0": {
+      "acc": 0.3414658434574786,
+      "acc_stderr": 0.0047323221721537485,
+      "acc_norm": 0.40310695080661224,
+      "acc_norm_stderr": 0.004895194143892681
+    },
+    "custom|mmlu_cloze:abstract_algebra|0": {
+      "acc": 0.22,
+      "acc_stderr": 0.0416333199893227,
+      "acc_norm": 0.17,
+      "acc_norm_stderr": 0.03775251680686371
+    },
+    "custom|mmlu_cloze:anatomy|0": {
+      "acc": 0.31851851851851853,
+      "acc_stderr": 0.040247784019771075,
+      "acc_norm": 0.31851851851851853,
+      "acc_norm_stderr": 0.04024778401977109
+    },
+    "custom|mmlu_cloze:astronomy|0": {
+      "acc": 0.26973684210526316,
+      "acc_stderr": 0.03611780560284898,
+      "acc_norm": 0.3881578947368421,
+      "acc_norm_stderr": 0.03965842097512744
+    },
+    "custom|mmlu_cloze:business_ethics|0": {
+      "acc": 0.5,
+      "acc_stderr": 0.050251890762960605,
+      "acc_norm": 0.39,
+      "acc_norm_stderr": 0.04902071300001974
+    },
+    "custom|mmlu_cloze:clinical_knowledge|0": {
+      "acc": 0.24150943396226415,
+      "acc_stderr": 0.026341480371118362,
+      "acc_norm": 0.3433962264150943,
+      "acc_norm_stderr": 0.02922452646912479
+    },
+    "custom|mmlu_cloze:college_biology|0": {
+      "acc": 0.3611111111111111,
+      "acc_stderr": 0.040166600304512336,
+      "acc_norm": 0.2986111111111111,
+      "acc_norm_stderr": 0.038270523579507554
+    },
+    "custom|mmlu_cloze:college_chemistry|0": {
+      "acc": 0.24,
+      "acc_stderr": 0.042923469599092816,
+      "acc_norm": 0.25,
+      "acc_norm_stderr": 0.04351941398892446
+    },
+    "custom|mmlu_cloze:college_computer_science|0": {
+      "acc": 0.28,
+      "acc_stderr": 0.04512608598542129,
+      "acc_norm": 0.26,
+      "acc_norm_stderr": 0.044084400227680794
+    },
+    "custom|mmlu_cloze:college_mathematics|0": {
+      "acc": 0.15,
+      "acc_stderr": 0.03588702812826371,
+      "acc_norm": 0.22,
+      "acc_norm_stderr": 0.04163331998932269
+    },
+    "custom|mmlu_cloze:college_medicine|0": {
+      "acc": 0.2543352601156069,
+      "acc_stderr": 0.0332055644308557,
+      "acc_norm": 0.23121387283236994,
+      "acc_norm_stderr": 0.0321473730202947
+    },
+    "custom|mmlu_cloze:college_physics|0": {
+      "acc": 0.18627450980392157,
+      "acc_stderr": 0.03873958714149352,
+      "acc_norm": 0.1568627450980392,
+      "acc_norm_stderr": 0.03618664819936245
+    },
+    "custom|mmlu_cloze:computer_security|0": {
+      "acc": 0.27,
+      "acc_stderr": 0.044619604333847394,
+      "acc_norm": 0.31,
+      "acc_norm_stderr": 0.04648231987117316
+    },
+    "custom|mmlu_cloze:conceptual_physics|0": {
+      "acc": 0.3446808510638298,
+      "acc_stderr": 0.03106898596312215,
+      "acc_norm": 0.2297872340425532,
+      "acc_norm_stderr": 0.027501752944412428
+    },
+    "custom|mmlu_cloze:econometrics|0": {
+      "acc": 0.24561403508771928,
+      "acc_stderr": 0.040493392977481425,
+      "acc_norm": 0.24561403508771928,
+      "acc_norm_stderr": 0.040493392977481425
+    },
+    "custom|mmlu_cloze:electrical_engineering|0": {
+      "acc": 0.2896551724137931,
+      "acc_stderr": 0.03780019230438015,
+      "acc_norm": 0.3103448275862069,
+      "acc_norm_stderr": 0.03855289616378949
+    },
+    "custom|mmlu_cloze:elementary_mathematics|0": {
+      "acc": 0.24338624338624337,
+      "acc_stderr": 0.022101128787415426,
+      "acc_norm": 0.24074074074074073,
+      "acc_norm_stderr": 0.0220190800122179
+    },
+    "custom|mmlu_cloze:formal_logic|0": {
+      "acc": 0.2857142857142857,
+      "acc_stderr": 0.04040610178208841,
+      "acc_norm": 0.2777777777777778,
+      "acc_norm_stderr": 0.04006168083848877
+    },
+    "custom|mmlu_cloze:global_facts|0": {
+      "acc": 0.27,
+      "acc_stderr": 0.044619604333847394,
+      "acc_norm": 0.27,
+      "acc_norm_stderr": 0.044619604333847394
+    },
+    "custom|mmlu_cloze:high_school_biology|0": {
+      "acc": 0.2870967741935484,
+      "acc_stderr": 0.025736542745594525,
+      "acc_norm": 0.3193548387096774,
+      "acc_norm_stderr": 0.02652270967466776
+    },
+    "custom|mmlu_cloze:high_school_chemistry|0": {
+      "acc": 0.21182266009852216,
+      "acc_stderr": 0.028748983689941054,
+      "acc_norm": 0.26108374384236455,
+      "acc_norm_stderr": 0.030903796952114485
+    },
+    "custom|mmlu_cloze:high_school_computer_science|0": {
+      "acc": 0.26,
+      "acc_stderr": 0.04408440022768078,
+      "acc_norm": 0.32,
+      "acc_norm_stderr": 0.04688261722621503
+    },
+    "custom|mmlu_cloze:high_school_european_history|0": {
+      "acc": 0.2787878787878788,
+      "acc_stderr": 0.03501438706296781,
+      "acc_norm": 0.43636363636363634,
+      "acc_norm_stderr": 0.03872592983524753
+    },
+    "custom|mmlu_cloze:high_school_geography|0": {
+      "acc": 0.29292929292929293,
+      "acc_stderr": 0.032424979581788166,
+      "acc_norm": 0.3383838383838384,
+      "acc_norm_stderr": 0.03371124142626303
+    },
+    "custom|mmlu_cloze:high_school_government_and_politics|0": {
+      "acc": 0.35233160621761656,
+      "acc_stderr": 0.03447478286414356,
+      "acc_norm": 0.3471502590673575,
+      "acc_norm_stderr": 0.03435696168361357
+    },
+    "custom|mmlu_cloze:high_school_macroeconomics|0": {
+      "acc": 0.2692307692307692,
+      "acc_stderr": 0.02248938979365481,
+      "acc_norm": 0.2641025641025641,
+      "acc_norm_stderr": 0.02235219373745329
+    },
+    "custom|mmlu_cloze:high_school_mathematics|0": {
+      "acc": 0.14444444444444443,
+      "acc_stderr": 0.021433761274104894,
+      "acc_norm": 0.13703703703703704,
+      "acc_norm_stderr": 0.020967126643677114
+    },
+    "custom|mmlu_cloze:high_school_microeconomics|0": {
+      "acc": 0.2815126050420168,
+      "acc_stderr": 0.02921354941437215,
+      "acc_norm": 0.37815126050420167,
+      "acc_norm_stderr": 0.031499305777849054
+    },
+    "custom|mmlu_cloze:high_school_physics|0": {
+      "acc": 0.2781456953642384,
+      "acc_stderr": 0.03658603262763743,
+      "acc_norm": 0.23178807947019867,
+      "acc_norm_stderr": 0.03445406271987053
+    },
+    "custom|mmlu_cloze:high_school_psychology|0": {
+      "acc": 0.381651376146789,
+      "acc_stderr": 0.020828148517022603,
+      "acc_norm": 0.3577981651376147,
+      "acc_norm_stderr": 0.020552060784827814
+    },
+    "custom|mmlu_cloze:high_school_statistics|0": {
+      "acc": 0.2638888888888889,
+      "acc_stderr": 0.030058202704309846,
+      "acc_norm": 0.2962962962962963,
+      "acc_norm_stderr": 0.03114144782353604
+    },
+    "custom|mmlu_cloze:high_school_us_history|0": {
+      "acc": 0.27941176470588236,
+      "acc_stderr": 0.03149328104507957,
+      "acc_norm": 0.35294117647058826,
+      "acc_norm_stderr": 0.03354092437591519
+    },
+    "custom|mmlu_cloze:high_school_world_history|0": {
+      "acc": 0.2911392405063291,
+      "acc_stderr": 0.029571601065753374,
+      "acc_norm": 0.31223628691983124,
+      "acc_norm_stderr": 0.030165137867847008
+    },
+    "custom|mmlu_cloze:human_aging|0": {
+      "acc": 0.3721973094170404,
+      "acc_stderr": 0.03244305283008731,
+      "acc_norm": 0.3542600896860987,
+      "acc_norm_stderr": 0.032100621541349864
+    },
+    "custom|mmlu_cloze:human_sexuality|0": {
+      "acc": 0.3969465648854962,
+      "acc_stderr": 0.04291135671009225,
+      "acc_norm": 0.366412213740458,
+      "acc_norm_stderr": 0.04225875451969638
+    },
+    "custom|mmlu_cloze:international_law|0": {
+      "acc": 0.14049586776859505,
+      "acc_stderr": 0.031722334260021606,
+      "acc_norm": 0.2892561983471074,
+      "acc_norm_stderr": 0.04139112727635464
+    },
+    "custom|mmlu_cloze:jurisprudence|0": {
+      "acc": 0.21296296296296297,
+      "acc_stderr": 0.03957835471980981,
+      "acc_norm": 0.3425925925925926,
+      "acc_norm_stderr": 0.045879047413018105
+    },
+    "custom|mmlu_cloze:logical_fallacies|0": {
+      "acc": 0.27607361963190186,
+      "acc_stderr": 0.0351238528370505,
+      "acc_norm": 0.3128834355828221,
+      "acc_norm_stderr": 0.036429145782924055
+    },
+    "custom|mmlu_cloze:machine_learning|0": {
+      "acc": 0.25,
+      "acc_stderr": 0.04109974682633932,
+      "acc_norm": 0.2767857142857143,
+      "acc_norm_stderr": 0.042466243366976256
+    },
+    "custom|mmlu_cloze:management|0": {
+      "acc": 0.30097087378640774,
+      "acc_stderr": 0.045416094465039504,
+      "acc_norm": 0.4174757281553398,
+      "acc_norm_stderr": 0.048828405482122375
+    },
+    "custom|mmlu_cloze:marketing|0": {
+      "acc": 0.3974358974358974,
+      "acc_stderr": 0.03205953453789293,
+      "acc_norm": 0.3888888888888889,
+      "acc_norm_stderr": 0.03193705726200293
+    },
+    "custom|mmlu_cloze:medical_genetics|0": {
+      "acc": 0.32,
+      "acc_stderr": 0.04688261722621505,
+      "acc_norm": 0.39,
+      "acc_norm_stderr": 0.04902071300001974
+    },
+    "custom|mmlu_cloze:miscellaneous|0": {
+      "acc": 0.3793103448275862,
+      "acc_stderr": 0.01735126811754445,
+      "acc_norm": 0.34738186462324394,
+      "acc_norm_stderr": 0.01702667174865573
+    },
+    "custom|mmlu_cloze:moral_disputes|0": {
+      "acc": 0.23699421965317918,
+      "acc_stderr": 0.02289408248992599,
+      "acc_norm": 0.23410404624277456,
+      "acc_norm_stderr": 0.02279711027807115
+    },
+    "custom|mmlu_cloze:moral_scenarios|0": {
+      "acc": 0.23798882681564246,
+      "acc_stderr": 0.014242630070574915,
+      "acc_norm": 0.27262569832402234,
+      "acc_norm_stderr": 0.014893391735249588
+    },
+    "custom|mmlu_cloze:nutrition|0": {
+      "acc": 0.2679738562091503,
+      "acc_stderr": 0.025360603796242557,
+      "acc_norm": 0.3431372549019608,
+      "acc_norm_stderr": 0.027184498909941616
+    },
+    "custom|mmlu_cloze:philosophy|0": {
+      "acc": 0.2508038585209003,
+      "acc_stderr": 0.024619771956697168,
+      "acc_norm": 0.2604501607717042,
+      "acc_norm_stderr": 0.02492672322484555
+    },
+    "custom|mmlu_cloze:prehistory|0": {
+      "acc": 0.35185185185185186,
+      "acc_stderr": 0.026571483480719974,
+      "acc_norm": 0.2716049382716049,
+      "acc_norm_stderr": 0.02474862449053737
+    },
+    "custom|mmlu_cloze:professional_accounting|0": {
+      "acc": 0.24113475177304963,
+      "acc_stderr": 0.02551873104953776,
+      "acc_norm": 0.21631205673758866,
+      "acc_norm_stderr": 0.024561720560562803
+    },
+    "custom|mmlu_cloze:professional_law|0": {
+      "acc": 0.24445893089960888,
+      "acc_stderr": 0.010976425013113895,
+      "acc_norm": 0.26010430247718386,
+      "acc_norm_stderr": 0.011204382887823825
+    },
+    "custom|mmlu_cloze:professional_medicine|0": {
+      "acc": 0.2426470588235294,
+      "acc_stderr": 0.026040662474201268,
+      "acc_norm": 0.28308823529411764,
+      "acc_norm_stderr": 0.02736586113151381
+    },
+    "custom|mmlu_cloze:professional_psychology|0": {
+      "acc": 0.28104575163398693,
+      "acc_stderr": 0.018185218954318082,
+      "acc_norm": 0.2875816993464052,
+      "acc_norm_stderr": 0.018311653053648222
+    },
+    "custom|mmlu_cloze:public_relations|0": {
+      "acc": 0.36363636363636365,
+      "acc_stderr": 0.04607582090719976,
+      "acc_norm": 0.23636363636363636,
+      "acc_norm_stderr": 0.040693063197213775
+    },
+    "custom|mmlu_cloze:security_studies|0": {
+      "acc": 0.31020408163265306,
+      "acc_stderr": 0.029613459872484378,
+      "acc_norm": 0.23265306122448978,
+      "acc_norm_stderr": 0.02704925791589618
+    },
+    "custom|mmlu_cloze:sociology|0": {
+      "acc": 0.2736318407960199,
+      "acc_stderr": 0.03152439186555404,
+      "acc_norm": 0.27860696517412936,
+      "acc_norm_stderr": 0.03170056183497308
+    },
+    "custom|mmlu_cloze:us_foreign_policy|0": {
+      "acc": 0.25,
+      "acc_stderr": 0.04351941398892446,
+      "acc_norm": 0.31,
+      "acc_norm_stderr": 0.04648231987117316
+    },
+    "custom|mmlu_cloze:virology|0": {
+      "acc": 0.27710843373493976,
+      "acc_stderr": 0.03484331592680587,
+      "acc_norm": 0.35542168674698793,
+      "acc_norm_stderr": 0.03726214354322415
+    },
+    "custom|mmlu_cloze:world_religions|0": {
+      "acc": 0.3391812865497076,
+      "acc_stderr": 0.036310534964889056,
+      "acc_norm": 0.4269005847953216,
+      "acc_norm_stderr": 0.03793620616529916
+    },
+    "custom|openbookqa|0": {
+      "acc": 0.214,
+      "acc_stderr": 0.018359797502387018,
+      "acc_norm": 0.328,
+      "acc_norm_stderr": 0.021017027165175495
+    },
+    "custom|piqa|0": {
+      "acc": 0.6730141458106638,
+      "acc_stderr": 0.010945157126978224,
+      "acc_norm": 0.6800870511425462,
+      "acc_norm_stderr": 0.010882873582092062
+    },
+    "custom|winogrande|0": {
+      "acc": 0.5067087608524072,
+      "acc_stderr": 0.014051220692330349,
+      "acc_norm": 0.49329123914759276,
+      "acc_norm_stderr": 0.014051220692330346
+    },
+    "custom|trivia_qa|0": {
+      "qem": 0.0324899687917967,
+      "qem_stderr": 0.0013235942041754346
+    },
+    "custom|arc:_average|0": {
+      "acc": 0.4238330403006171,
+      "acc_stderr": 0.011375778991796252,
+      "acc_norm": 0.4099290688454511,
+      "acc_norm_stderr": 0.011679768163870858
+    },
+    "custom|mmlu_cloze:_average|0": {
+      "acc": 0.28171901426465346,
+      "acc_stderr": 0.033241972434617136,
+      "acc_norm": 0.29857198629519954,
+      "acc_norm_stderr": 0.03388959982701055
+    },
+    "all": {
+      "acc": 0.2958863276794767,
+      "acc_stderr": 0.031200515623025695,
+      "acc_norm": 0.3133801047240322,
+      "acc_norm_stderr": 0.031839889556362445,
+      "qem": 0.0324899687917967,
+      "qem_stderr": 0.0013235942041754346
+    }
+  },
+  "versions": {
+    "custom|arc:challenge|0": 0,
+    "custom|arc:easy|0": 0,
+    "custom|hellaswag|0": 0,
+    "custom|mmlu_cloze:abstract_algebra|0": 0,
+    "custom|mmlu_cloze:anatomy|0": 0,
+    "custom|mmlu_cloze:astronomy|0": 0,
+    "custom|mmlu_cloze:business_ethics|0": 0,
+    "custom|mmlu_cloze:clinical_knowledge|0": 0,
+    "custom|mmlu_cloze:college_biology|0": 0,
+    "custom|mmlu_cloze:college_chemistry|0": 0,
+    "custom|mmlu_cloze:college_computer_science|0": 0,
+    "custom|mmlu_cloze:college_mathematics|0": 0,
+    "custom|mmlu_cloze:college_medicine|0": 0,
+    "custom|mmlu_cloze:college_physics|0": 0,
+    "custom|mmlu_cloze:computer_security|0": 0,
+    "custom|mmlu_cloze:conceptual_physics|0": 0,
+    "custom|mmlu_cloze:econometrics|0": 0,
+    "custom|mmlu_cloze:electrical_engineering|0": 0,
+    "custom|mmlu_cloze:elementary_mathematics|0": 0,
+    "custom|mmlu_cloze:formal_logic|0": 0,
+    "custom|mmlu_cloze:global_facts|0": 0,
+    "custom|mmlu_cloze:high_school_biology|0": 0,
+    "custom|mmlu_cloze:high_school_chemistry|0": 0,
+    "custom|mmlu_cloze:high_school_computer_science|0": 0,
+    "custom|mmlu_cloze:high_school_european_history|0": 0,
+    "custom|mmlu_cloze:high_school_geography|0": 0,
+    "custom|mmlu_cloze:high_school_government_and_politics|0": 0,
+    "custom|mmlu_cloze:high_school_macroeconomics|0": 0,
+    "custom|mmlu_cloze:high_school_mathematics|0": 0,
+    "custom|mmlu_cloze:high_school_microeconomics|0": 0,
+    "custom|mmlu_cloze:high_school_physics|0": 0,
+    "custom|mmlu_cloze:high_school_psychology|0": 0,
+    "custom|mmlu_cloze:high_school_statistics|0": 0,
+    "custom|mmlu_cloze:high_school_us_history|0": 0,
+    "custom|mmlu_cloze:high_school_world_history|0": 0,
+    "custom|mmlu_cloze:human_aging|0": 0,
+    "custom|mmlu_cloze:human_sexuality|0": 0,
+    "custom|mmlu_cloze:international_law|0": 0,
+    "custom|mmlu_cloze:jurisprudence|0": 0,
+    "custom|mmlu_cloze:logical_fallacies|0": 0,
+    "custom|mmlu_cloze:machine_learning|0": 0,
+    "custom|mmlu_cloze:management|0": 0,
+    "custom|mmlu_cloze:marketing|0": 0,
+    "custom|mmlu_cloze:medical_genetics|0": 0,
+    "custom|mmlu_cloze:miscellaneous|0": 0,
+    "custom|mmlu_cloze:moral_disputes|0": 0,
+    "custom|mmlu_cloze:moral_scenarios|0": 0,
+    "custom|mmlu_cloze:nutrition|0": 0,
+    "custom|mmlu_cloze:philosophy|0": 0,
+    "custom|mmlu_cloze:prehistory|0": 0,
+    "custom|mmlu_cloze:professional_accounting|0": 0,
+    "custom|mmlu_cloze:professional_law|0": 0,
+    "custom|mmlu_cloze:professional_medicine|0": 0,
+    "custom|mmlu_cloze:professional_psychology|0": 0,
+    "custom|mmlu_cloze:public_relations|0": 0,
+    "custom|mmlu_cloze:security_studies|0": 0,
+    "custom|mmlu_cloze:sociology|0": 0,
+    "custom|mmlu_cloze:us_foreign_policy|0": 0,
+    "custom|mmlu_cloze:virology|0": 0,
+    "custom|mmlu_cloze:world_religions|0": 0,
+    "custom|openbookqa|0": 0,
+    "custom|piqa|0": 0,
+    "custom|trivia_qa|0": 0,
+    "custom|winogrande|0": 0
+  },
+  "config_tasks": {
+    "custom|arc:challenge": {
+      "name": "arc:challenge",
+      "prompt_function": "arc",
+      "hf_repo": "ai2_arc",
+      "hf_subset": "ARC-Challenge",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": [
+        "train",
+        "validation",
+        "test"
+      ],
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": null,
+      "few_shots_select": null,
+      "generation_size": 1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 1172,
+      "effective_num_docs": 1172,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|arc:easy": {
+      "name": "arc:easy",
+      "prompt_function": "arc",
+      "hf_repo": "ai2_arc",
+      "hf_subset": "ARC-Easy",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": [
+        "train",
+        "validation",
+        "test"
+      ],
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": null,
+      "few_shots_select": null,
+      "generation_size": 1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 2376,
+      "effective_num_docs": 2376,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|hellaswag": {
+      "name": "hellaswag",
+      "prompt_function": "hellaswag_prompt",
+      "hf_repo": "hellaswag",
+      "hf_subset": "default",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": [
+        "train",
+        "validation",
+        "test"
+      ],
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "validation"
+      ],
+      "few_shots_split": null,
+      "few_shots_select": null,
+      "generation_size": null,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 10042,
+      "effective_num_docs": 10042,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:abstract_algebra": {
+      "name": "mmlu_cloze:abstract_algebra",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "abstract_algebra",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 100,
+      "effective_num_docs": 100,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:anatomy": {
+      "name": "mmlu_cloze:anatomy",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "anatomy",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 135,
+      "effective_num_docs": 135,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:astronomy": {
+      "name": "mmlu_cloze:astronomy",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "astronomy",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 152,
+      "effective_num_docs": 152,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:business_ethics": {
+      "name": "mmlu_cloze:business_ethics",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "business_ethics",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 100,
+      "effective_num_docs": 100,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:clinical_knowledge": {
+      "name": "mmlu_cloze:clinical_knowledge",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "clinical_knowledge",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 265,
+      "effective_num_docs": 265,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:college_biology": {
+      "name": "mmlu_cloze:college_biology",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "college_biology",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 144,
+      "effective_num_docs": 144,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:college_chemistry": {
+      "name": "mmlu_cloze:college_chemistry",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "college_chemistry",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 100,
+      "effective_num_docs": 100,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:college_computer_science": {
+      "name": "mmlu_cloze:college_computer_science",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "college_computer_science",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 100,
+      "effective_num_docs": 100,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:college_mathematics": {
+      "name": "mmlu_cloze:college_mathematics",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "college_mathematics",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 100,
+      "effective_num_docs": 100,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:college_medicine": {
+      "name": "mmlu_cloze:college_medicine",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "college_medicine",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 173,
+      "effective_num_docs": 173,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:college_physics": {
+      "name": "mmlu_cloze:college_physics",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "college_physics",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 102,
+      "effective_num_docs": 102,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:computer_security": {
+      "name": "mmlu_cloze:computer_security",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "computer_security",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 100,
+      "effective_num_docs": 100,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:conceptual_physics": {
+      "name": "mmlu_cloze:conceptual_physics",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "conceptual_physics",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 235,
+      "effective_num_docs": 235,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:econometrics": {
+      "name": "mmlu_cloze:econometrics",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "econometrics",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 114,
+      "effective_num_docs": 114,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:electrical_engineering": {
+      "name": "mmlu_cloze:electrical_engineering",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "electrical_engineering",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 145,
+      "effective_num_docs": 145,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:elementary_mathematics": {
+      "name": "mmlu_cloze:elementary_mathematics",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "elementary_mathematics",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 378,
+      "effective_num_docs": 378,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:formal_logic": {
+      "name": "mmlu_cloze:formal_logic",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "formal_logic",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 126,
+      "effective_num_docs": 126,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:global_facts": {
+      "name": "mmlu_cloze:global_facts",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "global_facts",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 100,
+      "effective_num_docs": 100,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:high_school_biology": {
+      "name": "mmlu_cloze:high_school_biology",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "high_school_biology",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 310,
+      "effective_num_docs": 310,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:high_school_chemistry": {
+      "name": "mmlu_cloze:high_school_chemistry",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "high_school_chemistry",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 203,
+      "effective_num_docs": 203,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:high_school_computer_science": {
+      "name": "mmlu_cloze:high_school_computer_science",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "high_school_computer_science",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 100,
+      "effective_num_docs": 100,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:high_school_european_history": {
+      "name": "mmlu_cloze:high_school_european_history",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "high_school_european_history",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 165,
+      "effective_num_docs": 165,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:high_school_geography": {
+      "name": "mmlu_cloze:high_school_geography",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "high_school_geography",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 198,
+      "effective_num_docs": 198,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:high_school_government_and_politics": {
+      "name": "mmlu_cloze:high_school_government_and_politics",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "high_school_government_and_politics",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 193,
+      "effective_num_docs": 193,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:high_school_macroeconomics": {
+      "name": "mmlu_cloze:high_school_macroeconomics",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "high_school_macroeconomics",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 390,
+      "effective_num_docs": 390,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:high_school_mathematics": {
+      "name": "mmlu_cloze:high_school_mathematics",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "high_school_mathematics",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 270,
+      "effective_num_docs": 270,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:high_school_microeconomics": {
+      "name": "mmlu_cloze:high_school_microeconomics",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "high_school_microeconomics",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 238,
+      "effective_num_docs": 238,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:high_school_physics": {
+      "name": "mmlu_cloze:high_school_physics",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "high_school_physics",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 151,
+      "effective_num_docs": 151,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:high_school_psychology": {
+      "name": "mmlu_cloze:high_school_psychology",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "high_school_psychology",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 545,
+      "effective_num_docs": 545,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:high_school_statistics": {
+      "name": "mmlu_cloze:high_school_statistics",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "high_school_statistics",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 216,
+      "effective_num_docs": 216,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:high_school_us_history": {
+      "name": "mmlu_cloze:high_school_us_history",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "high_school_us_history",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 204,
+      "effective_num_docs": 204,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:high_school_world_history": {
+      "name": "mmlu_cloze:high_school_world_history",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "high_school_world_history",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 237,
+      "effective_num_docs": 237,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:human_aging": {
+      "name": "mmlu_cloze:human_aging",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "human_aging",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 223,
+      "effective_num_docs": 223,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:human_sexuality": {
+      "name": "mmlu_cloze:human_sexuality",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "human_sexuality",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 131,
+      "effective_num_docs": 131,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:international_law": {
+      "name": "mmlu_cloze:international_law",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "international_law",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 121,
+      "effective_num_docs": 121,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:jurisprudence": {
+      "name": "mmlu_cloze:jurisprudence",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "jurisprudence",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 108,
+      "effective_num_docs": 108,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:logical_fallacies": {
+      "name": "mmlu_cloze:logical_fallacies",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "logical_fallacies",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 163,
+      "effective_num_docs": 163,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:machine_learning": {
+      "name": "mmlu_cloze:machine_learning",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "machine_learning",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 112,
+      "effective_num_docs": 112,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:management": {
+      "name": "mmlu_cloze:management",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "management",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 103,
+      "effective_num_docs": 103,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:marketing": {
+      "name": "mmlu_cloze:marketing",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "marketing",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 234,
+      "effective_num_docs": 234,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:medical_genetics": {
+      "name": "mmlu_cloze:medical_genetics",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "medical_genetics",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 100,
+      "effective_num_docs": 100,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:miscellaneous": {
+      "name": "mmlu_cloze:miscellaneous",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "miscellaneous",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 783,
+      "effective_num_docs": 783,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:moral_disputes": {
+      "name": "mmlu_cloze:moral_disputes",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "moral_disputes",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 346,
+      "effective_num_docs": 346,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:moral_scenarios": {
+      "name": "mmlu_cloze:moral_scenarios",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "moral_scenarios",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 895,
+      "effective_num_docs": 895,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:nutrition": {
+      "name": "mmlu_cloze:nutrition",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "nutrition",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 306,
+      "effective_num_docs": 306,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:philosophy": {
+      "name": "mmlu_cloze:philosophy",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "philosophy",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 311,
+      "effective_num_docs": 311,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:prehistory": {
+      "name": "mmlu_cloze:prehistory",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "prehistory",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 324,
+      "effective_num_docs": 324,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:professional_accounting": {
+      "name": "mmlu_cloze:professional_accounting",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "professional_accounting",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 282,
+      "effective_num_docs": 282,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:professional_law": {
+      "name": "mmlu_cloze:professional_law",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "professional_law",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 1534,
+      "effective_num_docs": 1534,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:professional_medicine": {
+      "name": "mmlu_cloze:professional_medicine",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "professional_medicine",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 272,
+      "effective_num_docs": 272,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:professional_psychology": {
+      "name": "mmlu_cloze:professional_psychology",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "professional_psychology",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 612,
+      "effective_num_docs": 612,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:public_relations": {
+      "name": "mmlu_cloze:public_relations",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "public_relations",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 110,
+      "effective_num_docs": 110,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:security_studies": {
+      "name": "mmlu_cloze:security_studies",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "security_studies",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 245,
+      "effective_num_docs": 245,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:sociology": {
+      "name": "mmlu_cloze:sociology",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "sociology",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 201,
+      "effective_num_docs": 201,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:us_foreign_policy": {
+      "name": "mmlu_cloze:us_foreign_policy",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "us_foreign_policy",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 100,
+      "effective_num_docs": 100,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:virology": {
+      "name": "mmlu_cloze:virology",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "virology",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 166,
+      "effective_num_docs": 166,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|mmlu_cloze:world_religions": {
+      "name": "mmlu_cloze:world_religions",
+      "prompt_function": "mmlu_cloze_prompt",
+      "hf_repo": "lighteval/mmlu",
+      "hf_subset": "world_religions",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": null,
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "test"
+      ],
+      "few_shots_split": "dev",
+      "few_shots_select": null,
+      "generation_size": -1,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 171,
+      "effective_num_docs": 171,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|openbookqa": {
+      "name": "openbookqa",
+      "prompt_function": "openbookqa",
+      "hf_repo": "openbookqa",
+      "hf_subset": "main",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": [
+        "train",
+        "validation",
+        "test"
+      ],
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "validation"
+      ],
+      "few_shots_split": null,
+      "few_shots_select": null,
+      "generation_size": null,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 500,
+      "effective_num_docs": 500,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|piqa": {
+      "name": "piqa",
+      "prompt_function": "piqa_harness",
+      "hf_repo": "piqa",
+      "hf_subset": "plain_text",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": [
+        "train",
+        "validation",
+        "test"
+      ],
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "validation"
+      ],
+      "few_shots_split": null,
+      "few_shots_select": null,
+      "generation_size": null,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 1838,
+      "effective_num_docs": 1838,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|trivia_qa": {
+      "name": "trivia_qa",
+      "prompt_function": "triviaqa",
+      "hf_repo": "mandarjoshi/trivia_qa",
+      "hf_subset": "rc.nocontext",
+      "metric": [
+        {
+          "metric_name": "qem",
+          "higher_is_better": true,
+          "category": "3",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": [
+        "train",
+        "validation"
+      ],
+      "trust_dataset": true,
+      "evaluation_splits": [
+        "validation"
+      ],
+      "few_shots_split": null,
+      "few_shots_select": "random_sampling_from_train",
+      "generation_size": 20,
+      "generation_grammar": null,
+      "stop_sequence": [
+        "\n",
+        ".",
+        ","
+      ],
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 17944,
+      "effective_num_docs": 17944,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    },
+    "custom|winogrande": {
+      "name": "winogrande",
+      "prompt_function": "winogrande",
+      "hf_repo": "winogrande",
+      "hf_subset": "winogrande_xl",
+      "metric": [
+        {
+          "metric_name": "acc",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        },
+        {
+          "metric_name": "acc_norm",
+          "higher_is_better": true,
+          "category": "8",
+          "use_case": "1",
+          "sample_level_fn": "compute",
+          "corpus_level_fn": "mean"
+        }
+      ],
+      "hf_revision": null,
+      "hf_filter": null,
+      "hf_avail_splits": [
+        "train",
+        "validation",
+        "test"
+      ],
+      "trust_dataset": false,
+      "evaluation_splits": [
+        "validation"
+      ],
+      "few_shots_split": null,
+      "few_shots_select": null,
+      "generation_size": null,
+      "generation_grammar": null,
+      "stop_sequence": null,
+      "output_regex": null,
+      "num_samples": null,
+      "suite": [
+        "custom"
+      ],
+      "original_num_docs": 1267,
+      "effective_num_docs": 1267,
+      "must_remove_duplicate_docs": false,
+      "version": 0,
+      "frozen": false
+    }
+  },
+  "summary_tasks": {
+    "custom|arc:challenge|0": {
+      "hashes": {
+        "hash_examples": "17b0cae357c0259e",
+        "hash_full_prompts": "17b0cae357c0259e",
+        "hash_input_tokens": "ad17dbd81a2a3d26",
+        "hash_cont_tokens": "c512920b4065b2e5"
+      },
+      "truncated": 0,
+      "non_truncated": 1172,
+      "padded": 4687,
+      "non_padded": 0,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|arc:easy|0": {
+      "hashes": {
+        "hash_examples": "63703c3cdff55bec",
+        "hash_full_prompts": "63703c3cdff55bec",
+        "hash_input_tokens": "40eb9e5845d99163",
+        "hash_cont_tokens": "9819b2bd4e06b652"
+      },
+      "truncated": 0,
+      "non_truncated": 2376,
+      "padded": 9501,
+      "non_padded": 0,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|hellaswag|0": {
+      "hashes": {
+        "hash_examples": "31985c805c3a737e",
+        "hash_full_prompts": "31985c805c3a737e",
+        "hash_input_tokens": "6ed1e652f6c51d42",
+        "hash_cont_tokens": "228934e77282dbf3"
+      },
+      "truncated": 0,
+      "non_truncated": 10042,
+      "padded": 39678,
+      "non_padded": 490,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:abstract_algebra|0": {
+      "hashes": {
+        "hash_examples": "ff00c12a680621ba",
+        "hash_full_prompts": "ff00c12a680621ba",
+        "hash_input_tokens": "3deb93f0a8b89a12",
+        "hash_cont_tokens": "3b1fd217ca5eae7d"
+      },
+      "truncated": 0,
+      "non_truncated": 100,
+      "padded": 394,
+      "non_padded": 6,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:anatomy|0": {
+      "hashes": {
+        "hash_examples": "7f9c9593991d6727",
+        "hash_full_prompts": "7f9c9593991d6727",
+        "hash_input_tokens": "83eb2604b438a0ac",
+        "hash_cont_tokens": "da5637ac437db1cd"
+      },
+      "truncated": 0,
+      "non_truncated": 135,
+      "padded": 506,
+      "non_padded": 34,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:astronomy|0": {
+      "hashes": {
+        "hash_examples": "ff5985a306787836",
+        "hash_full_prompts": "ff5985a306787836",
+        "hash_input_tokens": "665132a1dc5de70c",
+        "hash_cont_tokens": "5c634041250c2777"
+      },
+      "truncated": 0,
+      "non_truncated": 152,
+      "padded": 593,
+      "non_padded": 15,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:business_ethics|0": {
+      "hashes": {
+        "hash_examples": "e3fe02a23d08c2d0",
+        "hash_full_prompts": "e3fe02a23d08c2d0",
+        "hash_input_tokens": "8b4c3ffaa76df3bf",
+        "hash_cont_tokens": "53c23c096d6fbbc5"
+      },
+      "truncated": 0,
+      "non_truncated": 100,
+      "padded": 389,
+      "non_padded": 11,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:clinical_knowledge|0": {
+      "hashes": {
+        "hash_examples": "9b962be8e1615cd5",
+        "hash_full_prompts": "9b962be8e1615cd5",
+        "hash_input_tokens": "e23904e043567e98",
+        "hash_cont_tokens": "f0cbafe3545dd281"
+      },
+      "truncated": 0,
+      "non_truncated": 265,
+      "padded": 989,
+      "non_padded": 71,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:college_biology|0": {
+      "hashes": {
+        "hash_examples": "17b4ca841de3a2a3",
+        "hash_full_prompts": "17b4ca841de3a2a3",
+        "hash_input_tokens": "ceb01e0604c75ada",
+        "hash_cont_tokens": "bd120945b8cd6191"
+      },
+      "truncated": 0,
+      "non_truncated": 144,
+      "padded": 559,
+      "non_padded": 17,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:college_chemistry|0": {
+      "hashes": {
+        "hash_examples": "babea49005fd8249",
+        "hash_full_prompts": "babea49005fd8249",
+        "hash_input_tokens": "df472866ea2a8a3d",
+        "hash_cont_tokens": "01560744da3bb1ae"
+      },
+      "truncated": 0,
+      "non_truncated": 100,
+      "padded": 380,
+      "non_padded": 20,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:college_computer_science|0": {
+      "hashes": {
+        "hash_examples": "47f4fef1846c8914",
+        "hash_full_prompts": "47f4fef1846c8914",
+        "hash_input_tokens": "485962986df7fbb7",
+        "hash_cont_tokens": "0e6deead73387308"
+      },
+      "truncated": 0,
+      "non_truncated": 100,
+      "padded": 386,
+      "non_padded": 14,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:college_mathematics|0": {
+      "hashes": {
+        "hash_examples": "4d3686d599963414",
+        "hash_full_prompts": "4d3686d599963414",
+        "hash_input_tokens": "2e62aed19b952d56",
+        "hash_cont_tokens": "8dafab7e4fbb7fbe"
+      },
+      "truncated": 0,
+      "non_truncated": 100,
+      "padded": 391,
+      "non_padded": 9,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:college_medicine|0": {
+      "hashes": {
+        "hash_examples": "7209619ecac6f235",
+        "hash_full_prompts": "7209619ecac6f235",
+        "hash_input_tokens": "537efb793ce96ddc",
+        "hash_cont_tokens": "84342b2b76c98a6e"
+      },
+      "truncated": 0,
+      "non_truncated": 173,
+      "padded": 669,
+      "non_padded": 23,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:college_physics|0": {
+      "hashes": {
+        "hash_examples": "6131b6c60dd7f055",
+        "hash_full_prompts": "6131b6c60dd7f055",
+        "hash_input_tokens": "43de489cb2fb254d",
+        "hash_cont_tokens": "9d0e49ba8dc5989a"
+      },
+      "truncated": 0,
+      "non_truncated": 102,
+      "padded": 399,
+      "non_padded": 9,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:computer_security|0": {
+      "hashes": {
+        "hash_examples": "99539c9a5bc98a59",
+        "hash_full_prompts": "99539c9a5bc98a59",
+        "hash_input_tokens": "9e4ddd2397d35aa3",
+        "hash_cont_tokens": "01121a08afaaf8dc"
+      },
+      "truncated": 0,
+      "non_truncated": 100,
+      "padded": 382,
+      "non_padded": 18,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:conceptual_physics|0": {
+      "hashes": {
+        "hash_examples": "4e15015839d00858",
+        "hash_full_prompts": "4e15015839d00858",
+        "hash_input_tokens": "bf0f2e7060a7147a",
+        "hash_cont_tokens": "e513df10450acb97"
+      },
+      "truncated": 0,
+      "non_truncated": 235,
+      "padded": 891,
+      "non_padded": 49,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:econometrics|0": {
+      "hashes": {
+        "hash_examples": "fba5c647465e89e0",
+        "hash_full_prompts": "fba5c647465e89e0",
+        "hash_input_tokens": "0172a75cff9a807b",
+        "hash_cont_tokens": "134b345bdee1a0cb"
+      },
+      "truncated": 0,
+      "non_truncated": 114,
+      "padded": 451,
+      "non_padded": 5,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:electrical_engineering|0": {
+      "hashes": {
+        "hash_examples": "2db2ba0cb98cda51",
+        "hash_full_prompts": "2db2ba0cb98cda51",
+        "hash_input_tokens": "cb93841652392319",
+        "hash_cont_tokens": "a683d95cb9fbf0d6"
+      },
+      "truncated": 0,
+      "non_truncated": 145,
+      "padded": 556,
+      "non_padded": 24,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:elementary_mathematics|0": {
+      "hashes": {
+        "hash_examples": "f231cd5ae05742bb",
+        "hash_full_prompts": "f231cd5ae05742bb",
+        "hash_input_tokens": "2c622fca8451ea44",
+        "hash_cont_tokens": "094ff4c560f0db79"
+      },
+      "truncated": 0,
+      "non_truncated": 378,
+      "padded": 1448,
+      "non_padded": 64,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:formal_logic|0": {
+      "hashes": {
+        "hash_examples": "b69d9607d5da536e",
+        "hash_full_prompts": "b69d9607d5da536e",
+        "hash_input_tokens": "3f9f9808ee4d5c08",
+        "hash_cont_tokens": "29db55d952acb85d"
+      },
+      "truncated": 0,
+      "non_truncated": 126,
+      "padded": 499,
+      "non_padded": 5,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:global_facts|0": {
+      "hashes": {
+        "hash_examples": "c9f53772e672f6bc",
+        "hash_full_prompts": "c9f53772e672f6bc",
+        "hash_input_tokens": "ce153de1bd9d7d1d",
+        "hash_cont_tokens": "867dcd15c271e15c"
+      },
+      "truncated": 0,
+      "non_truncated": 100,
+      "padded": 394,
+      "non_padded": 6,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:high_school_biology|0": {
+      "hashes": {
+        "hash_examples": "455027cf6cdd02bc",
+        "hash_full_prompts": "455027cf6cdd02bc",
+        "hash_input_tokens": "8ac752c32df9f4f5",
+        "hash_cont_tokens": "cb3e6a68f47a8eeb"
+      },
+      "truncated": 0,
+      "non_truncated": 310,
+      "padded": 1208,
+      "non_padded": 32,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:high_school_chemistry|0": {
+      "hashes": {
+        "hash_examples": "95d9caac9edbc34d",
+        "hash_full_prompts": "95d9caac9edbc34d",
+        "hash_input_tokens": "df11c251b9b0d163",
+        "hash_cont_tokens": "896d06c20dcec9ec"
+      },
+      "truncated": 0,
+      "non_truncated": 203,
+      "padded": 790,
+      "non_padded": 22,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:high_school_computer_science|0": {
+      "hashes": {
+        "hash_examples": "6e44706db3791e51",
+        "hash_full_prompts": "6e44706db3791e51",
+        "hash_input_tokens": "bdeea952887d8dd7",
+        "hash_cont_tokens": "9da53a8484fa853e"
+      },
+      "truncated": 0,
+      "non_truncated": 100,
+      "padded": 394,
+      "non_padded": 6,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:high_school_european_history|0": {
+      "hashes": {
+        "hash_examples": "9078fce41897117d",
+        "hash_full_prompts": "9078fce41897117d",
+        "hash_input_tokens": "9ad11e4de3ce0c67",
+        "hash_cont_tokens": "62e27833dc0027fe"
+      },
+      "truncated": 0,
+      "non_truncated": 165,
+      "padded": 660,
+      "non_padded": 0,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:high_school_geography|0": {
+      "hashes": {
+        "hash_examples": "c68adcc34130a2e8",
+        "hash_full_prompts": "c68adcc34130a2e8",
+        "hash_input_tokens": "4c9748f8e241a30d",
+        "hash_cont_tokens": "0dde98155d0c26e6"
+      },
+      "truncated": 0,
+      "non_truncated": 198,
+      "padded": 752,
+      "non_padded": 40,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:high_school_government_and_politics|0": {
+      "hashes": {
+        "hash_examples": "6f839b19e49a0858",
+        "hash_full_prompts": "6f839b19e49a0858",
+        "hash_input_tokens": "da410e087149f6bc",
+        "hash_cont_tokens": "d74a61eae0b6b657"
+      },
+      "truncated": 0,
+      "non_truncated": 193,
+      "padded": 758,
+      "non_padded": 14,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:high_school_macroeconomics|0": {
+      "hashes": {
+        "hash_examples": "708a5c05e7adb220",
+        "hash_full_prompts": "708a5c05e7adb220",
+        "hash_input_tokens": "70302329195e342b",
+        "hash_cont_tokens": "6441e265e8f4af19"
+      },
+      "truncated": 0,
+      "non_truncated": 390,
+      "padded": 1477,
+      "non_padded": 83,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:high_school_mathematics|0": {
+      "hashes": {
+        "hash_examples": "47c621dd61fd7790",
+        "hash_full_prompts": "47c621dd61fd7790",
+        "hash_input_tokens": "c87690d64f3747c0",
+        "hash_cont_tokens": "089e3cb73a2e8d5a"
+      },
+      "truncated": 0,
+      "non_truncated": 270,
+      "padded": 1057,
+      "non_padded": 23,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:high_school_microeconomics|0": {
+      "hashes": {
+        "hash_examples": "3c467180d90f6371",
+        "hash_full_prompts": "3c467180d90f6371",
+        "hash_input_tokens": "19e3ca96d87edb6b",
+        "hash_cont_tokens": "b796174aba15bfad"
+      },
+      "truncated": 0,
+      "non_truncated": 238,
+      "padded": 895,
+      "non_padded": 57,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:high_school_physics|0": {
+      "hashes": {
+        "hash_examples": "89a598cdde43be79",
+        "hash_full_prompts": "89a598cdde43be79",
+        "hash_input_tokens": "639b1ef057172e8c",
+        "hash_cont_tokens": "842e2a4539ef99ab"
+      },
+      "truncated": 0,
+      "non_truncated": 151,
+      "padded": 597,
+      "non_padded": 7,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:high_school_psychology|0": {
+      "hashes": {
+        "hash_examples": "d8a7bf3f17ec12d0",
+        "hash_full_prompts": "d8a7bf3f17ec12d0",
+        "hash_input_tokens": "80a9a600eb9eebaa",
+        "hash_cont_tokens": "a77f669bd77c6c4d"
+      },
+      "truncated": 0,
+      "non_truncated": 545,
+      "padded": 2100,
+      "non_padded": 80,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:high_school_statistics|0": {
+      "hashes": {
+        "hash_examples": "995374a6caaa97d6",
+        "hash_full_prompts": "995374a6caaa97d6",
+        "hash_input_tokens": "2beb42f49ef9dd1b",
+        "hash_cont_tokens": "7d7c20e92bc841a9"
+      },
+      "truncated": 0,
+      "non_truncated": 216,
+      "padded": 845,
+      "non_padded": 19,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:high_school_us_history|0": {
+      "hashes": {
+        "hash_examples": "7893e9d07e34cb37",
+        "hash_full_prompts": "7893e9d07e34cb37",
+        "hash_input_tokens": "83a6ca8cc3ca2519",
+        "hash_cont_tokens": "e117d838a8f12367"
+      },
+      "truncated": 0,
+      "non_truncated": 204,
+      "padded": 816,
+      "non_padded": 0,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:high_school_world_history|0": {
+      "hashes": {
+        "hash_examples": "48879684e37d1716",
+        "hash_full_prompts": "48879684e37d1716",
+        "hash_input_tokens": "48c38505c96e1601",
+        "hash_cont_tokens": "5ba8b8b1bd31492f"
+      },
+      "truncated": 0,
+      "non_truncated": 237,
+      "padded": 948,
+      "non_padded": 0,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:human_aging|0": {
+      "hashes": {
+        "hash_examples": "afae8c53bd6e5f44",
+        "hash_full_prompts": "afae8c53bd6e5f44",
+        "hash_input_tokens": "b622d2ae2a9a2389",
+        "hash_cont_tokens": "3ed6eb737b8d673d"
+      },
+      "truncated": 0,
+      "non_truncated": 223,
+      "padded": 843,
+      "non_padded": 49,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:human_sexuality|0": {
+      "hashes": {
+        "hash_examples": "9701f02004912a7a",
+        "hash_full_prompts": "9701f02004912a7a",
+        "hash_input_tokens": "0590bed70f247fc8",
+        "hash_cont_tokens": "a0ca80e5fea94af0"
+      },
+      "truncated": 0,
+      "non_truncated": 131,
+      "padded": 504,
+      "non_padded": 20,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:international_law|0": {
+      "hashes": {
+        "hash_examples": "47955196de2d2c7a",
+        "hash_full_prompts": "47955196de2d2c7a",
+        "hash_input_tokens": "0835116ea29b754c",
+        "hash_cont_tokens": "e294ba24e42cee98"
+      },
+      "truncated": 0,
+      "non_truncated": 121,
+      "padded": 463,
+      "non_padded": 21,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:jurisprudence|0": {
+      "hashes": {
+        "hash_examples": "a992eac2b8ae8bc4",
+        "hash_full_prompts": "a992eac2b8ae8bc4",
+        "hash_input_tokens": "1030710a6d14196a",
+        "hash_cont_tokens": "0609d6898d9b68ad"
+      },
+      "truncated": 0,
+      "non_truncated": 108,
+      "padded": 419,
+      "non_padded": 13,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:logical_fallacies|0": {
+      "hashes": {
+        "hash_examples": "b0d31ed08f699e6c",
+        "hash_full_prompts": "b0d31ed08f699e6c",
+        "hash_input_tokens": "d25d432910b49efe",
+        "hash_cont_tokens": "185350eb12cb00c8"
+      },
+      "truncated": 0,
+      "non_truncated": 163,
+      "padded": 638,
+      "non_padded": 14,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:machine_learning|0": {
+      "hashes": {
+        "hash_examples": "dccdef2bae4461a6",
+        "hash_full_prompts": "dccdef2bae4461a6",
+        "hash_input_tokens": "07a5e2893c11a61b",
+        "hash_cont_tokens": "4246808b9997c875"
+      },
+      "truncated": 0,
+      "non_truncated": 112,
+      "padded": 441,
+      "non_padded": 7,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:management|0": {
+      "hashes": {
+        "hash_examples": "f600be25303e1fe2",
+        "hash_full_prompts": "f600be25303e1fe2",
+        "hash_input_tokens": "10ff2ab1debb80e2",
+        "hash_cont_tokens": "14f65210b4927437"
+      },
+      "truncated": 0,
+      "non_truncated": 103,
+      "padded": 392,
+      "non_padded": 20,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:marketing|0": {
+      "hashes": {
+        "hash_examples": "1a0df3ae5e306669",
+        "hash_full_prompts": "1a0df3ae5e306669",
+        "hash_input_tokens": "dd8fb6f3fc9075b9",
+        "hash_cont_tokens": "52968c44575b2158"
+      },
+      "truncated": 0,
+      "non_truncated": 234,
+      "padded": 909,
+      "non_padded": 27,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:medical_genetics|0": {
+      "hashes": {
+        "hash_examples": "eb87c9cfd9b7c760",
+        "hash_full_prompts": "eb87c9cfd9b7c760",
+        "hash_input_tokens": "e34c7451d5600add",
+        "hash_cont_tokens": "11ee1d1bad20ade8"
+      },
+      "truncated": 0,
+      "non_truncated": 100,
+      "padded": 375,
+      "non_padded": 25,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:miscellaneous|0": {
+      "hashes": {
+        "hash_examples": "f88d724036ba03b7",
+        "hash_full_prompts": "f88d724036ba03b7",
+        "hash_input_tokens": "2c64d670544bcb79",
+        "hash_cont_tokens": "d84457206b083219"
+      },
+      "truncated": 0,
+      "non_truncated": 783,
+      "padded": 2994,
+      "non_padded": 138,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:moral_disputes|0": {
+      "hashes": {
+        "hash_examples": "79782c0823005e7b",
+        "hash_full_prompts": "79782c0823005e7b",
+        "hash_input_tokens": "1ba722114b2f8fa8",
+        "hash_cont_tokens": "85c70be841230602"
+      },
+      "truncated": 0,
+      "non_truncated": 346,
+      "padded": 1341,
+      "non_padded": 43,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:moral_scenarios|0": {
+      "hashes": {
+        "hash_examples": "fe57fdd86442b483",
+        "hash_full_prompts": "fe57fdd86442b483",
+        "hash_input_tokens": "d24c1c4d9202eaff",
+        "hash_cont_tokens": "afb7f4b4b6fba335"
+      },
+      "truncated": 0,
+      "non_truncated": 895,
+      "padded": 3376,
+      "non_padded": 204,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:nutrition|0": {
+      "hashes": {
+        "hash_examples": "421f206f5957e90f",
+        "hash_full_prompts": "421f206f5957e90f",
+        "hash_input_tokens": "7231de6e2da3e3a5",
+        "hash_cont_tokens": "09243c7215a5c8ff"
+      },
+      "truncated": 0,
+      "non_truncated": 306,
+      "padded": 1151,
+      "non_padded": 73,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:philosophy|0": {
+      "hashes": {
+        "hash_examples": "c93073e383957fc4",
+        "hash_full_prompts": "c93073e383957fc4",
+        "hash_input_tokens": "9ccba858995c9a71",
+        "hash_cont_tokens": "0391eac7daac6e51"
+      },
+      "truncated": 0,
+      "non_truncated": 311,
+      "padded": 1161,
+      "non_padded": 83,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:prehistory|0": {
+      "hashes": {
+        "hash_examples": "58ec03e20eae9f90",
+        "hash_full_prompts": "58ec03e20eae9f90",
+        "hash_input_tokens": "2124f665ee7adbcd",
+        "hash_cont_tokens": "f8d95d6e63c30de1"
+      },
+      "truncated": 0,
+      "non_truncated": 324,
+      "padded": 1246,
+      "non_padded": 50,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:professional_accounting|0": {
+      "hashes": {
+        "hash_examples": "13f7a6023a118512",
+        "hash_full_prompts": "13f7a6023a118512",
+        "hash_input_tokens": "fc4166484adb1c07",
+        "hash_cont_tokens": "47a3d8a4fa184090"
+      },
+      "truncated": 0,
+      "non_truncated": 282,
+      "padded": 1118,
+      "non_padded": 10,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:professional_law|0": {
+      "hashes": {
+        "hash_examples": "8086d24f4d4e82f4",
+        "hash_full_prompts": "8086d24f4d4e82f4",
+        "hash_input_tokens": "39cad63797669b26",
+        "hash_cont_tokens": "477ac5f3a2582801"
+      },
+      "truncated": 0,
+      "non_truncated": 1534,
+      "padded": 6119,
+      "non_padded": 17,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:professional_medicine|0": {
+      "hashes": {
+        "hash_examples": "f0b30b4e786eaeea",
+        "hash_full_prompts": "f0b30b4e786eaeea",
+        "hash_input_tokens": "709cda008dac9ac1",
+        "hash_cont_tokens": "9d55d18fcd916be3"
+      },
+      "truncated": 0,
+      "non_truncated": 272,
+      "padded": 1084,
+      "non_padded": 4,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:professional_psychology|0": {
+      "hashes": {
+        "hash_examples": "29fd2b4a194c28ea",
+        "hash_full_prompts": "29fd2b4a194c28ea",
+        "hash_input_tokens": "42770d1eedfa3fca",
+        "hash_cont_tokens": "8688f339b9fbfe2c"
+      },
+      "truncated": 0,
+      "non_truncated": 612,
+      "padded": 2364,
+      "non_padded": 84,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:public_relations|0": {
+      "hashes": {
+        "hash_examples": "52a84bb75dd812eb",
+        "hash_full_prompts": "52a84bb75dd812eb",
+        "hash_input_tokens": "5fba1759550647a1",
+        "hash_cont_tokens": "ba439106d4e0e8a5"
+      },
+      "truncated": 0,
+      "non_truncated": 110,
+      "padded": 398,
+      "non_padded": 42,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:security_studies|0": {
+      "hashes": {
+        "hash_examples": "2469ceb06f350432",
+        "hash_full_prompts": "2469ceb06f350432",
+        "hash_input_tokens": "73e7fe139aa7ad05",
+        "hash_cont_tokens": "76872d770f0588d0"
+      },
+      "truncated": 0,
+      "non_truncated": 245,
+      "padded": 944,
+      "non_padded": 36,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:sociology|0": {
+      "hashes": {
+        "hash_examples": "d2060dedb3fc2bea",
+        "hash_full_prompts": "d2060dedb3fc2bea",
+        "hash_input_tokens": "016dea10212f649e",
+        "hash_cont_tokens": "553c93e7469b2370"
+      },
+      "truncated": 0,
+      "non_truncated": 201,
+      "padded": 747,
+      "non_padded": 57,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:us_foreign_policy|0": {
+      "hashes": {
+        "hash_examples": "84e882e740d43f01",
+        "hash_full_prompts": "84e882e740d43f01",
+        "hash_input_tokens": "cb0a28188e82e30c",
+        "hash_cont_tokens": "f7dacbcf4c12192e"
+      },
+      "truncated": 0,
+      "non_truncated": 100,
+      "padded": 373,
+      "non_padded": 27,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:virology|0": {
+      "hashes": {
+        "hash_examples": "0428d2d277aa56aa",
+        "hash_full_prompts": "0428d2d277aa56aa",
+        "hash_input_tokens": "c5da9860726a4e42",
+        "hash_cont_tokens": "cf21f14e7122825c"
+      },
+      "truncated": 0,
+      "non_truncated": 166,
+      "padded": 614,
+      "non_padded": 50,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|mmlu_cloze:world_religions|0": {
+      "hashes": {
+        "hash_examples": "7e8f045c67ba6ba1",
+        "hash_full_prompts": "7e8f045c67ba6ba1",
+        "hash_input_tokens": "f132e6f15278f47c",
+        "hash_cont_tokens": "ec9b2ef91888ec59"
+      },
+      "truncated": 0,
+      "non_truncated": 171,
+      "padded": 634,
+      "non_padded": 50,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|openbookqa|0": {
+      "hashes": {
+        "hash_examples": "fd427af2ef0577e3",
+        "hash_full_prompts": "fd427af2ef0577e3",
+        "hash_input_tokens": "c0fdbda881575e0c",
+        "hash_cont_tokens": "c7b680eb9c858d5f"
+      },
+      "truncated": 0,
+      "non_truncated": 500,
+      "padded": 1990,
+      "non_padded": 10,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|piqa|0": {
+      "hashes": {
+        "hash_examples": "f7e288a8894cd149",
+        "hash_full_prompts": "f7e288a8894cd149",
+        "hash_input_tokens": "16f5fd94bc53d32e",
+        "hash_cont_tokens": "c74853740fbd4159"
+      },
+      "truncated": 0,
+      "non_truncated": 1838,
+      "padded": 3554,
+      "non_padded": 122,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|winogrande|0": {
+      "hashes": {
+        "hash_examples": "087d5d1a1afd4c7b",
+        "hash_full_prompts": "087d5d1a1afd4c7b",
+        "hash_input_tokens": "837d38312121c11a",
+        "hash_cont_tokens": "07fdfa56b379c911"
+      },
+      "truncated": 0,
+      "non_truncated": 1267,
+      "padded": 2518,
+      "non_padded": 16,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    },
+    "custom|trivia_qa|0": {
+      "hashes": {
+        "hash_examples": "1e083041cb75ff0c",
+        "hash_full_prompts": "1e083041cb75ff0c",
+        "hash_input_tokens": "6d9bbd76baa542e2",
+        "hash_cont_tokens": "15efc61022c5570a"
+      },
+      "truncated": 527,
+      "non_truncated": 17417,
+      "padded": 17944,
+      "non_padded": 0,
+      "effective_few_shots": 0.0,
+      "num_truncated_few_shots": 0
+    }
+  },
+  "summary_general": {
+    "hashes": {
+      "hash_examples": "8c5d115902bdf2aa",
+      "hash_full_prompts": "8c5d115902bdf2aa",
+      "hash_input_tokens": "7f18aa2cc552a80b",
+      "hash_cont_tokens": "cfbf3a9edba4e8a2"
+    },
+    "truncated": 527,
+    "non_truncated": 48654,
+    "padded": 134093,
+    "non_padded": 2585,
+    "num_truncated_few_shots": 0
+  }
+}

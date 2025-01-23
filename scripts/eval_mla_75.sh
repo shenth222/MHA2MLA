@@ -1,7 +1,7 @@
 #!/bin/bash
 #################### 环境变量 ####################
 
-export CUDA_VISIBLE_DEVICES="4,5,6,7"
+export CUDA_VISIBLE_DEVICES='0,1,2,3'
 export HF_HOME="/home/binguo/data/hf-home"
 export NUM_GPUS=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
 export MASTER_PORT="auto"
@@ -57,5 +57,4 @@ eval_all() {
 #################### 任务执行 ####################
 
 
-eval_all ../checkpoints/rope_v4_topk4_svd_method2_rank8 rope_v4_topk4_svd_method2_rank8 ../configs/mla/rope_v4_topk4_svd_method2_rank8.yaml
-eval_all ../checkpoints/rope_v4_topk4_svd_method5_rank8 rope_v4_topk4_svd_method5_rank8 ../configs/mla/rope_v4_topk4_svd_method5_rank8.yaml
+eval_all ../checkpoints/rope_v4_topk4_svd_method7_rank8_step36000 rope_v4_topk4_svd_method7_rank8_step36000 ../configs/mla/rope_v4_topk4_svd_method7_rank8_step36000.yaml
