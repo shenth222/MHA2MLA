@@ -12,6 +12,8 @@ export WANDB_PROJECT="smollm_nt"
 
 torchrun --nproc_per_node 4 --master_port 24575 \
     -m src.mla_train_nt \
-    --config-file ../configs/mla/rope_v4_topk4_svd_method5_rank8.yaml
+    --config-file ../configs/mla/rope_v4_topk4_svd_method7_rank8_step36000.yaml
 
-feishu_msg -u 18055481550 -m 'rope_v4_topk4_svd_method5_rank8'
+feishu_msg -u 18055481550 -m 'rope_v4_topk4_svd_method7_rank8_step36000'
+
+./eval_mla_75.sh
