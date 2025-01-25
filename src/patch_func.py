@@ -7,7 +7,6 @@ import sys
 from nanotron.parallel.pipeline_parallel.block import TensorPointer
 
 
-
 def create_custom_apply_rotary_pos_emb(cfg):
     def apply_rotary_pos_emb_v0(self, q, k, cos, sin, unsqueeze_dim=2):
         cos = cos.unsqueeze(unsqueeze_dim)
@@ -95,7 +94,9 @@ def create_custom_apply_rotary_pos_emb(cfg):
         topk_indices = torch.topk(qk_tensor[layer_idx], k=top_k_dim, dim=1)[1]
         mask = torch.zeros_like(qk_tensor[layer_idx])
         mask.scatter_(1, topk_indices, 1)
-        mask_for_k = torch.cat((mask, mask), dim=1).unsqueeze(0).unsqueeze(1).to(q.device)
+        mask_for_k = (
+            torch.cat((mask, mask), dim=1).unsqueeze(0).unsqueeze(1).to(q.device)
+        )
         mask_for_q = torch.repeat_interleave(
             input=mask_for_k, repeats=cfg["n_gqa_group"], dim=2
         ).to(q.device)
@@ -125,11 +126,35 @@ def create_custom_apply_rotary_pos_emb(cfg):
         q_embed = torch.cat([q for q in qs if q != []], -1)
         k_embed = torch.cat([k for k in ks if k != []], -1)
         return q_embed, k_embed
+    
+    def apply_rotary_pos_emb_v6(self, q, k, cos, sin, layer_idx=0, unsqueeze_dim=2):
+        cos = cos.unsqueeze(unsqueeze_dim)
+        sin = sin.unsqueeze(unsqueeze_dim)
+        q_embed = (q * cos) + (self.rotate_half(q) * sin)
+        k_embed = (k * cos) + (self.rotate_half(k) * sin)
+        mask = mask_tensor[layer_idx].to(q.device)
+        mask_for_k = (
+            torch.cat((mask, mask), dim=1).unsqueeze(0).unsqueeze(1).to(q.device)
+        )
+        mask_for_q = torch.repeat_interleave(
+            input=mask_for_k, repeats=cfg["n_gqa_group"], dim=2
+        ).to(q.device)
+        q_embed = torch.where(mask_for_q == 1, q_embed, q)
+        k_embed = torch.where(mask_for_k == 1, k_embed, k)
+        return q_embed, k_embed
 
     version = cfg["partial_rope_version"]
-    if version == 4:
+    if version == 4 or version == 6:
         with open(cfg["qk_tensor_path"], "rb") as fin:
             qk_tensor = torch.load(fin).cuda()
+    if version == 6:
+        flattened_qk = qk_tensor.view(qk_tensor.size(0), -1)
+        total_dim = qk_tensor.size(1) * cfg["top_k_rope_dim"]
+        _, top_indices = torch.topk(flattened_qk, total_dim, dim=1)
+        mask_tensor = torch.zeros_like(flattened_qk, dtype=torch.bool)
+        mask_tensor.scatter_(1, top_indices, 1)
+        mask_tensor = mask_tensor.view_as(qk_tensor)
+
     versions = {
         0: apply_rotary_pos_emb_v0,
         1: apply_rotary_pos_emb_v1,
@@ -137,6 +162,7 @@ def create_custom_apply_rotary_pos_emb(cfg):
         3: apply_rotary_pos_emb_v3,
         4: apply_rotary_pos_emb_v4,
         5: apply_rotary_pos_emb_v5,
+        6: apply_rotary_pos_emb_v6,
     }
     return versions.get(version, apply_rotary_pos_emb_v0)
 
