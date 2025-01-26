@@ -257,12 +257,12 @@ if __name__ == "__main__":
     config_file = args.config_file
 
     # Monkey patch
-    from .patch_func_nt import mla_patch_nt,CustomConfig
+    from .patch_func_nt import low_rank_patch_nt,CustomConfig
     import yaml
     with open(config_file, "r") as fin:
         config = yaml.safe_load(fin)
     rope_cfg=config["model"]["model_config"]["RoPE"]
-    mla_patch_nt(rope_cfg)
+    low_rank_patch_nt(rope_cfg)
 
     from nanotron import trainer as nt_trainer
     # Load trainer and data

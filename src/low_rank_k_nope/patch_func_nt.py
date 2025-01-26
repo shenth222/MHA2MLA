@@ -55,6 +55,7 @@ from nanotron.serialize.utils import (
 )
 from transformers.modeling_flash_attention_utils import _flash_attention_forward
 
+
 from ..mla.NopeIndex import IndexForNope
 from ..mla.svd_low_rank import SvdInit
 
@@ -125,23 +126,72 @@ class CustomCausalSelfAttention(nn.Module, AttachableStore):
         self.d_model = config.hidden_size
         self.is_using_mup = config.is_using_mup
         self.layer_idx = layer_idx
+        self.nope_mask = IndexForNope.get_index_for_nope(
+            config.RoPE,
+            head_dim=self.d_qk,
+            head_num=self.n_local_kv_heads,
+            layer_idx=self.layer_idx,
+        )
         self.is_share_W_down = bool(config.SVD["method"] not in [2, 3])
         self.low_rank = config.SVD["low_rank"]
-        self.tp_mode = (
-            self.parallel_config.tp_mode
-            if self.parallel_config is not None
+
+        # TODO @thomasw21: refactor so that we store that default in a single place.
+        tp_mode = (
+            parallel_config.tp_mode
+            if parallel_config is not None
             else TensorParallelLinearMode.ALL_REDUCE
         )
-        self.tp_linear_async_communication = (
-            self.parallel_config.tp_linear_async_communication
-            if self.parallel_config is not None
+        self.tp_mode = tp_mode
+        tp_linear_async_communication = (
+            parallel_config.tp_linear_async_communication
+            if parallel_config is not None
             else False
         )
-        # TODO @thomasw21: refactor so that we store that default in a single place.
+        self.tp_linear_async_communication = tp_linear_async_communication
 
         # build the slice config for self.qkv for save/load
         # shard are done within the contiguous chunk
-
+        self.q_proj = TensorParallelColumnLinear(
+            self.d_model,
+            config.num_attention_heads * self.d_qk,
+            pg=tp_pg,
+            mode=tp_mode,
+            bias=False,
+            async_communication=tp_linear_async_communication,
+            tp_recompute_allgather=parallel_config.tp_recompute_allgather,
+        )
+        self.W_k_r = TensorParallelColumnLinear(
+            self.d_model,
+            (self.nope_mask == False).sum().item(),
+            bias=False,
+            pg=tp_pg,
+            mode=tp_mode,
+            async_communication=tp_linear_async_communication,
+        )
+        self.W_down_k = TensorParallelColumnLinear(
+            self.d_model,
+            self.low_rank * self.n_local_kv_heads,
+            bias=False,
+            pg=tp_pg,
+            mode=tp_mode,
+            async_communication=tp_linear_async_communication,
+        )
+        self.W_up_k = TensorParallelColumnLinear(
+            self.low_rank * self.n_local_kv_heads,
+            self.n_local_kv_heads * self.d_qk - (self.nope_mask == False).sum().item(),
+            bias=False,
+            pg=tp_pg,
+            mode=tp_mode,
+            async_communication=tp_linear_async_communication,
+        )
+        self.v_proj = TensorParallelRowLinear(
+            self.d_model,
+            self.n_local_kv_heads * self.d_v,
+            pg=self.tp_pg,
+            mode=self.tp_mode,
+            bias=False,
+            async_communication=self.tp_linear_async_communication,
+        )
         # TODO(kunhao): We want to have only one version per device and not one version per layer.
         self.rotary_embedding = llama.LlamaRotaryEmbedding(
             dim=self.d_qk,
@@ -149,14 +199,19 @@ class CustomCausalSelfAttention(nn.Module, AttachableStore):
             theta=config.rope_theta,
         )
         self.rope_interleaved = config.rope_interleaved
-        self.init_w_q()
-        self.init_w_k()
-        self.init_w_v()
-        self.init_w_o()
 
         # NOTE: Only supported for training (TODO(fmom): position_ids not supported yet)
         self.flash_rotary_embedding = FlashRotaryEmbedding(
             dim=self.d_qk, base=config.rope_theta, interleaved=config.rope_interleaved
+        )
+
+        self.o_proj = TensorParallelRowLinear(
+            config.num_attention_heads * self.d_qk,
+            self.d_model,
+            pg=tp_pg,
+            mode=tp_mode,
+            bias=False,
+            async_communication=tp_linear_async_communication,
         )
 
         self.attention = CoreAttention(
@@ -169,136 +224,6 @@ class CustomCausalSelfAttention(nn.Module, AttachableStore):
             config.max_position_embeddings
         )  # TODO @nouamane: compute based on free memory, because in rope we can surpass max_position_embeddings
 
-
-    def init_w_q(self):
-        self.q_proj = TensorParallelColumnLinear(
-            self.d_model,
-            self.config.num_attention_heads * self.d_qk,
-            pg=self.tp_pg,
-            mode=self.tp_mode,
-            bias=False,
-            async_communication=self.tp_linear_async_communication,
-            tp_recompute_allgather=self.parallel_config.tp_recompute_allgather,
-        )
-
-    def init_w_k(self):
-        self.k_proj = TensorParallelColumnLinear(
-            self.d_model,
-            self.n_local_kv_heads * self.d_qk,
-            pg=self.tp_pg,
-            mode=self.tp_mode,
-            bias=False,
-            async_communication=self.tp_linear_async_communication,
-            tp_recompute_allgather=self.parallel_config.tp_recompute_allgather,
-        )
-        # self.W_down_k = TensorParallelColumnLinear(
-        #     self.d_model,
-        #     self.low_rank * self.n_local_kv_heads,
-        #     bias=False,
-        #     pg=self.tp_pg,
-        #     mode=self.tp_mode,
-        #     async_communication=self.tp_linear_async_communication,
-        # )
-        # self.W_up_k = TensorParallelColumnLinear(
-        #     self.low_rank * self.n_local_kv_heads,
-        #     self.n_local_kv_heads * self.d_qk - (self.nope_mask == False).sum().item(),
-        #     bias=False,
-        #     pg=self.tp_pg,
-        #     mode=self.tp_mode,
-        #     async_communication=self.tp_linear_async_communication,
-        # )
-
-    def init_w_v(self):
-        # self.v_proj = TensorParallelColumnLinear(
-        #     self.d_model,
-        #     self.n_local_kv_heads * self.d_v,
-        #     pg=self.tp_pg,
-        #     mode=self.tp_mode,
-        #     bias=False,
-        #     async_communication=self.tp_linear_async_communication,
-        #     tp_recompute_allgather=self.parallel_config.tp_recompute_allgather,
-        # )
-        self.W_down_v = TensorParallelColumnLinear(
-            self.d_model,
-            self.low_rank * self.n_local_kv_heads,
-            bias=False,
-            pg=self.tp_pg,
-            mode=self.tp_mode,
-            async_communication=self.tp_linear_async_communication,
-        )
-        self.W_up_v = TensorParallelColumnLinear(
-            self.low_rank * self.n_local_kv_heads,
-            self.n_local_kv_heads * self.d_v,
-            bias=False,
-            pg=self.tp_pg,
-            mode=self.tp_mode,
-            async_communication=self.tp_linear_async_communication,
-        )
-
-    def init_w_o(self):
-        self.o_proj = TensorParallelRowLinear(
-            self.config.num_attention_heads * self.d_qk,
-            self.d_model,
-            pg=self.tp_pg,
-            mode=self.tp_mode,
-            bias=False,
-            async_communication=self.tp_linear_async_communication,
-        )
-
-    def get_query_states(
-        self,
-        hidden_states,  # [seq_length, batch_size, hidden_size]
-        sequence_mask,  # [batch_size, seq_length]
-    ):
-        query_states = self.q_proj(
-            hidden_states
-        )  # [seq_length, batch_size, n_local_q_heads * d_qk]
-        q_length, batch_size, _ = query_states.shape
-        query_states = (
-            query_states.transpose(0, 1)
-            .contiguous()
-            .view(batch_size, q_length, self.n_local_q_heads, self.d_qk)
-        )  # [batch_size, seq_length, n_local_q_heads, d_qk]
-        return query_states
-
-    def get_key_states(
-        self,
-        hidden_states,  # [seq_length, batch_size, hidden_size]
-        sequence_mask,  # [batch_size, seq_length]
-    ):
-        key_states = self.k_proj(hidden_states)  # [seq_length, batch_size, n_local_kv_heads * d_qk]
-        # k_r = self.W_k_r(hidden_states)
-        # k_c = self.W_up_k(self.W_down_k(hidden_states))
-        # key_states = torch.zeros(
-        #     (hidden_states.size(0),hidden_states.size(1),self.n_local_kv_heads*self.d_qk),
-        #     dtype=hidden_states.dtype,
-        #     device=hidden_states.device,
-        # )
-        # key_states[...,~self.nope_mask] = k_r
-        # key_states[...,self.nope_mask] = k_c
-        key_states = (
-            key_states.transpose(0,1)
-            .contiguous()
-            .view(hidden_states.size(1),hidden_states.size(0),self.n_local_kv_heads,self.d_qk)
-        )
-        return key_states
-    
-    def get_value_states(
-        self,
-        hidden_states,  # [seq_length, batch_size, hidden_size]
-        sequence_mask,  # [batch_size, seq_length]
-    ):
-        # value_states = self.v_proj(hidden_states)  # [seq_length, batch_size, n_local_kv_heads * d_v]
-        c_k = self.W_down_v(hidden_states)
-        value_states = self.W_up_v(c_k)
-        value_states = (
-            value_states.transpose(0,1)
-            .contiguous()
-            .view(hidden_states.size(1),hidden_states.size(0),self.n_local_kv_heads,self.d_v)
-        )
-        return value_states
-
-
     def forward(
         self,
         hidden_states,  # [seq_length, batch_size, hidden_size]
@@ -306,11 +231,37 @@ class CustomCausalSelfAttention(nn.Module, AttachableStore):
     ):
         from flash_attn import bert_padding
         from flash_attn.flash_attn_interface import flash_attn_varlen_func
-        batch_size, q_length = sequence_mask.shape
 
-        query_states = self.get_query_states(hidden_states, sequence_mask)
-        key_states = self.get_key_states(hidden_states, sequence_mask)
-        value_states = self.get_value_states(hidden_states, sequence_mask)
+        query_states = self.q_proj(
+            hidden_states
+        )  # [seq_length, batch_size, n_local_q_heads * d_qk]
+        q_length, batch_size, _ = query_states.shape
+
+        query_states = (
+            query_states.transpose(0, 1)
+            .contiguous()
+            .view(batch_size, q_length, self.n_local_q_heads, self.d_qk)
+        )  # [batch_size, seq_length, n_local_q_heads, d_qk]
+        k_r = self.W_k_r(hidden_states)  # [seq_len, bsz, -1]
+        k_c = self.W_up_k(self.W_down_k(hidden_states))
+        key_states = torch.zeros(
+            (q_length, batch_size, self.n_local_kv_heads * self.d_qk),
+            dtype=query_states.dtype,
+            device=query_states.device,
+        )
+        key_states[..., ~self.nope_mask] = k_r
+        key_states[..., self.nope_mask] = k_c
+        key_states = (
+            key_states.transpose(0, 1)
+            .contiguous()
+            .view(batch_size, q_length, self.n_local_kv_heads, self.d_qk)
+        )  # [batch_size, seq_length, n_local_kv_heads, d_qk]
+        value_states = self.v_proj(hidden_states)
+        value_states = (
+            value_states.transpose(0, 1)
+            .contiguous()
+            .view(batch_size, q_length, self.n_local_kv_heads, self.d_v)
+        )  # [batch_size, seq_length, n_local_kv_heads, d_v]
 
         store = self.get_local_store()  # In fact, collections.defaultdict?
         if store is not None:  # Inference case
@@ -319,9 +270,28 @@ class CustomCausalSelfAttention(nn.Module, AttachableStore):
         else:  # Training case
             position_ids = torch.cumsum(sequence_mask, dim=-1, dtype=torch.int32) - 1
             cos, sin = self.rotary_embedding(value_states, position_ids)
+            dbg_key_states = key_states
 
-            query_states, key_states = self.rotary_embedding.apply_rotary_pos_emb(
-                query_states, key_states, cos, sin
+            if self.config.RoPE["partial_rope_version"] == 4:
+                query_states, key_states = self.rotary_embedding.apply_rotary_pos_emb(
+                    query_states,
+                    key_states,
+                    cos,
+                    sin,
+                    layer_idx=self.layer_idx,
+                )
+            else:
+                query_states, key_states = self.rotary_embedding.apply_rotary_pos_emb(
+                    query_states, key_states, cos, sin
+                )
+            # [batch_size, seq_length, n_local_kv_heads, d_qk]
+            assert torch.allclose(
+                dbg_key_states.view(
+                    batch_size, q_length, self.n_local_kv_heads * self.d_qk
+                )[..., self.nope_mask],
+                key_states.view(
+                    batch_size, q_length, self.n_local_kv_heads * self.d_qk
+                )[..., self.nope_mask],
             )
 
             q_sequence_mask = sequence_mask
@@ -512,13 +482,13 @@ def custom_load_weights(
             raise NotImplementedError(
                 f"Parameters {param} should be a NanotronParameter"
             )
-        
-    low_rank = model.config.SVD["low_rank"] * model.config.num_key_value_heads
+    low_rank = model.config.SVD["low_rank"]*model.config.num_key_value_heads
     logger.info(f"Low rank: {low_rank}")
     for missing_key in missing_keys:
         layer_idx = int(missing_key.split(".")[2])
         attn_module_prefix = f"model.decoder.{layer_idx}.pp_block.attn"
         attn_module = model.model.decoder[layer_idx].pp_block.attn
+        nope_mask = attn_module.nope_mask
         base_name = f"model.decoder.{layer_idx}.pp_block.attn.qkv_proj.weight"
         path = get_path(
             base_name,
@@ -537,30 +507,23 @@ def custom_load_weights(
             ],
             dim=-1,
         )
+        W_down_k, W_up_k, W_down_v, W_up_v = SvdInit.init(
+            k_proj[..., nope_mask],
+            v_proj,
+            svd_method=model.config.SVD["method"],
+            r=model.config.SVD["low_rank"] * model.config.num_key_value_heads,
+        )
         if missing_key.endswith("W_down_k.weight"):
-            dtype = filtered_state_dict[f"{attn_module_prefix}.W_down_k.weight"].dtype
-            U,S,V = torch.svd(k_proj.to(dtype=torch.float32))
-            U = U[:,:low_rank].to(dtype=dtype)
-            S = S[:low_rank].to(dtype=dtype)
-            V = V[:,:low_rank].to(dtype=dtype)
-            filtered_state_dict[f"{attn_module_prefix}.W_down_k.weight"][:] = U.t()
-            filtered_state_dict[f"{attn_module_prefix}.W_up_k.weight"][:] = (torch.diag(S) @ V.t()).t()
+            filtered_state_dict[f"{attn_module_prefix}.W_down_k.weight"][:] = W_down_k
+            filtered_state_dict[f"{attn_module_prefix}.W_up_k.weight"][:] = W_up_k
+            W_k_r = k_proj[..., ~nope_mask].t()
+            filtered_state_dict[f"{attn_module_prefix}.W_k_r.weight"][:] = W_k_r
         elif missing_key.endswith("W_up_k.weight"):
             continue
-        elif missing_key.endswith("W_down_v.weight"):
-            dtype = filtered_state_dict[f"{attn_module_prefix}.W_down_v.weight"].dtype
-            U,S,V = torch.svd(v_proj.to(dtype=torch.float32))
-            U = U[:,:low_rank].to(dtype=dtype)
-            S = S[:low_rank].to(dtype=dtype)
-            V = V[:,:low_rank].to(dtype=dtype)
-            filtered_state_dict[f"{attn_module_prefix}.W_down_v.weight"][:] = U.t()
-            filtered_state_dict[f"{attn_module_prefix}.W_up_v.weight"][:] = (torch.diag(S) @ V.t()).t()
-        elif missing_key.endswith("W_up_v.weight"):
+        elif missing_key.endswith("W_k_r.weight"):
             continue
         elif missing_key.endswith("q_proj.weight"):
             filtered_state_dict[f"{attn_module_prefix}.q_proj.weight"][:] = q_proj.t()
-        elif missing_key.endswith("k_proj.weight"):
-            filtered_state_dict[f"{attn_module_prefix}.k_proj.weight"][:] = k_proj.t()
         elif missing_key.endswith("v_proj.weight"):
             filtered_state_dict[f"{attn_module_prefix}.v_proj.weight"][:] = v_proj.t()
         else:
@@ -573,22 +536,23 @@ def custom_load_weights(
     return param_shard_metadata
 
 
-def mla_patch_nt(rope_cfg=None):
+def low_rank_k_nope_patch_func_nt(rope_cfg=None):
     llama.CausalSelfAttention = CustomCausalSelfAttention
     if not hasattr(nt_weights, "original_load_weights"):
         nt_weights.original_load_weights = nt_weights.load_weights
         nt_weights.load_weights = custom_load_weights
     nanotron.config.models_config.LlamaConfig = CustomLlamaConfig
+    nanotron.trainer.load_weights = custom_load_weights
     nanotron.trainer.CONFIG_TO_MODEL_CLASS.update(
         {"CustomLlamaConfig": nanotron.trainer.CONFIG_TO_MODEL_CLASS["LlamaConfig"]}
     )
 
-    nanotron.trainer.load_weights = custom_load_weights
-    from ..patch_func import create_custom_apply_rotary_pos_emb
+    if rope_cfg is not None:
+        from ..patch_func import create_custom_apply_rotary_pos_emb
 
-    llama.LlamaRotaryEmbedding.apply_rotary_pos_emb = (
-        create_custom_apply_rotary_pos_emb({"partial_rope_version":0})
-    )
-    from ..mla.NopeIndex import IndexForNope
-    IndexForNope._qk_tensor_cache=torch.load(rope_cfg["qk_tensor_path"])
-    IndexForNope._qk_tensor_path=rope_cfg["qk_tensor_path"]
+        llama.LlamaRotaryEmbedding.apply_rotary_pos_emb = (
+            create_custom_apply_rotary_pos_emb(rope_cfg)
+        )
+        from ..mla.NopeIndex import IndexForNope
+        IndexForNope._qk_tensor_cache=torch.load(rope_cfg["qk_tensor_path"])
+        IndexForNope._qk_tensor_path=rope_cfg["qk_tensor_path"]

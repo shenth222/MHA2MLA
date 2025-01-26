@@ -51,111 +51,32 @@ class CustomLlamaAttention(nn.Module):
         )
         self.is_share_W_down = bool(config.SVD["method"] not in [2, 3])
         self.low_rank = config.SVD["low_rank"]
-        self.init_w_q()
-        self.init_w_k()
-        self.init_w_v()
-        self.init_w_o()
-        self.rotary_emb = LlamaRotaryEmbedding(config=self.config)
 
-
-
-    def init_w_q(self):
         self.q_proj = nn.Linear(
-            self.hidden_size, self.num_heads * self.head_dim, bias=self.config.attention_bias
+            self.hidden_size, self.num_heads * self.head_dim, bias=config.attention_bias
         )
-
-    def init_w_k(self):
-        self.k_proj = nn.Linear(self.hidden_size,self.num_key_value_heads * self.head_dim,bias=self.config.attention_bias,)
-        # self.W_down_k = nn.Linear(
-        #     self.hidden_size, self.low_rank*self.num_key_value_heads, bias=self.config.attention_bias
-        # )
-        # self.W_up_k = nn.Linear(
-        #     self.low_rank*self.num_key_value_heads,
-        #     self.num_key_value_heads * self.head_dim
-        #     - (self.nope_mask == False).sum().item(),
-        #     bias=self.config.attention_bias,
-        # )
-
-    def init_w_v(self):
-        # self.v_proj = nn.Linear(self.hidden_size,self.num_key_value_heads * self.head_dim,bias=config.attention_bias,)
-        self.W_down_v = nn.Linear(
-            self.hidden_size, self.low_rank*self.num_key_value_heads, bias=self.config.attention_bias
+        # self.k_proj = nn.Linear(self.hidden_size,self.num_key_value_heads * self.head_dim,bias=config.attention_bias,)
+        self.v_proj = nn.Linear(self.hidden_size,self.num_key_value_heads * self.head_dim,bias=config.attention_bias,)
+        self.W_k_r = nn.Linear(
+            self.hidden_size,
+            (self.nope_mask == False).sum().item(),
+            bias=config.attention_bias,
         )
-        self.W_up_v = nn.Linear(
+        self.W_down_k = nn.Linear(
+            self.hidden_size, self.low_rank*self.num_key_value_heads, bias=config.attention_bias
+        )
+        self.W_up_k = nn.Linear(
             self.low_rank*self.num_key_value_heads,
-            self.num_key_value_heads * self.head_dim,
-            bias=self.config.attention_bias,
+            self.num_key_value_heads * self.head_dim
+            - (self.nope_mask == False).sum().item(),
+            bias=config.attention_bias,
         )
-
-    def init_w_o(self):
         self.o_proj = nn.Linear(
-            self.num_heads * self.head_dim, self.hidden_size, bias=self.config.attention_bias
+            self.num_heads * self.head_dim, self.hidden_size, bias=config.attention_bias
         )
 
-    def get_query_states(
-        self,
-        hidden_states: torch.Tensor,
-        attention_mask: Optional[torch.Tensor] = None,
-        position_ids: Optional[torch.LongTensor] = None,
-        past_key_value: Optional[Cache] = None,
-        output_attentions: bool = False,
-        use_cache: bool = False,
-        cache_position: Optional[torch.LongTensor] = None,
-        position_embeddings: Optional[
-            Tuple[torch.Tensor, torch.Tensor]
-        ] = None,  # will become mandatory in v4.46
-        **kwargs,
-    ):
-        bsz,q_len,_ = hidden_states.size()
-        query_states = self.q_proj(hidden_states)
-        query_states = query_states.view(
-            bsz, q_len, self.num_heads, self.head_dim
-        ).transpose(1, 2)
-        return query_states
-    
-    def get_key_states(
-        self,
-        hidden_states: torch.Tensor,
-        attention_mask: Optional[torch.Tensor] = None,
-        position_ids: Optional[torch.LongTensor] = None,
-        past_key_value: Optional[Cache] = None,
-        output_attentions: bool = False,
-        use_cache: bool = False,
-        cache_position: Optional[torch.LongTensor] = None,
-        position_embeddings: Optional[
-            Tuple[torch.Tensor, torch.Tensor]
-        ] = None,  # will become mandatory in v4.46
-        **kwargs,
-    ):
-        bsz,q_len,_ = hidden_states.size()
-        key_states = self.k_proj(hidden_states)
-        # key_states = self.W_up_k(self.W_down_k(hidden_states))
-        key_states = key_states.view(
-            bsz,q_len,self.num_key_value_heads,self.head_dim
-        ).transpose(1,2)
-        return key_states
-
-    def get_value_states(
-        self,
-        hidden_states: torch.Tensor,
-        attention_mask: Optional[torch.Tensor] = None,
-        position_ids: Optional[torch.LongTensor] = None,
-        past_key_value: Optional[Cache] = None,
-        output_attentions: bool = False,
-        use_cache: bool = False,
-        cache_position: Optional[torch.LongTensor] = None,
-        position_embeddings: Optional[
-            Tuple[torch.Tensor, torch.Tensor]
-        ] = None,  # will become mandatory in v4.46
-        **kwargs,
-    ):
-        bsz,q_len,_ = hidden_states.size()
-        # value_states = self.v_proj(hidden_states)
-        value_states = self.W_up_v(self.W_down_v(hidden_states))
-        value_states = value_states.view(
-            bsz,q_len,self.num_key_value_heads,self.head_dim
-        ).transpose(1,2)
-        return value_states
+        # TODO (joao): remove in v4.46 (RoPE is computed in the model, not in the decoder layers)
+        self.rotary_emb = LlamaRotaryEmbedding(config=self.config)
 
     def get_qkv_states(
         self,
@@ -173,36 +94,22 @@ class CustomLlamaAttention(nn.Module):
     ):
         bsz, q_len, _ = hidden_states.size()
         assert not self.config.pretraining_tp > 1, "not support pretraining_tp>1"
-        query_states = self.get_query_states(
-            hidden_states=hidden_states,
-            attention_mask=attention_mask,
-            position_ids=position_ids,
-            past_key_value=past_key_value,
-            output_attentions=output_attentions,
-            use_cache=use_cache,
-            cache_position=cache_position,
-            **kwargs,
+        # prepare query_states and k_r
+        query_states = self.q_proj(hidden_states)
+        key_states = torch.zeros(
+            (bsz, q_len, self.num_key_value_heads * self.head_dim),
+            device=hidden_states.device,
+            dtype=hidden_states.dtype,
         )
-        key_states = self.get_key_states(
-            hidden_states=hidden_states,
-            attention_mask=attention_mask,
-            position_ids=position_ids,
-            past_key_value=past_key_value,
-            output_attentions=output_attentions,
-            use_cache=use_cache,
-            cache_position=cache_position,
-            **kwargs,
-        )
-        value_states = self.get_value_states(
-            hidden_states=hidden_states,
-            attention_mask=attention_mask,
-            position_ids=position_ids,
-            past_key_value=past_key_value,
-            output_attentions=output_attentions,
-            use_cache=use_cache,
-            cache_position=cache_position,
-            **kwargs,
-        )
+        k_r = self.W_k_r(hidden_states)
+        key_states[..., ~self.nope_mask] = k_r
+
+        query_states = query_states.view(
+            bsz, q_len, self.num_heads, self.head_dim
+        ).transpose(1, 2)
+        key_states = key_states.view(
+            bsz, q_len, self.num_key_value_heads, self.head_dim
+        ).transpose(1, 2)
         if position_embeddings is None:
             logger.warning_once(
                 "The attention layers in this model are transitioning from computing the RoPE embeddings internally "
@@ -215,19 +122,50 @@ class CustomLlamaAttention(nn.Module):
             cos, sin = position_embeddings
         query_states, key_states = self.apply_custom_rotary_pos_emb(
             query_states, key_states, cos, sin
-        ) # [bsz,num_heads,q_len,head_dim]
+        )
+        key_states = key_states.transpose(1, 2).reshape(bsz, q_len, -1)
+        k_r = key_states[..., ~self.nope_mask] #[bsz, q_len, -1]
+        c_k = self.W_down_k(hidden_states)
+
+        value_states = self.v_proj(hidden_states)
 
         if past_key_value is not None:
             # sin and cos are specific to RoPE models; cache_position needed for the static cache
             cache_kwargs = {"sin": sin, "cos": cos, "cache_position": cache_position}
-            key_states, value_states = past_key_value.update(key_states, value_states, self.layer_idx, cache_kwargs)
+            k_cache = torch.cat([k_r,c_k],dim=-1)
+            k_cache, value_states = past_key_value.update(k_cache, value_states, self.layer_idx, cache_kwargs)
+            k_r, c_k = k_cache.split([k_r.size(-1), c_k.size(-1)], dim=-1)
+        
+        k_c = self.W_up_k(c_k)
+
+        # merge k_c and k_r into key_states
+        # TODO: c_kv up+nope_mask填充的过程等同线性变换，可以优化成一个矩阵，推理时可以融合到后面的矩阵乘法，即q_proj矩阵中
+        # 需要添加两个矩阵：1.矩阵a负责r维向量映射到k_c维向量，2.矩阵b负责维度顺序的变换(置换矩阵)
+        key_states = torch.zeros(
+            bsz, c_k.size(1), self.nope_mask.shape[-1], device=hidden_states.device, dtype=hidden_states.dtype
+        )
+        key_states[..., self.nope_mask] = k_c
+        key_states[..., ~self.nope_mask] = k_r
+
+        # prepare key_states and value_states
+        key_states = key_states.view(
+            bsz, -1, self.num_key_value_heads, self.head_dim
+        ).transpose(1, 2)
+        value_states = value_states.view(
+            bsz, -1, self.num_key_value_heads, self.head_dim
+        ).transpose(1, 2)
 
         return query_states, key_states, value_states
 
     def apply_custom_rotary_pos_emb(self, query_states, key_states, cos, sin):
-        query_states, key_states = modeling_llama.apply_rotary_pos_emb(
-            query_states, key_states, cos, sin
-        )
+        if self.config.RoPE["partial_rope_version"] == 4:
+            query_states, key_states = modeling_llama.apply_rotary_pos_emb(
+                query_states, key_states, cos, sin, layer_idx=self.layer_idx
+            )
+        else:
+            query_states, key_states = modeling_llama.apply_rotary_pos_emb(
+                query_states, key_states, cos, sin
+            )
         return query_states, key_states
 
     def forward(
@@ -578,12 +516,18 @@ def custom_load_pretrained_model(
     return outputs
 
 
-def mla_patch_hf(rope_cfg=None):
+def low_rank_k_nope_patch_func_hf(rope_cfg=None):
     modeling_llama.LLAMA_ATTENTION_CLASSES = {
         "eager": CustomLlamaAttention,
         "flash_attention_2": CustomLlamaFlashAttention2,
         "sdpa": CustomLlamaSdpaAttention,
     }
 
-    from ..patch_func_hf import create_custom_apply_rotary_pos_emb_hf
-    modeling_llama.apply_rotary_pos_emb = create_custom_apply_rotary_pos_emb_hf({"partial_rope_version":0})
+    # if not hasattr(modeling_llama.LlamaPreTrainedModel, 'original_load_pretrained_model'):
+    #     modeling_llama.LlamaPreTrainedModel.original_load_pretrained_model = modeling_llama.LlamaPreTrainedModel._load_pretrained_model
+    #     modeling_llama.LlamaPreTrainedModel._load_pretrained_model = custom_load_pretrained_model
+
+    if rope_cfg is not None:
+        # replace apply_rotary_pos_emb function in llama model
+        from ..patch_func_hf import create_custom_apply_rotary_pos_emb_hf
+        modeling_llama.apply_rotary_pos_emb = create_custom_apply_rotary_pos_emb_hf(rope_cfg)
