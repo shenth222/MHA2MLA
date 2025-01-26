@@ -41,8 +41,8 @@ def cli_evaluate():  # noqa: C901
     args = parser.parse_args()
 
     # Monkey patching for the partial rope
-    from .patch_func_hf import mla_patch_hf
-    mla_patch_hf()
+    from .patch_func_hf import low_rank_patch_hf
+    low_rank_patch_hf()
 
     if args.subcommand == "accelerate":
         from lighteval.main_accelerate import main as main_accelerate

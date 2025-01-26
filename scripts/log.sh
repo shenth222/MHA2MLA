@@ -28,4 +28,9 @@ log_lighteval_to_wandb() {
 # log_lighteval_to_wandb /home/binguo/data/MLA-FT/eval_results/rope_v2_start0_step8_svd_method5_rank8/results rope_v2_start0_step8_svd_method5_rank8
 # log_lighteval_to_wandb /home/binguo/data/MLA-FT/eval_results/rope_v2_start0_step8_svd_method7_rank8/results rope_v2_start0_step8_svd_method7_rank8
 
-log_lighteval_to_wandb /home/binguo/data/MLA-FT/eval_results/rope_v4_topk4_svd_method7_rank8_step36000/results rope_v4_topk4_svd_method7_rank8_step36000
+# log_lighteval_to_wandb /home/binguo/data/MLA-FT/eval_results/rope_v0_svd_v_rank8/results rope_v0_svd_v_rank8
+
+log_lighteval_to_wandb /home/binguo/data/MLA-FT/eval_results/v2_start0_step8_svd_method2_W_k_nope_rank8/results v2_start0_step8_svd_method2_W_k_nope_rank8
+
+log_lighteval_to_wandb /home/binguo/data/MLA-FT/eval_results/rope_v0_svd_v_method1_rank8/results rope_v0_svd_v_method1_rank8
+

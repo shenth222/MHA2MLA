@@ -1,7 +1,7 @@
 #!/bin/bash
 #################### 环境变量 ####################
 
-export CUDA_VISIBLE_DEVICES="0,1,2"
+export CUDA_VISIBLE_DEVICES='5,6'
 export HF_HOME="/home/binguo/data/hf-home"
 export NUM_GPUS=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
 export MASTER_PORT="auto"
@@ -14,14 +14,22 @@ eval_one_ckpt() {
     local output_dir=$2
     local cfg_RoPE=$3
 
-    torchrun --nproc_per_node=1 --master_port 25675 \
-        ../modules/nanotron/examples/llama/convert_nanotron_to_hf.py \
+    torchrun --nproc_per_node=1 --master_port 29577 \
+        -m src.conversation.convert_nanotron_to_hf \
         --checkpoint_path ${model_name_or_path} \
         --save_path "${model_name_or_path}_hf" \
-        --tokenizer_name /home/binguo/data/models/HuggingFaceTB/SmolLM-135M
+        --tokenizer_name /home/binguo/data/models/HuggingFaceTB/SmolLM-135M \
+        --is_low_rank_v
 
-    accelerate launch --multi_gpu --num_processes=${NUM_GPUS} --main_process_port 25675 \
-        -m src.evaluation.eval_partial_rope --cfg_RoPE ${cfg_RoPE} \
+    # python -m src.evaluation.eval_partial_rope --cfg_RoPE ${cfg_RoPE} \
+    #     accelerate \
+    #     --model_args "pretrained=${model_name_or_path},revision=main,dtype=bfloat16,vllm,gpu_memory_utilisation=0.8,max_model_length=2048,data_parallel_size=${NUM_GPUS}" \
+    #     --custom_tasks "../src/evaluation/smollm1_tasks.py" \
+    #     --tasks "../src/evaluation/smollm1_base.txt" \
+    #     --output_dir "../eval_results/${output_dir}"
+
+    accelerate launch --multi_gpu --num_processes=${NUM_GPUS} --main_process_port=29577 \
+        -m src.low_rank_v.eval --cfg_RoPE ${cfg_RoPE} \
         accelerate \
         --model_args "pretrained=${model_name_or_path}_hf,revision=main,dtype=bfloat16,max_length=2048" \
         --override_batch_size 96 \
@@ -48,5 +56,5 @@ eval_all() {
 
 #################### 任务执行 ####################
 
-
-eval_all checkpoints/rope_v2_start0_step8_svd_method2_rank16 rope_v2_start0_step8_svd_method2_rank16 ../configs/mla/rope_v2_start0_step8_svd_method2_rank16.yaml
+set -e
+eval_all ../checkpoints/rope_v0_svd_v_method1_rank8 rope_v0_svd_v_method1_rank8 ../configs/low_rank/rope_v0_svd_v_method1_rank8.yaml
