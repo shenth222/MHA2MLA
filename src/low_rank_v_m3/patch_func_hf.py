@@ -80,7 +80,7 @@ class CustomLlamaAttention(nn.Module):
     def init_w_v(self):
         self.v_proj = nn.Linear(self.hidden_size,self.num_key_value_heads * self.head_dim,bias=self.config.attention_bias,)
         self.W_down_v = nn.Linear(
-            self.num_key_value_heads * self.head_dim, self.low_rank*self.num_key_value_heads, bias=self.config.attention_bias
+            self.head_dim, self.low_rank, bias=self.config.attention_bias
         )
         # self.W_up_v = nn.Linear(
         #     self.low_rank*self.num_key_value_heads,
@@ -88,8 +88,8 @@ class CustomLlamaAttention(nn.Module):
         #     bias=self.config.attention_bias,
         # )
         self.W_up_v = nn.Linear(
-            self.low_rank*self.num_key_value_heads,
-            self.num_key_value_heads * self.head_dim,
+            self.low_rank,
+            self.head_dim,
             bias=self.config.attention_bias,
         )
 
@@ -157,7 +157,7 @@ class CustomLlamaAttention(nn.Module):
     ):
         bsz,q_len,_ = hidden_states.size()
         # value_states = self.v_proj(hidden_states)
-        value_states = self.v_proj(hidden_states)
+        value_states = self.v_proj(hidden_states).view(bsz,q_len,self.num_key_value_heads,self.head_dim)
         value_states = self.W_down_v(value_states)
         value_states = apply_activation(value_states, self.config.SVD["activation_fn"])
         value_states = self.W_up_v(value_states)

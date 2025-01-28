@@ -1,4 +1,3 @@
-# copied from https://github.com/huggingface/nanotron/blob/main/examples/llama/convert_nanotron_to_hf.py
 """
 Converts a nanotron model to HF format
 Command:
@@ -11,7 +10,7 @@ from pathlib import Path
 from typing import Literal, Optional
 
 import torch
-from .convert_weights import get_config_mapping, get_weight_mapping, load_nanotron_model
+from convert_weights import get_config_mapping, get_weight_mapping, load_nanotron_model
 from nanotron.config import LlamaConfig as NanotronLlamaConfig
 from nanotron.models import init_on_device_and_dtype
 from nanotron.models.llama import LlamaForTraining
@@ -144,48 +143,8 @@ if __name__ == "__main__":
     parser.add_argument("--checkpoint_path", type=Path, default="llama-7b", help="Path to the checkpoint")
     parser.add_argument("--save_path", type=Path, default="llama-7b-hf", help="Path to save the HF model")
     parser.add_argument("--tokenizer_name", type=str, default="meta-llama/Llama-2-7b-chat-hf")
-    parser.add_argument("--is_mla", action="store_true", help="Whether the model is an MLA model")
-    parser.add_argument("--is_low_rank_v", action="store_true", help="Whether the model is low rank")
-    parser.add_argument("--is_low_rank_k_nope", action="store_true", help="Whether the model is low rank")
-    parser.add_argument("--is_low_rank_v_m3", action="store_true", help="Whether the model is low rank with method 3")
     args = parser.parse_args()
 
-    if args.is_mla:
-        import json,os
-        with open(os.path.join(args.checkpoint_path,"model_config.json")) as f:
-            config = json.load(f)
-        from ..mla.mla_patch_hf import mla_patch_hf
-        from ..mla.mla_patch_nt import mla_patch_nt,CustomLlamaConfig
-        mla_patch_nt(config["RoPE"])
-        mla_patch_hf(config["RoPE"])
-        globals()["NanotronLlamaConfig"] = CustomLlamaConfig
-    if args.is_low_rank_v:
-        import json,os
-        with open(os.path.join(args.checkpoint_path,"model_config.json")) as f:
-            config = json.load(f)
-        from ..low_rank_v.patch_func_hf import low_rank_patch_hf
-        from ..low_rank_v.patch_func_nt import low_rank_patch_nt,CustomLlamaConfig
-        low_rank_patch_nt(config["RoPE"])
-        low_rank_patch_hf(config["RoPE"])
-        globals()["NanotronLlamaConfig"] = CustomLlamaConfig
-    if args.is_low_rank_k_nope:
-        import json,os
-        with open(os.path.join(args.checkpoint_path,"model_config.json")) as f:
-            config = json.load(f)
-        from ..low_rank_k_nope.patch_func_hf import low_rank_k_nope_patch_func_hf
-        from ..low_rank_k_nope.patch_func_nt import low_rank_k_nope_patch_func_nt,CustomLlamaConfig
-        low_rank_k_nope_patch_func_hf(config["RoPE"])
-        low_rank_k_nope_patch_func_nt(config["RoPE"])
-        globals()["NanotronLlamaConfig"] = CustomLlamaConfig
-    if args.is_low_rank_v_m3:
-        import json,os
-        with open(os.path.join(args.checkpoint_path,"model_config.json")) as f:
-            config = json.load(f)
-        from ..low_rank_v_m3.patch_func_hf import low_rank_patch_hf
-        from ..low_rank_v_m3.patch_func_nt import low_rank_patch_nt,CustomLlamaConfig
-        low_rank_patch_nt(config["RoPE"])
-        low_rank_patch_hf(config["RoPE"])
-        globals()["NanotronLlamaConfig"] = CustomLlamaConfig
     # Convert Nanotron model to HF format.
     convert_checkpoint_and_save(
         checkpoint_path=args.checkpoint_path, save_path=args.save_path, tokenizer_name=args.tokenizer_name

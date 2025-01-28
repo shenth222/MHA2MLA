@@ -6,6 +6,7 @@ import nanotron.config.models_config
 import nanotron.trainer
 import torch
 from torch import nn
+from torch.nn import functional as F
 import torch.distributed as dist
 from packaging.version import Version
 from pathlib import Path
@@ -57,7 +58,6 @@ from transformers.modeling_flash_attention_utils import _flash_attention_forward
 
 from ..mla.NopeIndex import IndexForNope
 from ..mla.svd_low_rank import SvdInit
-from ..mla.utils import apply_activation
 
 
 @dataclass
@@ -76,6 +76,8 @@ class CustomConfig(nanotron.config.config.Config):
     """Main configuration class"""
 
     model: CustomModelArgs
+
+from ..mla.utils import apply_activation
 
 
 class CustomCausalSelfAttention(nn.Module, AttachableStore):
@@ -220,16 +222,16 @@ class CustomCausalSelfAttention(nn.Module, AttachableStore):
             tp_recompute_allgather=self.parallel_config.tp_recompute_allgather,
         )
         self.W_down_v = TensorParallelColumnLinear(
-            self.n_local_kv_heads * self.d_v,
-            self.low_rank * self.n_local_kv_heads,
+            self.d_v,
+            self.low_rank,
             bias=False,
             pg=self.tp_pg,
             mode=self.tp_mode,
             async_communication=self.tp_linear_async_communication,
         )
         self.W_up_v = TensorParallelColumnLinear(
-            self.low_rank * self.n_local_kv_heads,
-            self.n_local_kv_heads * self.d_v,
+            self.low_rank,
+            self.d_v,
             bias=False,
             pg=self.tp_pg,
             mode=self.tp_mode,
@@ -300,7 +302,7 @@ class CustomCausalSelfAttention(nn.Module, AttachableStore):
         # value_states = self.v_proj(hidden_states)  # [seq_length, batch_size, n_local_kv_heads * d_v]
         # c_k = self.W_down_v(hidden_states)
         # value_states = self.W_up_v(c_k)
-        value_states = self.v_proj(hidden_states)
+        value_states = self.v_proj(hidden_states).view(hidden_states.size(0),hidden_states.size(1),self.n_local_kv_heads,self.d_v)
         value_states = self.W_down_v(value_states)
         value_states = apply_activation(value_states, self.config.SVD["activation_fn"])
         value_states = self.W_up_v(value_states)
@@ -526,7 +528,7 @@ def custom_load_weights(
                 f"Parameters {param} should be a NanotronParameter"
             )
         
-    low_rank = model.config.SVD["low_rank"] * model.config.num_key_value_heads
+    low_rank = model.config.SVD["low_rank"]
     logger.info(f"Low rank: {low_rank}")
     for missing_key in missing_keys:
         layer_idx = int(missing_key.split(".")[2])
@@ -561,8 +563,9 @@ def custom_load_weights(
         elif missing_key.endswith("W_up_k.weight"):
             continue
         elif missing_key.endswith("W_down_v.weight"):
+            low_rank = model.config.SVD["low_rank"]
             dtype = filtered_state_dict[f"{attn_module_prefix}.W_down_v.weight"].dtype
-            U,S,V = torch.svd(torch.eye(attn_module.n_local_kv_heads * attn_module.d_v).to(dtype=torch.float32))
+            U,S,V = torch.svd(torch.eye(attn_module.d_v).to(dtype=torch.float32))
             U = U[:,:low_rank].to(dtype=dtype)
             S = S[:low_rank].to(dtype=dtype)
             V = V[:,:low_rank].to(dtype=dtype)
