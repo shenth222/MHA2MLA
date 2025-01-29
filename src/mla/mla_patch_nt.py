@@ -802,5 +802,6 @@ def mla_patch_nt(rope_cfg=None):
             create_custom_apply_rotary_pos_emb(rope_cfg)
         )
         from .NopeIndex import IndexForNope
-        IndexForNope._qk_tensor_cache=torch.load(rope_cfg["qk_tensor_path"])
-        IndexForNope._qk_tensor_path=rope_cfg["qk_tensor_path"]
+        if rope_cfg["partial_rope_version"]==4:
+            IndexForNope._qk_tensor_cache=torch.load(rope_cfg["qk_tensor_path"])
+            IndexForNope._qk_tensor_path=rope_cfg["qk_tensor_path"]
