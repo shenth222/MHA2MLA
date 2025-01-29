@@ -1,7 +1,7 @@
 # SmolLM1 1.7B trained on 1T tokens
 checkpoints:
   checkpoint_interval: 2000
-  checkpoints_path: ../checkpoints/1.7B_1
+  checkpoints_path: ../checkpoints/1.7B_rope_v2_start0_step8_svd_method2_rank8
   checkpoints_path_is_shared_file_system: false
   resume_checkpoint_path: ../checkpoints/HuggingFaceTB/SmolLM-1.7B_nt
   save_final_state: true
@@ -53,11 +53,11 @@ general:
   consumed_train_samples: null
   ignore_sanity_checks: true
   project: smollm
-  run: 1.7B_1
+  run: 1.7B_rope_v2_start0_step8_svd_method2_rank8
   seed: 42 # 8
   step: null
 logging:
-  iteration_step_info_interval: 1
+  iteration_step_info_interval: 100
   log_level: info
   log_level_replica: info
 model:
@@ -86,6 +86,19 @@ model:
     tie_word_embeddings: true
     use_cache: true
     vocab_size: 49152
+    RoPE:
+      partial_rope_version: 2
+      top_k_rope_dim: 4
+      lask_k_rope_dim: 4
+      uniform_start_point: 0
+      uniform_step: 8
+      qk_tensor_path: null
+      n_gqa_group: 1
+    SVD:
+      method: 2
+      low_rank: 8
+
+     
 optimizer:
   accumulate_grad_in_fp32: true
   clip_grad: 1.0
@@ -104,7 +117,7 @@ optimizer:
     name: adamW
     torch_adam_is_fused: true
   weight_decay: 0.01
-  zero_stage: 0
+  zero_stage: 1
 parallelism:
   dp: 8 # 64
   expert_parallel_size: 1
@@ -121,10 +134,10 @@ tokenizer:
   tokenizer_name_or_path: ../checkpoints/HuggingFaceTB/SmolLM-1.7B
   tokenizer_revision: null
 tokens:
-  batch_accumulation_per_replica: 8
+  batch_accumulation_per_replica: 4
   limit_test_batches: 0
   limit_val_batches: 0
-  micro_batch_size: 4 # GBS = 4*8*8*sequence_length = 1024*sequence_length = 2.1M tokens
+  micro_batch_size: 8 # GBS = 8*4*8*sequence_length = 256*sequence_length = 0.5M tokens
   sequence_length: 2048
   train_steps: 20000 # 500000
   val_check_interval: -1

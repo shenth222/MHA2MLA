@@ -173,6 +173,7 @@ cython_debug/
 /test_dbg
 wandb/
 /images
+/pj_scripts
 
 # debug setting
 /.vscode
