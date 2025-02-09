@@ -18,7 +18,7 @@ eval_one_ckpt() {
         -m src.conversation.convert_nanotron_to_hf \
         --checkpoint_path ${model_name_or_path} \
         --save_path "${model_name_or_path}_hf" \
-        --tokenizer_name /home/binguo/data/models/HuggingFaceTB/SmolLM-135M \
+        --tokenizer_name /home/binguo/data/models/HuggingFaceTB/SmolLM-360M \
         --is_mla
 
     # python -m src.evaluation.eval_partial_rope --cfg_RoPE ${cfg_RoPE} \
@@ -27,6 +27,8 @@ eval_one_ckpt() {
     #     --custom_tasks "../src/evaluation/smollm1_tasks.py" \
     #     --tasks "../src/evaluation/smollm1_base.txt" \
     #     --output_dir "../eval_results/${output_dir}"
+#     accelerate launch --multi_gpu --num_processes=${NUM_GPUS} \
+
 
     accelerate launch --multi_gpu --num_processes=${NUM_GPUS} \
         -m src.evaluation.eval_mla --cfg_RoPE ${cfg_RoPE} \
@@ -57,4 +59,16 @@ eval_all() {
 #################### 任务执行 ####################
 
 
-eval_all ../checkpoints/rope_v2_start0_step8_svd_method2_rank16 rope_v2_start0_step8_svd_method2_rank16 ../configs/mla/rope_v2_start0_step8_svd_method2_rank16.yaml
+# eval_all ../checkpoints/rope_v2_start0_step8_svd_method2_rank16 rope_v2_start0_step8_svd_method2_rank16 ../configs/mla/rope_v2_start0_step8_svd_method2_rank16.yaml
+
+eval_one_ckpt ../checkpoints/rope_v2_start0_step8_svd_method2_rank4/18000 rope_v2_start0_step8_svd_method2_rank4 ../configs/mla/rope_v2_start0_step8_svd_method2_rank4.yaml
+
+eval_one_ckpt ../checkpoints/rope_v4_topk4_svd_method2_rank4/18000 rope_v4_topk4_svd_method2_rank4 ../configs/mla/rope_v4_topk4_svd_method2_rank4.yaml
+
+eval_one_ckpt ../checkpoints/rope_v4_topk4_svd_method2_rank16/18000 rope_v4_topk4_svd_method2_rank16 ../configs/mla/rope_v4_topk4_svd_method2_rank16.yaml
+
+eval_one_ckpt ../checkpoints/rope_v4_topk4_svd_method5_rank16/18000 rope_v4_topk4_svd_method5_rank16 ../configs/mla/rope_v4_topk4_svd_method5_rank16.yaml
+
+eval_one_ckpt ../checkpoints/rope_v4_topk4_svd_method7_rank16/18000 rope_v4_topk4_svd_method7_rank16 ../configs/mla/rope_v4_topk4_svd_method7_rank16.yaml
+
+eval_one_ckpt ../checkpoints/rope_v4_topk4_svd_method7_rank32/18000 rope_v4_topk4_svd_method7_rank32 ../configs/mla/rope_v4_topk4_svd_method7_rank32.yaml
