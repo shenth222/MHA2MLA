@@ -442,14 +442,14 @@ def main():
         query_states, dim=0, keepdim=False
     )  # [n_layer][n_head][n_dim/2]
     key_states = torch.mean(key_states, dim=0, keepdim=False)
-    visualize(query_states, key_states)
+    # visualize(query_states, key_states)
     qk_states = query_states + key_states
     if qk_states.shape[1] != model.config.num_key_value_heads:
         layer_num, _, dim = query_states.shape
         qk_states = qk_states.view(
             layer_num, model.config.num_key_value_heads, -1, dim
         ).sum(dim=2)
-    with open("/home/binguo/data/MLA-FT/images/2-norm/qk_tensor.pth", "wb") as f:
+    with open("../images/2-norm/qk_tensor.pth", "wb") as f:
         torch.save(qk_states, f)
 
 

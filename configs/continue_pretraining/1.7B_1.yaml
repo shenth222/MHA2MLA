@@ -1,7 +1,7 @@
 # SmolLM1 1.7B trained on 1T tokens
 checkpoints:
   checkpoint_interval: 2000
-  checkpoints_path: ../checkpoints/1.7B_1
+  checkpoints_path: ../checkpoints/1B7_rope_V5
   checkpoints_path_is_shared_file_system: false
   resume_checkpoint_path: ../checkpoints/HuggingFaceTB/SmolLM-1.7B_nt
   save_final_state: true
@@ -53,7 +53,7 @@ general:
   consumed_train_samples: null
   ignore_sanity_checks: true
   project: smollm
-  run: 1.7B_1
+  run: 1B7_rope_V5
   seed: 42 # 8
   step: null
 logging:
