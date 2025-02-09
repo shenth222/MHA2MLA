@@ -54,6 +54,7 @@ def create_custom_apply_rotary_pos_emb(cfg):
         indices = torch.arange(
             cfg["uniform_start_point"], q.size(-1), cfg["uniform_step"], device=q.device
         )
+        q,k = q.clone(),k.clone()
         q[..., indices] = q_embed[..., indices]
         k[..., indices] = k_embed[..., indices]
         return q, k
