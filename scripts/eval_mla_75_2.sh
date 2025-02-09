@@ -1,7 +1,7 @@
 #!/bin/bash
 #################### 环境变量 ####################
 
-export CUDA_VISIBLE_DEVICES='5,6'
+export CUDA_VISIBLE_DEVICES='3,4,5'
 export HF_HOME="/home/binguo/data/hf-home"
 export NUM_GPUS=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
 export MASTER_PORT="auto"
@@ -19,23 +19,25 @@ eval_one_ckpt() {
         --checkpoint_path ${model_name_or_path} \
         --save_path "${model_name_or_path}_hf" \
         --tokenizer_name /home/binguo/data/models/HuggingFaceTB/SmolLM-135M \
-        --is_low_rank_v
+        --is_mla
 
-    # python -m src.evaluation.eval_partial_rope --cfg_RoPE ${cfg_RoPE} \
-    #     accelerate \
-    #     --model_args "pretrained=${model_name_or_path},revision=main,dtype=bfloat16,vllm,gpu_memory_utilisation=0.8,max_model_length=2048,data_parallel_size=${NUM_GPUS}" \
-    #     --custom_tasks "../src/evaluation/smollm1_tasks.py" \
-    #     --tasks "../src/evaluation/smollm1_base.txt" \
-    #     --output_dir "../eval_results/${output_dir}"
-
-    accelerate launch --multi_gpu --num_processes=${NUM_GPUS} --main_process_port=29577 \
-        -m src.low_rank_v.eval --cfg_RoPE ${cfg_RoPE} \
+    accelerate launch --multi_gpu --num_processes=${NUM_GPUS} \
+        -m src.evaluation.eval_mla --cfg_RoPE ${cfg_RoPE} \
         accelerate \
         --model_args "pretrained=${model_name_or_path}_hf,revision=main,dtype=bfloat16,max_length=2048" \
         --override_batch_size 96 \
         --custom_tasks "../src/evaluation/tasks.py" \
         --tasks "../src/evaluation/smollm1_base_v2.txt" \
         --output_dir "../eval_results/${output_dir}"
+
+    # accelerate launch --multi_gpu --num_processes=${NUM_GPUS} --main_process_port=29577 \
+    #     -m src.low_rank_v.eval --cfg_RoPE ${cfg_RoPE} \
+    #     accelerate \
+    #     --model_args "pretrained=${model_name_or_path}_hf,revision=main,dtype=bfloat16,max_length=2048" \
+    #     --override_batch_size 48 \
+    #     --custom_tasks "../src/evaluation/tasks.py" \
+    #     --tasks "../src/evaluation/smollm1_base_v2.txt" \
+    #     --output_dir "../eval_results/${output_dir}"
 }
 
 eval_all() {
@@ -57,4 +59,6 @@ eval_all() {
 #################### 任务执行 ####################
 
 set -e
-eval_all ../checkpoints/rope_v0_svd_v_method1_rank8 rope_v0_svd_v_method1_rank8 ../configs/low_rank/rope_v0_svd_v_method1_rank8.yaml
+# eval_all ../checkpoints/360M_rope_v2_start0_step8_svd_method5_rank8 360M_rope_v2_start0_step8_svd_method5_rank8 ../configs/low_rank/360M_rope_v2_start0_step8_svd_method5_rank8.yaml
+
+eval_one_ckpt ../checkpoints/rope_v2_start0_step8_svd_method7_rank16/18000 rope_v2_start0_step8_svd_method7_rank16 ../configs/mla/rope_v2_start0_step8_svd_method7_rank16.yaml

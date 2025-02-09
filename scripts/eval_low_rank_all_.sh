@@ -1,7 +1,6 @@
 #!/bin/bash
 #################### 环境变量 ####################
-
-export CUDA_VISIBLE_DEVICES="1"
+export CUDA_VISIBLE_DEVICES="2"
 export HF_HOME="/home/binguo/data/hf-home"
 export NUM_GPUS=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
 export MASTER_PORT="auto"
@@ -14,15 +13,15 @@ eval_one_ckpt() {
     local output_dir=$2
     local cfg_RoPE=$3
 
-    torchrun --nproc_per_node=1 \
+    torchrun --nproc_per_node=1 --master_port 25675 \
         -m src.conversation.convert_nanotron_to_hf \
         --checkpoint_path ${model_name_or_path} \
         --save_path "${model_name_or_path}_hf" \
         --tokenizer_name /home/binguo/data/models/HuggingFaceTB/SmolLM-135M \
-        --is_mla
-# --multi_gpu 
-    accelerate launch --num_processes=${NUM_GPUS} \
-        -m src.evaluation.eval_mla --cfg_RoPE ${cfg_RoPE} \
+        --is_low_rank_v
+
+    accelerate launch --num_processes=${NUM_GPUS} --main_process_port 25675 \
+        -m src.low_rank_v.eval --cfg_RoPE ${cfg_RoPE} \
         accelerate \
         --model_args "pretrained=${model_name_or_path}_hf,revision=main,dtype=bfloat16,max_length=2048" \
         --override_batch_size 96 \
@@ -48,8 +47,7 @@ eval_all() {
 }
 
 #################### 任务执行 ####################
+set -e
 
 
-eval_all ../checkpoints/rope_v2_start0_step8_svd_method7_rank16 rope_v2_start0_step8_svd_method7_rank16 ../configs/mla/rope_v2_start0_step8_svd_method7_rank16.yaml
-
-eval_one_ckpt 
+eval_one_ckpt ../checkpoints/rope_v0_svd_v_method2_rank8_silu_auto_encoder/18000 rope_v0_svd_v_method2_rank8_silu_auto_encoder ../configs/low_rank/rope_v0_svd_v_method2_rank8_silu_auto_encoder.yaml

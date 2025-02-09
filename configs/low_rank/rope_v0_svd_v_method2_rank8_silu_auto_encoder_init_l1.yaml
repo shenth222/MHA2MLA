@@ -1,8 +1,8 @@
 checkpoints:
   checkpoint_interval: 1800 # 保存检查点的步数间隔
-  checkpoints_path: ../checkpoints/rope_v0_svd_v_method2_rank8_silu # 检查点保存的路径
+  checkpoints_path: ../checkpoints/rope_v0_svd_v_method2_rank8_silu_auto_encoder_init_l1 # 检查点保存的路径
   checkpoints_path_is_shared_file_system: false # 检查点路径是否在共享文件系统上
-  resume_checkpoint_path: /home/binguo/data/models/HuggingFaceTB/SmolLM-135M_nt # 恢复训练时的检查点路径
+  resume_checkpoint_path: ../checkpoints/rope_v0_svd_v_method2_rank8_silu_auto_encoder_init_l1/0 # 恢复训练时的检查点路径
   save_final_state: true # 是否保存最终状态
   save_initial_state: true # 是否保存初始状态
   load_lr_scheduler: false
@@ -24,7 +24,7 @@ data_stages:
         - 0.06
         - 0.01
     num_loading_workers: 1 # 数据加载的工作线程数
-    seed: 114514 # 随机种子
+    seed: 42 # 随机种子
   name: training stage # 数据阶段名称
   start_training_step: 1 # 开始训练的步数
 
@@ -32,9 +32,9 @@ general:
   benchmark_csv_path: null # 基准测试CSV文件路径
   consumed_train_samples: null # 已消耗的训练样本数
   ignore_sanity_checks: true # 是否忽略完整性检查
-  project: smollm_nt # 项目名称
-  run: rope_v0_svd_v_method2_rank8_silu # 运行名称
-  seed: 114514 # 随机种子
+  project: mla_smollm_ft_nt # 项目名称
+  run: rope_v0_svd_v_method2_rank8_silu_auto_encoder_init_l1 # 运行名称
+  seed: 42 # 随机种子
   step: null # 当前步数
 
 logging:

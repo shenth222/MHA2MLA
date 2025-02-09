@@ -1,6 +1,6 @@
 checkpoints:
   checkpoint_interval: 1800 # 保存检查点的步数间隔
-  checkpoints_path: ../checkpoints/rope_v0_svd_v_method2_rank8_silu # 检查点保存的路径
+  checkpoints_path: ../checkpoints/rope_v4_topk4_svd_method2_rank4 # 检查点保存的路径
   checkpoints_path_is_shared_file_system: false # 检查点路径是否在共享文件系统上
   resume_checkpoint_path: /home/binguo/data/models/HuggingFaceTB/SmolLM-135M_nt # 恢复训练时的检查点路径
   save_final_state: true # 是否保存最终状态
@@ -24,7 +24,7 @@ data_stages:
         - 0.06
         - 0.01
     num_loading_workers: 1 # 数据加载的工作线程数
-    seed: 114514 # 随机种子
+    seed: 42 # 随机种子
   name: training stage # 数据阶段名称
   start_training_step: 1 # 开始训练的步数
 
@@ -33,8 +33,8 @@ general:
   consumed_train_samples: null # 已消耗的训练样本数
   ignore_sanity_checks: true # 是否忽略完整性检查
   project: smollm_nt # 项目名称
-  run: rope_v0_svd_v_method2_rank8_silu # 运行名称
-  seed: 114514 # 随机种子
+  run: rope_v4_topk4_svd_method2_rank4 # 运行名称
+  seed: 42 # 随机种子
   step: null # 当前步数
 
 logging:
@@ -69,8 +69,8 @@ model:
     use_cache: true # 是否使用缓存
     vocab_size: 49152 # 词汇表大小
     RoPE:
-      partial_rope_version: 0  # 0 1 2 3 4 5
-      top_k_rope_dim: 0
+      partial_rope_version: 4  # 0 1 2 3 4 5
+      top_k_rope_dim: 4
       last_k_rope_dim: 0
       uniform_start_point: 0
       uniform_step: 1
@@ -78,8 +78,7 @@ model:
       n_gqa_group: 3
     SVD:
       method: 2
-      low_rank: 8
-      activation_fn: silu
+      low_rank: 4
 
 optimizer:
   accumulate_grad_in_fp32: true # 是否在FP32中累积梯度
@@ -102,7 +101,7 @@ optimizer:
   zero_stage: 0 # ZeRO优化的阶段
 
 parallelism:
-  dp: 2 # 数据并行度(并行设备数目)
+  dp: 4 # 数据并行度(并行设备数目)
   expert_parallel_size: 1 # 专家并行大小
   pp: 1 # 管道并行度
   pp_engine: 1f1b # 管道引擎
@@ -120,7 +119,7 @@ tokenizer:
   tokenizer_revision: null # 分词器版本
 
 tokens:
-  batch_accumulation_per_replica: 4 # 每个副本（设备）的批次累积
+  batch_accumulation_per_replica: 2 # 每个副本（设备）的批次累积
   limit_test_batches: 0 # 测试批次限制
   limit_val_batches: 0 # 验证批次限制
   micro_batch_size: 8 # 微批次大小（单个设备上样本大小

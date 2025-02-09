@@ -61,7 +61,10 @@ eval_all() {
 
 # eval_all ../checkpoints/rope_v2_start0_step8_svd_method5_rank8 rope_v2_start0_step8_svd_method5_rank8 ../configs/mla/rope_v2_start0_step8_svd_method5_rank8.yaml
 
-# eval_all ../checkpoints/rope_v4_topk4_svd_method2_rank8 rope_v4_topk4_svd_method2_rank8 ../configs/mla/rope_v4_topk4_svd_method2_rank8.yaml
+eval_all ../checkpoints/360M_rope_v2_start0_step8_svd_method2_rank8 360M_rope_v2_start0_step8_svd_method2_rank8 ../configs/mla/360M_rope_v2_start0_step8_svd_method2_rank8.yaml
 
-eval_one_ckpt ../checkpoints/rope_v4_topk4_svd_method2_rank8/9000 rope_v4_topk4_svd_method2_rank8 ../configs/mla/rope_v4_topk4_svd_method2_rank8.yaml
-eval_one_ckpt ../checkpoints/rope_v4_topk4_svd_method2_rank8/10800 rope_v4_topk4_svd_method2_rank8 ../configs/mla/rope_v4_topk4_svd_method2_rank8.yaml
+eval_all ../checkpoints/360M_rope_v2_start0_step8_svd_method7_rank8 360M_rope_v2_start0_step8_svd_method7_rank8 ../configs/mla/360M_rope_v2_start0_step8_svd_method7_rank8.yaml
+
+eval_all ..//home/binguo/data/MLA-FT/checkpoints/360M_rope_v4_topk4_svd_method2_rank8 360M_rope_v4_topk4_svd_method2_rank8 ../configs/mla/360M_rope_v4_topk4_svd_method2_rank8.yaml
+
+eval_all ..//home/binguo/data/MLA-FT/checkpoints/360M_rope_v4_topk4_svd_method7_rank8 360M_rope_v4_topk4_svd_method7_rank8 ../configs/mla/360M_rope_v4_topk4_svd_method7_rank8.yaml

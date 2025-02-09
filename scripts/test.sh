@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 #################### 环境变量 ####################
-export CUDA_VISIBLE_DEVICES='2'
+export CUDA_VISIBLE_DEVICES='7'
 export PYTHONPATH=..:$PYTHONPATH
 export CUDA_DEVICE_MAX_CONNECTIONS=1
 export MASTER_PORT="auto"
@@ -48,5 +48,10 @@ export PYTHONPATH=..:$PYTHONPATH
 #     -m src.test.dbg_attn_fwd
 
 torchrun --master_port=29564 --nproc_per_node=1 \
-    -m src.low_rank_v.test \
-    --config-file ../configs/low_rank/test.yaml
+    -m src.test.test_cache \
+    --model_name /home/binguo/data/MLA-FT/checkpoints/rope_v4_topk4_svd_method2_rank8/18000_hf \
+    --is_mla
+
+# torchrun --master_port=29564 --nproc_per_node=1 \
+#     -m src.test.test_cache \
+#     --model_name /home/binguo/data/models/meta-llama/Llama-3.2-1B
