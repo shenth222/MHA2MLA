@@ -14,18 +14,19 @@ export WANDB_PROJECT="mla_smollm_ft_nt"
 
 set -e
 
-# torchrun --nproc_per_node 1 --master_port 24577 \
-#     -m src.low_rank_v_m3.auto_encoder_init \
-#     --config_file ../configs/low_rank/ae_m3_init_hf.yaml
+# torchrun --nproc_per_node 1 --master_port 24571 \
+#     -m src.auto_encoder.init \
+#     --config_file ../configs/ae/init_hf.yaml
 
+# torchrun --nproc_per_node 1 --master_port 24571 \
+#     -m src.auto_encoder.init
 
-torchrun --nproc_per_node 1 --master_port 24563 \
-    -m src.low_rank_v_m3.auto_encoder_init
-
-torchrun --nproc_per_node 1 --master_port 24563 \
+torchrun --master_port=29564 --nproc_per_node=1 \
     -m src.conversation.convert_hf_to_nanotron \
-    --checkpoint_path ../checkpoints/rope_v0_svd_v_method2_rank8_silu_auto_encoder_l1/0_hf \
-    --save_path ../checkpoints/rope_v0_svd_v_method2_rank8_silu_auto_encoder_l1/0 \
-    --is_low_rank_v_m3
+    --checkpoint_path "../checkpoints/rope_v4_topk4_ae_v2_rank8_silu/0_hf" \
+    --save_path "../checkpoints/rope_v4_topk4_ae_v2_rank8_silu/0" \
+    --auto_encoder
 
-feishu_msg -u 18055481550 -m 'init'
+torchrun --nproc_per_node 4 --master_port 24571 \
+    -m src.auto_encoder.train \
+    --config-file ../configs/ae/rope_v4_topk4_ae_v2_rank8_silu.yaml

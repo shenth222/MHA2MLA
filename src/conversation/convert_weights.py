@@ -40,10 +40,14 @@ def get_weight_mapping(config: NanotronLlamaConfig, nt_to_hf: bool = True) -> di
         hf_to_nt_map[f"{hf_prefix}.post_attention_layernorm.weight"] = f"{nt_prefix}.post_attention_layernorm.weight"
         hf_to_nt_map[f"{hf_prefix}.self_attn.W_k_r.weight"] = f"{nt_prefix}.attn.W_k_r.weight"
         hf_to_nt_map[f"{hf_prefix}.self_attn.W_down_k.weight"] = f"{nt_prefix}.attn.W_down_k.weight"
-        if config.SVD["method"] in [2,3]:
-            hf_to_nt_map[f"{hf_prefix}.self_attn.W_down_v.weight"] = f"{nt_prefix}.attn.W_down_v.weight"
+        hf_to_nt_map[f"{hf_prefix}.self_attn.W_down_v.weight"] = f"{nt_prefix}.attn.W_down_v.weight"
         hf_to_nt_map[f"{hf_prefix}.self_attn.W_up_k.weight"] = f"{nt_prefix}.attn.W_up_k.weight"
         hf_to_nt_map[f"{hf_prefix}.self_attn.W_up_v.weight"] = f"{nt_prefix}.attn.W_up_v.weight"
+        # auto_encoder
+        hf_to_nt_map[f"{hf_prefix}.self_attn.auto_encoder.W_down_k.weight"] = f"{nt_prefix}.attn.auto_encoder.W_down_k.weight"
+        hf_to_nt_map[f"{hf_prefix}.self_attn.auto_encoder.W_down_v.weight"] = f"{nt_prefix}.attn.auto_encoder.W_down_v.weight"
+        hf_to_nt_map[f"{hf_prefix}.self_attn.auto_encoder.W_up_k.weight"] = f"{nt_prefix}.attn.auto_encoder.W_up_k.weight"
+        hf_to_nt_map[f"{hf_prefix}.self_attn.auto_encoder.W_up_v.weight"] = f"{nt_prefix}.attn.auto_encoder.W_up_v.weight"
 
 
     if nt_to_hf:
@@ -88,6 +92,7 @@ def get_config_mapping(nt_to_hf: bool = True) -> dict[str, str]:
         "vocab_size": "vocab_size",
         "RoPE": "RoPE",
         "SVD": "SVD",
+        "AE": "AE",
     }
     if nt_to_hf:
         return {nt: hf for hf, nt in hf_to_nt_map.items()}

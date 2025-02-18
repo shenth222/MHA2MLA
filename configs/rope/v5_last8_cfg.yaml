@@ -90,7 +90,7 @@ optimizer:
   zero_stage: 0 # ZeRO优化的阶段
 
 parallelism:
-  dp: 8 # 数据并行度(并行设备数目)
+  dp: 2 # 数据并行度(并行设备数目)
   expert_parallel_size: 1 # 专家并行大小
   pp: 1 # 管道并行度
   pp_engine: 1f1b # 管道引擎

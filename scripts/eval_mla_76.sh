@@ -18,7 +18,7 @@ eval_one_ckpt() {
         -m src.conversation.convert_nanotron_to_hf \
         --checkpoint_path ${model_name_or_path} \
         --save_path "${model_name_or_path}_hf" \
-        --tokenizer_name /home/binguo/data/models/HuggingFaceTB/SmolLM-135M \
+        --tokenizer_name /home/binguo/data/models/HuggingFaceTB/SmolLM-360M \
         --is_mla
 
     # python -m src.evaluation.eval_partial_rope --cfg_RoPE ${cfg_RoPE} \
@@ -61,10 +61,7 @@ eval_all() {
 
 # eval_all ../checkpoints/rope_v2_start0_step8_svd_method5_rank8 rope_v2_start0_step8_svd_method5_rank8 ../configs/mla/rope_v2_start0_step8_svd_method5_rank8.yaml
 
-eval_all ../checkpoints/360M_rope_v2_start0_step8_svd_method2_rank8 360M_rope_v2_start0_step8_svd_method2_rank8 ../configs/mla/360M_rope_v2_start0_step8_svd_method2_rank8.yaml
 
-eval_all ../checkpoints/360M_rope_v2_start0_step8_svd_method7_rank8 360M_rope_v2_start0_step8_svd_method7_rank8 ../configs/mla/360M_rope_v2_start0_step8_svd_method7_rank8.yaml
+export MODEL_NAME="rope_v1_topk4_svd_method7_rank16"
 
-eval_all ..//home/binguo/data/MLA-FT/checkpoints/360M_rope_v4_topk4_svd_method2_rank8 360M_rope_v4_topk4_svd_method2_rank8 ../configs/mla/360M_rope_v4_topk4_svd_method2_rank8.yaml
-
-eval_all ..//home/binguo/data/MLA-FT/checkpoints/360M_rope_v4_topk4_svd_method7_rank8 360M_rope_v4_topk4_svd_method7_rank8 ../configs/mla/360M_rope_v4_topk4_svd_method7_rank8.yaml
+eval_one_ckpt ../checkpoints/${MODEL_NAME}/18000 ${MODEL_NAME} ../configs/mla/${MODEL_NAME}.yaml

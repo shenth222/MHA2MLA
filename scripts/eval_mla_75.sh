@@ -1,7 +1,7 @@
 #!/bin/bash
 #################### 环境变量 ####################
 
-export CUDA_VISIBLE_DEVICES='6,7'
+export CUDA_VISIBLE_DEVICES='0,1'
 export HF_HOME="/home/binguo/data/hf-home"
 export NUM_GPUS=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
 export MASTER_PORT="auto"
@@ -61,14 +61,4 @@ eval_all() {
 
 # eval_all ../checkpoints/rope_v2_start0_step8_svd_method2_rank16 rope_v2_start0_step8_svd_method2_rank16 ../configs/mla/rope_v2_start0_step8_svd_method2_rank16.yaml
 
-eval_one_ckpt ../checkpoints/rope_v2_start0_step8_svd_method2_rank4/18000 rope_v2_start0_step8_svd_method2_rank4 ../configs/mla/rope_v2_start0_step8_svd_method2_rank4.yaml
-
-eval_one_ckpt ../checkpoints/rope_v4_topk4_svd_method2_rank4/18000 rope_v4_topk4_svd_method2_rank4 ../configs/mla/rope_v4_topk4_svd_method2_rank4.yaml
-
-eval_one_ckpt ../checkpoints/rope_v4_topk4_svd_method2_rank16/18000 rope_v4_topk4_svd_method2_rank16 ../configs/mla/rope_v4_topk4_svd_method2_rank16.yaml
-
-eval_one_ckpt ../checkpoints/rope_v4_topk4_svd_method5_rank16/18000 rope_v4_topk4_svd_method5_rank16 ../configs/mla/rope_v4_topk4_svd_method5_rank16.yaml
-
-eval_one_ckpt ../checkpoints/rope_v4_topk4_svd_method7_rank16/18000 rope_v4_topk4_svd_method7_rank16 ../configs/mla/rope_v4_topk4_svd_method7_rank16.yaml
-
-eval_one_ckpt ../checkpoints/rope_v4_topk4_svd_method7_rank32/18000 rope_v4_topk4_svd_method7_rank32 ../configs/mla/rope_v4_topk4_svd_method7_rank32.yaml
+eval_one_ckpt ../checkpoints/360M_rope_v4_topk4_svd_method7_rank16/24000 360M_rope_v4_topk4_svd_method7_rank16 ../configs/mla/360M_rope_v4_topk4_svd_method7_rank16.yaml

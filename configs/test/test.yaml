@@ -1,11 +1,11 @@
 checkpoints:
-  checkpoint_interval: 10 # 保存检查点的步数间隔
+  checkpoint_interval: 10000 # 保存检查点的步数间隔
   checkpoints_path: ../checkpoints/test # 检查点保存的路径
   checkpoints_path_is_shared_file_system: false # 检查点路径是否在共享文件系统上
-  resume_checkpoint_path: /home/binguo/data/models/HuggingFaceTB/SmolLM-135M_nt # 恢复训练时的检查点路径
+  resume_checkpoint_path: /home/binguo/data/MLA-FT/checkpoints/test_nt/0_nt # 恢复训练时的检查点路径
   # resume_checkpoint_path: null # 恢复训练时的检查点路径
-  save_final_state: true # 是否保存最终状态
-  save_initial_state: true # 是否保存初始状态
+  save_final_state: false # 是否保存最终状态
+  save_initial_state: false # 是否保存初始状态
   load_lr_scheduler: false
   load_optimizer: false
 
@@ -13,11 +13,11 @@ data_stages:
 - data:
     dataset:
       dataset_folder: # 数据集的路径列表
-        - ../datasets/fineweb-edu-dedup
-        - ../datasets/cosmopedia-v2
-        - ../datasets/python-edu
-        - ../datasets/open-web-math
-        - ../datasets/stackoverflow
+        - ~/local/smollm1_corpus/fineweb-edu-dedup/
+        - ~/local/smollm1_corpus/cosmopedia-v2/
+        - ~/local/smollm1_corpus/python-edu/
+        - ~/local/smollm1_corpus/open-web-math/
+        - ~/local/smollm1_corpus/stackoverflow/
       dataset_weights: # 各数据集的权重
         - 0.7
         - 0.15
@@ -69,6 +69,18 @@ model:
     tie_word_embeddings: true # 是否绑定词嵌入
     use_cache: true # 是否使用缓存
     vocab_size: 49152 # 词汇表大小
+    RoPE:
+      partial_rope_version: 4
+      last_k_rope_dim: 0
+      n_gqa_group: 3
+      qk_tensor_path: /home/binguo/data/MLA-FT/utils/qk_tensor_135M.pth
+      top_k_rope_dim: 4
+      uniform_start_point: 0
+      uniform_step: 1
+    AE:
+      version: 3
+      activation_fn: silu
+      low_rank: 8
 
 optimizer:
   accumulate_grad_in_fp32: true # 是否在FP32中累积梯度

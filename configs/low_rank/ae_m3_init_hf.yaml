@@ -3,7 +3,7 @@ TrainingArguments:
   seed: 42
   max_steps: 2000
   report_to: wandb
-  run_name: rope_v0_svd_v_method2_rank8_silu_auto_encoder_m3_init_lr1e-4
+  run_name: rope_v0_svd_v_method2_rank8_silu_auto_encoder_m3_init_lr1e-2
   save_strategy : steps
   save_steps: 0.5
   output_dir: ../checkpoints/rope_v0_svd_v_method2_rank8_silu_auto_encoder_m3
@@ -18,7 +18,7 @@ TrainingArguments:
   dataloader_drop_last: true
   # optim
   max_grad_norm: 1.0
-  learning_rate: 1.0e-4
+  learning_rate: 1.0e-2
   weight_decay: 0.01
   adam_beta1: 0.9
   adam_beta2: 0.999
