@@ -39,12 +39,7 @@ class AttnForTraing(PreTrainedModel):
     def post_init(self,original_model):
         self.original_model = original_model
         import os
-        if os.getenv("AE_LOSS", "L2") == "L2":
-            self.loss_func = torch.nn.MSELoss(reduction="sum")
-        elif os.getenv("AE_LOSS") == "L1":
-            self.loss_func = torch.nn.SmoothL1Loss(reduction="sum")
-        else:
-            raise ValueError("Unsupported loss function specified in AE_LOSS environment variable.")
+        self.loss_func = torch.nn.SmoothL1Loss(reduction="sum")
         for layer_idx, layer in enumerate(self.original_model.model.layers):
             original_attn = layer.self_attn
             # q,k,v,o
@@ -225,8 +220,8 @@ def main():
 def merge():
     from .patch_func_hf import low_rank_patch_hf
     low_rank_patch_hf()
-    original_model = AutoModelForCausalLM.from_pretrained("/home/binguo/data/MLA-FT/checkpoints/rope_v0_svd_v_method2_rank8_silu/0_hf")
-    model = AttnForTraing.from_pretrained("/home/binguo/data/MLA-FT/checkpoints/rope_v0_svd_v_method2_rank8_silu_auto_encoder_l1/checkpoint-2000")
+    original_model = AutoModelForCausalLM.from_pretrained("/home/binguo/data/MLA-FT/checkpoints/rope_v0_svd_v_method3_rank8_silu/0_hf")
+    model = AttnForTraing.from_pretrained("/home/binguo/data/MLA-FT/checkpoints/rope_v0_svd_v_method2_rank8_silu_auto_encoder_m3/checkpoint-2000")
     with torch.no_grad():
         for layer_idx, layer in enumerate(original_model.model.layers):
             attn = model.model[layer_idx]
@@ -235,5 +230,5 @@ def merge():
     original_model.save_pretrained("/home/binguo/data/MLA-FT/checkpoints/rope_v0_svd_v_method2_rank8_silu_auto_encoder_l1/0_hf")
 
 if __name__ == "__main__":
-    main()
-    # merge()
+    # main()
+    merge()

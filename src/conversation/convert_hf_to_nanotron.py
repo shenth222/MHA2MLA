@@ -83,7 +83,7 @@ def convert_hf_to_nt(model_hf: LlamaForCausalLM, model_nt: LlamaForTraining, con
 
 def get_nanotron_config(config: HFLlamaConfig) -> NanotronLlamaConfig:
     """Converts a huggingface configuration to nanotron configuration."""
-    attrs = {key: getattr(config, value) for key, value in get_config_mapping(nt_to_hf=True).items()}
+    attrs = {key: getattr(config, value) for key, value in get_config_mapping(nt_to_hf=True).items() if hasattr(config, value)}
     return NanotronLlamaConfig(**attrs)
 
 
@@ -118,6 +118,8 @@ if __name__ == "__main__":
     parser.add_argument("--is_low_rank_v", action="store_true", help="Whether the model is low rank")
     parser.add_argument("--is_low_rank_k_nope", action="store_true", help="Whether the model is low rank")
     parser.add_argument("--is_low_rank_v_m3", action="store_true", help="Whether the model is low rank with method 3")
+    parser.add_argument("--is_low_rank_kv", action="store_true", help="Whether the model's k_nope and v is low rank")
+    parser.add_argument("--auto_encoder", action="store_true", help="Whether the model is using auto-encoder")
     args = parser.parse_args()
     if args.is_mla:
         from ..mla.mla_patch_hf import mla_patch_hf
@@ -153,6 +155,24 @@ if __name__ == "__main__":
         from ..low_rank_v_m3.patch_func_nt import low_rank_patch_nt,CustomLlamaConfig
         low_rank_patch_nt(config["RoPE"])
         low_rank_patch_hf(config["RoPE"])
+        globals()["NanotronLlamaConfig"] = CustomLlamaConfig
+    if args.is_low_rank_kv:
+        import json,os
+        with open(os.path.join(args.checkpoint_path,"config.json")) as f:
+            config = json.load(f)
+        from ..low_rank_kv.patch_func_hf import low_rank_kv_patch_func_hf
+        from ..low_rank_kv.patch_func_nt import low_rank_kv_patch_func_nt,CustomLlamaConfig
+        low_rank_kv_patch_func_hf(config["RoPE"])
+        low_rank_kv_patch_func_nt(config["RoPE"])
+        globals()["NanotronLlamaConfig"] = CustomLlamaConfig
+    if args.auto_encoder:
+        import json,os
+        with open(os.path.join(args.checkpoint_path,"config.json")) as f:
+            config = json.load(f)
+        from ..auto_encoder.patch_func_hf import ae_patch_func_hf
+        from ..auto_encoder.patch_func_nt import ae_patch_func_nt,CustomLlamaConfig
+        ae_patch_func_hf(config["RoPE"])
+        ae_patch_func_nt(config["RoPE"])
         globals()["NanotronLlamaConfig"] = CustomLlamaConfig
 
     # Convert HF model to nanotron format.

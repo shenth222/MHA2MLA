@@ -340,20 +340,20 @@ if __name__ == "__main__":
     torch.set_default_dtype(torch.bfloat16)
 
     # Monkey patch
-    from ..mla.mla_patch_nt import (
-        mla_patch_nt,
+    from ..auto_encoder.patch_func_nt import (
+        ae_patch_func_nt,
         CustomModelArgs,
         CustomLlamaConfig,
         CustomConfig,
     )
-    from ..mla.mla_patch_hf import mla_patch_hf
+    from ..auto_encoder.patch_func_hf import ae_patch_func_hf
     import yaml
 
     with open(config_file, "r") as fin:
         config = yaml.safe_load(fin)
     rope_cfg = config["model"]["model_config"]["RoPE"]
-    mla_patch_nt(rope_cfg)
-    mla_patch_hf(rope_cfg)
+    ae_patch_func_nt(rope_cfg)
+    ae_patch_func_hf(rope_cfg)
 
     from nanotron import trainer as nt_trainer
 
@@ -365,8 +365,7 @@ if __name__ == "__main__":
     model_nanotron = trainer.model
     dataloader = list(dataloader.values())[0]
     model_hf = AutoModelForCausalLM.from_pretrained(
-        # "../checkpoints/rope_v4_topk4_svd_method7_rank8/18000_hf"
-        "/home/binguo/data/MLA-FT/checkpoints/test_hf"
+        "../checkpoints/test_nt/0_hf"
     ).cuda()
     num = 1
     with torch.no_grad():
@@ -377,55 +376,9 @@ if __name__ == "__main__":
             input_mask = batch["input_mask"]
             print(model_nanotron(**batch))
             print(model_hf(input_ids=batch["input_ids"],labels=batch["input_ids"],attention_mask=batch["input_mask"]).loss)
-            print(sum(p.numel() for p in model_hf.parameters()))
-            print(model_nanotron)
-            print(model_hf)
+            # print(sum(p.numel() for p in model_hf.parameters()))
+            # print(model_nanotron)
+            # print(model_hf)
             num -= 1
             if num == 0:
                 break
-
-    state_dict_hf = model_hf.state_dict()
-    state_dict_nanotron = model_nanotron.state_dict()
-    for i in range(30):
-        hf_prefix = f"model.layers.{i}"
-        nt_prefix = f"model.decoder.{i}.pp_block"
-        hf_to_nt_map = {}
-        stata_dict_layer1_hf = {}
-        hf_to_nt_map[f"{hf_prefix}.self_attn.q_proj.weight"] = (
-            f"{nt_prefix}.attn.q_proj.weight"
-        )
-        hf_to_nt_map[f"{hf_prefix}.self_attn.W_k_r.weight"] = (
-            f"{nt_prefix}.attn.W_k_r.weight"
-        )
-        hf_to_nt_map[f"{hf_prefix}.self_attn.W_down_k.weight"] = (
-            f"{nt_prefix}.attn.W_down_k.weight"
-        )
-        hf_to_nt_map[f"{hf_prefix}.self_attn.W_down_v.weight"] = (
-            f"{nt_prefix}.attn.W_down_v.weight"
-        )
-        hf_to_nt_map[f"{hf_prefix}.self_attn.W_up_k.weight"] = (
-            f"{nt_prefix}.attn.W_up_k.weight"
-        )
-        hf_to_nt_map[f"{hf_prefix}.self_attn.W_up_v.weight"] = (
-            f"{nt_prefix}.attn.W_up_v.weight"
-        )
-        for key, value in hf_to_nt_map.items():
-            if key not in state_dict_hf:
-                continue
-            assert torch.equal(
-                state_dict_nanotron[value], state_dict_hf[key]
-            ), f"{key} not equal {value}"
-    assert torch.equal(
-        state_dict_hf["lm_head.weight"],
-        state_dict_nanotron["model.lm_head.pp_block.weight"],
-    )
-    assert torch.equal(
-        state_dict_hf["model.embed_tokens.weight"],
-        state_dict_nanotron[
-            "model.token_position_embeddings.pp_block.token_embedding.weight"
-        ],
-    )
-    assert torch.equal(
-        state_dict_hf["model.norm.weight"],
-        state_dict_nanotron["model.final_layer_norm.pp_block.weight"],
-    )

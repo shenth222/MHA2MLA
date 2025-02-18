@@ -32,7 +32,7 @@ general:
   benchmark_csv_path: null # 基准测试CSV文件路径
   consumed_train_samples: null # 已消耗的训练样本数
   ignore_sanity_checks: true # 是否忽略完整性检查
-  project: smollm_nt # 项目名称
+  project: mla_smollm_ft_nt # 项目名称
   run: 360M_rope_v2_start0_step8_svd_method7_rank8 # 运行名称
   seed: 42 # 随机种子
   step: null # 当前步数
@@ -70,7 +70,7 @@ model:
     vocab_size: 49152 # 词汇表大小
     RoPE:
       partial_rope_version: 2  # 0 1 2 3 4 5
-      top_k_rope_dim: 4
+      top_k_rope_dim: 0
       last_k_rope_dim: 0
       uniform_start_point: 0
       uniform_step: 8
@@ -85,10 +85,10 @@ optimizer:
   clip_grad: 1.0 # 梯度裁剪值
   learning_rate_scheduler:
     learning_rate: 0.0001 # 学习率
-    lr_decay_starting_step: 21600 # 学习率衰减开始步数
-    lr_decay_steps: 2400 # 学习率衰减步数
+    lr_decay_starting_step: 16200 # 学习率衰减开始步数
+    lr_decay_steps: 1800 # 学习率衰减步数
     lr_decay_style: 1-sqrt # 学习率衰减风格
-    lr_warmup_steps: 1200 # 学习率预热步数
+    lr_warmup_steps: 900 # 学习率预热步数
     lr_warmup_style: linear # 学习率预热风格
     min_decay_lr: 0 # 最小衰减学习率
   optimizer_factory:
@@ -101,7 +101,7 @@ optimizer:
   zero_stage: 0 # ZeRO优化的阶段
 
 parallelism:
-  dp: 4 # 数据并行度(并行设备数目)
+  dp: 2 # 数据并行度(并行设备数目)
   expert_parallel_size: 1 # 专家并行大小
   pp: 1 # 管道并行度
   pp_engine: 1f1b # 管道引擎
@@ -119,12 +119,12 @@ tokenizer:
   tokenizer_revision: null # 分词器版本
 
 tokens:
-  batch_accumulation_per_replica: 6 # 每个副本（设备）的批次累积
+  batch_accumulation_per_replica: 8 # 每个副本（设备）的批次累积
   limit_test_batches: 0 # 测试批次限制
   limit_val_batches: 0 # 验证批次限制
   micro_batch_size: 4 # 微批次大小（单个设备上样本大小
   sequence_length: 2048 # 序列长度
-  train_steps: 24000 # 训练步骤数
+  train_steps: 18000 # 训练步骤数
   val_check_interval: -1 # 验证检查间隔
 
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 #################### 环境变量 ####################
-export CUDA_VISIBLE_DEVICES='7'
+export CUDA_VISIBLE_DEVICES='2'
 export PYTHONPATH=..:$PYTHONPATH
 export CUDA_DEVICE_MAX_CONNECTIONS=1
 export MASTER_PORT="auto"
@@ -14,44 +14,43 @@ export PYTHONPATH=..:$PYTHONPATH
 
 #################### 任务执行 ####################
 
-# torchrun --nproc_per_node 1 \
-#     -m src.test.test_mla
+
+# torchrun --master_port=29564 --nproc_per_node=1 \
+#     -m src.auto_encoder.train \
+#     --config-file ../configs/ae/test.yaml
+
+# torchrun --master_port=29564 --nproc_per_node=1 \
+#     -m src.conversation.convert_nanotron_to_hf \
+#     --checkpoint_path "../checkpoints/test_nt/0" \
+#     --save_path "../checkpoints/test_nt/0_hf" \
+#     --tokenizer_name /home/binguo/data/models/HuggingFaceTB/SmolLM-135M \
+#     --auto_encoder
 
 # torchrun --master_port=29564 --nproc_per_node=1 \
 #     -m src.conversation.convert_hf_to_nanotron \
-#     --checkpoint_path="../checkpoints/rope_v4_topk4_svd_method7_rank8/18000_hf" \
-#     --save_path="../checkpoints/test_nt" \
-#     --is_mla
-
-# torchrun --master_port=29564 --nproc_per_node=1 \
-#     -m src.conversation.convert_nanotron_to_hf \
-#     --checkpoint_path="../checkpoints/test_nt" \
-#     --tokenizer_name="../checkpoints/rope_v4_topk4_svd_method7_rank8/18000_hf" \
-#     --save_path="../checkpoints/test_hf" \
-#     --is_mla
-
-
-# torchrun --master_port=29564 --nproc_per_node=1 \
-#     -m src.conversation.convert_nanotron_to_hf \
-#     --checkpoint_path="../checkpoints/test_nt" \
-#     --tokenizer_name="../checkpoints/rope_v4_topk4_svd_method2_rank8_hf/checkpoint-18000" \
-#     --save_path="../checkpoints/test_hf" \
-#     --is_mla
-
+#     --checkpoint_path "../checkpoints/test_nt/0_hf" \
+#     --save_path "../checkpoints/test_nt/0_hf_nt" \
+#     --auto_encoder
 
 # torchrun --master_port=29564 --nproc_per_node=1 \
 #     -m src.test.test_conversation \
-#     --config-file "../configs/mla/test.yaml"
+#     --config-file ../configs/ae/test.yaml
 
-
-# torchrun --master_port=29564 --nproc_per_node=1 \
-#     -m src.test.dbg_attn_fwd
-
-torchrun --master_port=29564 --nproc_per_node=1 \
-    -m src.test.test_cache \
-    --model_name /home/binguo/data/MLA-FT/checkpoints/rope_v4_topk4_svd_method2_rank8/18000_hf \
-    --is_mla
 
 # torchrun --master_port=29564 --nproc_per_node=1 \
 #     -m src.test.test_cache \
-#     --model_name /home/binguo/data/models/meta-llama/Llama-3.2-1B
+#     --model_name /home/binguo/data/MLA-FT/checkpoints/rope_v4_topk4_svd_method7_rank32/18000_hf \
+#     --is_mla
+
+
+torchrun --master_port=29564 --nproc_per_node=1 \
+    -m src.test.test_cache \
+    --model_name /home/binguo/data/models/HuggingFaceTB/SmolLM-135M
+
+torchrun --master_port=29564 --nproc_per_node=1 \
+    -m src.test.test_cache \
+    --model_name /home/binguo/data/MLA-FT/checkpoints/rope_v4_topk4_svd_method7_rank8/18000_hf \
+    --is_mla
+# 12.57 9.90
+# 17.44 11.92
+# 4.87 2.02

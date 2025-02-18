@@ -1,7 +1,7 @@
 #!/bin/bash
 #################### 环境变量 ####################
 
-export CUDA_VISIBLE_DEVICES="0,1,2"
+export CUDA_VISIBLE_DEVICES="0,1,2,3"
 export HF_HOME="/home/binguo/data/hf-home"
 export NUM_GPUS=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
 export MASTER_PORT="auto"
@@ -55,21 +55,23 @@ eval_all() {
 
 #################### 任务执行 ####################
 
+eval_one_ckpt ../checkpoints/v1_2_rope/18000 v1_2_rope ../configs/rope/v1_2_rope.yaml
 
-eval_all ../checkpoints/v1_4_rope v1_4_rope ../configs/rope/v1_4_rope.yaml
-eval_all ../checkpoints/v1_8_rope v1_8_rope ../configs/rope/v1_8_rope.yaml
 
-eval_all ../checkpoints/v2_start0_step8_rope v2_start0_step8_rope ../configs/rope/v2_start0_step8_rope.yaml
-eval_all ../checkpoints/v2_start0_step4_rope v2_start0_step4_rope ../configs/rope/v2_start0_step4_rope.yaml
+# eval_all ../checkpoints/v1_4_rope v1_4_rope ../configs/rope/v1_4_rope.yaml
+# eval_all ../checkpoints/v1_8_rope v1_8_rope ../configs/rope/v1_8_rope.yaml
 
-eval_all ../checkpoints/v3_top2_last2_rope v3_top2_last2_rope ../configs/rope/v3_top2_last2_rope.yaml
-eval_all ../checkpoints/v3_top4_last4_rope v3_top4_last4_rope ../configs/rope/v3_top4_last4_rope.yaml
+# eval_all ../checkpoints/v2_start0_step8_rope v2_start0_step8_rope ../configs/rope/v2_start0_step8_rope.yaml
+# eval_all ../checkpoints/v2_start0_step4_rope v2_start0_step4_rope ../configs/rope/v2_start0_step4_rope.yaml
 
-eval_all ../checkpoints/v4_topk4_rope v4_topk4_rope ../configs/rope/v4_topk4_rope.yaml
-eval_all ../checkpoints/v4_topk8_rope v4_topk8_rope ../configs/rope/v4_topk8_rope.yaml
+# eval_all ../checkpoints/v3_top2_last2_rope v3_top2_last2_rope ../configs/rope/v3_top2_last2_rope.yaml
+# eval_all ../checkpoints/v3_top4_last4_rope v3_top4_last4_rope ../configs/rope/v3_top4_last4_rope.yaml
 
-eval_all ../checkpoints/v5_last4_rope v5_last4_rope ../configs/rope/v5_last4_rope.yaml
-eval_all ../checkpoints/v5_last8_rope v5_last8_rope ../configs/rope/v5_last8_rope.yaml
+# eval_all ../checkpoints/v4_topk4_rope v4_topk4_rope ../configs/rope/v4_topk4_rope.yaml
+# eval_all ../checkpoints/v4_topk8_rope v4_topk8_rope ../configs/rope/v4_topk8_rope.yaml
+
+# eval_all ../checkpoints/v5_last4_rope v5_last4_rope ../configs/rope/v5_last4_rope.yaml
+# eval_all ../checkpoints/v5_last8_rope v5_last8_rope ../configs/rope/v5_last8_rope.yaml
 
 
 

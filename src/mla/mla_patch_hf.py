@@ -11,7 +11,7 @@ from transformers.models.llama.modeling_llama import (
     LlamaConfig,
     logger,
     LlamaRotaryEmbedding,
-    repeat_kv
+    repeat_kv,
 )
 from transformers.models.llama import modeling_llama
 from transformers.cache_utils import Cache, StaticCache
@@ -63,20 +63,24 @@ class CustomLlamaAttention(nn.Module):
             bias=config.attention_bias,
         )
         self.W_down_k = nn.Linear(
-            self.hidden_size, self.low_rank*self.num_key_value_heads, bias=config.attention_bias
+            self.hidden_size,
+            self.low_rank * self.num_key_value_heads,
+            bias=config.attention_bias,
         )
         if not self.is_share_W_down:
             self.W_down_v = nn.Linear(
-                self.hidden_size, self.low_rank*self.num_key_value_heads, bias=config.attention_bias
+                self.hidden_size,
+                self.low_rank * self.num_key_value_heads,
+                bias=config.attention_bias,
             )
         self.W_up_k = nn.Linear(
-            self.low_rank*self.num_key_value_heads,
+            self.low_rank * self.num_key_value_heads,
             self.num_key_value_heads * self.head_dim
             - (self.nope_mask == False).sum().item(),
             bias=config.attention_bias,
         )
         self.W_up_v = nn.Linear(
-            self.low_rank*self.num_key_value_heads,
+            self.low_rank * self.num_key_value_heads,
             self.num_key_value_heads * self.head_dim,
             bias=config.attention_bias,
         )
@@ -146,12 +150,26 @@ class CustomLlamaAttention(nn.Module):
         if past_key_value is not None:
             # sin and cos are specific to RoPE models; cache_position needed for the static cache
             cache_kwargs = {"sin": sin, "cos": cos, "cache_position": cache_position}
-            k_r, c_kv = past_key_value.update(k_r, c_kv, self.layer_idx, cache_kwargs)
+            r_dim,c_dim = k_r.size(-1),c_kv.size(-1)
+            k_r, c_kv = past_key_value.update(
+                k_r.view(bsz, q_len, self.num_key_value_heads, -1).transpose(1, 2),
+                c_kv.view(bsz, q_len, self.num_key_value_heads, -1).transpose(1, 2),
+                self.layer_idx,
+                cache_kwargs,
+            )
+            k_r = k_r.transpose(1, 2).reshape(bsz, -1, r_dim)
+            c_kv = c_kv.transpose(1, 2).reshape(bsz, -1, c_dim)
         if self.is_share_W_down:
             k_c = self.W_up_k(c_kv)
             value_states = self.W_up_v(c_kv)
         else:
-            c_k, c_v = c_kv.split([self.low_rank*self.num_key_value_heads, self.low_rank*self.num_key_value_heads], dim=-1)
+            c_k, c_v = c_kv.split(
+                [
+                    self.low_rank * self.num_key_value_heads,
+                    self.low_rank * self.num_key_value_heads,
+                ],
+                dim=-1,
+            )
             k_c = self.W_up_k(c_k)
             value_states = self.W_up_v(c_v)
 
@@ -159,7 +177,11 @@ class CustomLlamaAttention(nn.Module):
         # TODO: c_kv up+nope_mask填充的过程等同线性变换，可以优化成一个矩阵，推理时可以融合到后面的矩阵乘法，即q_proj矩阵中
         # 需要添加两个矩阵：1.矩阵a负责r维向量映射到k_c维向量，2.矩阵b负责维度顺序的变换(置换矩阵)
         key_states = torch.zeros(
-            bsz, c_kv.size(1), self.nope_mask.shape[-1], device=hidden_states.device, dtype=hidden_states.dtype
+            bsz,
+            c_kv.size(1),
+            self.nope_mask.shape[-1],
+            device=hidden_states.device,
+            dtype=hidden_states.dtype,
         )
         key_states[..., self.nope_mask] = k_c
         key_states[..., ~self.nope_mask] = k_r
@@ -453,7 +475,7 @@ class CustomLlamaSdpaAttention(CustomLlamaAttention):
         return attn_output, None, past_key_value
 
 
-def state_dict_svd_init(model,state_dict):
+def state_dict_svd_init(model, state_dict):
     for layer_idx in range(model.config.num_hidden_layers):
         nope_mask = IndexForNope.get_index_for_nope(
             rope_cfg=model.config.RoPE,
@@ -471,16 +493,15 @@ def state_dict_svd_init(model,state_dict):
             W_k[..., nope_mask],
             W_v,
             svd_method=model.config.SVD["method"],
-            r=model.config.SVD["low_rank"]*model.config.num_key_value_heads,
+            r=model.config.SVD["low_rank"] * model.config.num_key_value_heads,
         )
         state_dict[f"model.layers.{layer_idx}.self_attn.W_down_k.weight"] = W_down_k
         state_dict[f"model.layers.{layer_idx}.self_attn.W_up_k.weight"] = W_up_k
         if not model.model.layers[layer_idx].self_attn.is_share_W_down:
-            state_dict[f"model.layers.{layer_idx}.self_attn.W_down_v.weight"] = (
-                W_down_v
-            )
+            state_dict[f"model.layers.{layer_idx}.self_attn.W_down_v.weight"] = W_down_v
         state_dict[f"model.layers.{layer_idx}.self_attn.W_up_v.weight"] = W_up_v
     return state_dict
+
 
 @classmethod
 def custom_load_pretrained_model(
@@ -503,30 +524,32 @@ def custom_load_pretrained_model(
     gguf_path=None,
     weights_only=True,
 ):
-    if all(["W_k_r" not in k for k in state_dict.keys()]) and isinstance(model.model, modeling_llama.LlamaPreTrainedModel):
+    if all(["W_k_r" not in k for k in state_dict.keys()]) and isinstance(
+        model.model, modeling_llama.LlamaPreTrainedModel
+    ):
         # replace the original llama weights with the mla weights
         state_dict = state_dict_svd_init(model, state_dict)
         loaded_keys = list(state_dict.keys())
     old_k_r_weight = model.model.layers[0].self_attn.W_k_r.weight
     outputs = cls.original_load_pretrained_model(
-            model,
-            state_dict,
-            loaded_keys,
-            resolved_archive_file,
-            pretrained_model_name_or_path,
-            ignore_mismatched_sizes,
-            sharded_metadata,
-            _fast_init,
-            low_cpu_mem_usage,
-            device_map,
-            offload_folder,
-            offload_state_dict,
-            dtype,
-            hf_quantizer,
-            keep_in_fp32_modules,
-            gguf_path,
-            weights_only,
-        )
+        model,
+        state_dict,
+        loaded_keys,
+        resolved_archive_file,
+        pretrained_model_name_or_path,
+        ignore_mismatched_sizes,
+        sharded_metadata,
+        _fast_init,
+        low_cpu_mem_usage,
+        device_map,
+        offload_folder,
+        offload_state_dict,
+        dtype,
+        hf_quantizer,
+        keep_in_fp32_modules,
+        gguf_path,
+        weights_only,
+    )
     new_k_r_weight = model.model.layers[0].self_attn.W_k_r.weight
     assert not (old_k_r_weight == new_k_r_weight).all()
     # 调用原始的加载方法
@@ -547,4 +570,7 @@ def mla_patch_hf(rope_cfg=None):
     if rope_cfg is not None:
         # replace apply_rotary_pos_emb function in llama model
         from ..patch_func_hf import create_custom_apply_rotary_pos_emb_hf
-        modeling_llama.apply_rotary_pos_emb = create_custom_apply_rotary_pos_emb_hf(rope_cfg)
+
+        modeling_llama.apply_rotary_pos_emb = create_custom_apply_rotary_pos_emb_hf(
+            rope_cfg
+        )
