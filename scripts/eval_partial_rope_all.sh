@@ -15,17 +15,10 @@ eval_one_ckpt() {
     local cfg_RoPE=$3
 
     torchrun --nproc_per_node=1 \
-        ../modules/nanotron/examples/llama/convert_nanotron_to_hf.py \
+        -m src.original_conversation.convert_nanotron_to_hf \
         --checkpoint_path ${model_name_or_path} \
         --save_path "${model_name_or_path}_hf" \
         --tokenizer_name /home/binguo/data/models/HuggingFaceTB/SmolLM-135M
-
-    # python -m src.evaluation.eval_partial_rope --cfg_RoPE ${cfg_RoPE} \
-    #     accelerate \
-    #     --model_args "pretrained=${model_name_or_path},revision=main,dtype=bfloat16,vllm,gpu_memory_utilisation=0.8,max_model_length=2048,data_parallel_size=${NUM_GPUS}" \
-    #     --custom_tasks "../src/evaluation/smollm1_tasks.py" \
-    #     --tasks "../src/evaluation/smollm1_base.txt" \
-    #     --output_dir "../eval_results/${output_dir}"
 
     accelerate launch --multi_gpu --num_processes=${NUM_GPUS} \
         -m src.evaluation.eval_partial_rope --cfg_RoPE ${cfg_RoPE} \
@@ -56,30 +49,3 @@ eval_all() {
 #################### 任务执行 ####################
 
 eval_one_ckpt ../checkpoints/v1_2_rope/18000 v1_2_rope ../configs/rope/v1_2_rope.yaml
-
-
-# eval_all ../checkpoints/v1_4_rope v1_4_rope ../configs/rope/v1_4_rope.yaml
-# eval_all ../checkpoints/v1_8_rope v1_8_rope ../configs/rope/v1_8_rope.yaml
-
-# eval_all ../checkpoints/v2_start0_step8_rope v2_start0_step8_rope ../configs/rope/v2_start0_step8_rope.yaml
-# eval_all ../checkpoints/v2_start0_step4_rope v2_start0_step4_rope ../configs/rope/v2_start0_step4_rope.yaml
-
-# eval_all ../checkpoints/v3_top2_last2_rope v3_top2_last2_rope ../configs/rope/v3_top2_last2_rope.yaml
-# eval_all ../checkpoints/v3_top4_last4_rope v3_top4_last4_rope ../configs/rope/v3_top4_last4_rope.yaml
-
-# eval_all ../checkpoints/v4_topk4_rope v4_topk4_rope ../configs/rope/v4_topk4_rope.yaml
-# eval_all ../checkpoints/v4_topk8_rope v4_topk8_rope ../configs/rope/v4_topk8_rope.yaml
-
-# eval_all ../checkpoints/v5_last4_rope v5_last4_rope ../configs/rope/v5_last4_rope.yaml
-# eval_all ../checkpoints/v5_last8_rope v5_last8_rope ../configs/rope/v5_last8_rope.yaml
-
-
-
-# accelerate launch --multi_gpu --num_processes=${NUM_GPUS} \
-#     -m lighteval \
-#     accelerate \
-#     --model_args "pretrained=/home/binguo/data/models/HuggingFaceTB/SmolLM-135M,revision=main,dtype=bfloat16,max_length=2048" \
-#     --override_batch_size 96 \
-#     --custom_tasks "../src/evaluation/tasks.py" \
-#     --tasks "../src/evaluation/smollm1_base_v2.txt" \
-#     --output_dir "../eval_results/hf_test"

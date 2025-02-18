@@ -881,6 +881,7 @@ def ae_patch_func_nt(rope_cfg=None):
         {"CustomLlamaConfig": nanotron.trainer.CONFIG_TO_MODEL_CLASS["LlamaConfig"]}
     )
 
+    nanotron.serialize.load_weights = custom_load_weights
     nanotron.trainer.load_weights = custom_load_weights
     from ..patch_func import create_custom_apply_rotary_pos_emb
 
