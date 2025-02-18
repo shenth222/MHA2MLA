@@ -1,7 +1,7 @@
 #!/bin/bash
 #################### 环境变量 ####################
 export CUDA_VISIBLE_DEVICES="0,1"
-export HF_HOME="/home/binguo/data/hf-home"
+export HF_HOME="~/data/hf-home"
 export NUM_GPUS=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
 export MASTER_PORT="auto"
 export PYTHONPATH=..:$PYTHONPATH
@@ -48,12 +48,5 @@ eval_all() {
 
 #################### 任务执行 ####################
 set -e
-
-export MODEL_NAME="rope_v4_topk4_ae_v3_rank8_null"
-
-eval_one_ckpt ../checkpoints/${MODEL_NAME}/18000 "${MODEL_NAME}" ../configs/ae/${MODEL_NAME}.yaml
-
-
-export MODEL_NAME="rope_v4_topk4_ae_v3_rank8_silu"
 
 eval_one_ckpt ../checkpoints/${MODEL_NAME}/18000 "${MODEL_NAME}" ../configs/ae/${MODEL_NAME}.yaml

@@ -7,8 +7,6 @@ export MASTER_PORT="auto"
 export PYTHONPATH=..:$PYTHONPATH
 export HF_ENDPOINT=https://hf-mirror.com
 export HF_HOME="/cpfs01/user/jitao/hf_home/"
-export WANDB_API_KEY=4bdf7e746b5e3bb922d6c3675da23e2a1d2b642f
-export WANDB_PROJECT="smollm_evaluation"
 export PYTHONPATH=..:$PYTHONPATH
 
 #################### 函数定义 ####################
@@ -24,15 +22,6 @@ eval_one_ckpt() {
         --save_path "${model_name_or_path}_hf" \
         --tokenizer_name ../checkpoints/HuggingFaceTB/SmolLM-1.7B \
         --is_mla
-
-    # accelerate launch --multi_gpu --num_processes=${NUM_GPUS} \
-    #     -m src.evaluation.eval_mla --cfg_RoPE ${cfg_RoPE} \
-    #     accelerate \
-    #     --model_args "pretrained=${model_name_or_path}_hf,revision=main,dtype=bfloat16,max_length=2048" \
-    #     --override_batch_size 256 \
-    #     --custom_tasks "../src/evaluation/tasks.py" \
-    #     --tasks "../src/evaluation/smollm1_base_v2.txt" \
-    #     --output_dir "../eval_results/${output_dir}"
 
 
     accelerate launch --num_processes=${NUM_GPUS} \
@@ -66,7 +55,3 @@ set -e
 
 export MODEL_NAME="1.7B_rope_v2_start0_step8_svd_method2_rank4"
 eval_one_ckpt ../checkpoints/${MODEL_NAME}/12000 "${MODEL_NAME}" ../configs/mla/${MODEL_NAME}.yaml
-
-export MODEL_NAME="1.7B_rope_v2_start0_step8_svd_method2_rank16"
-eval_one_ckpt ../checkpoints/${MODEL_NAME}/12000 "${MODEL_NAME}" ../configs/mla/${MODEL_NAME}.yaml
-

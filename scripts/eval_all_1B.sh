@@ -16,7 +16,7 @@ eval_one_ckpt() {
         -m src.original_conversation.convert_nanotron_to_hf \
         --checkpoint_path ${model_name_or_path} \
         --save_path "${model_name_or_path}_hf" \
-        --tokenizer_name /cpfs01/shared/llm_ddd/doushihan/taoji/code/MLA-FT/checkpoints/meta-llama/Llama-2-7b-hf
+        --tokenizer_name ../checkpoints/meta-llama/Llama-2-7b-hf
         # --tokenizer_name ../checkpoints/HuggingFaceTB/SmolLM-1.7B
 
     accelerate launch --multi_gpu --num_processes=${NUM_GPUS} \
@@ -46,11 +46,5 @@ eval_all() {
 #################### 任务执行 ####################
 
 set -e
-# eval_all ../checkpoints/1.7B_1 "1.7B_1"
-# eval_one_ckpt ../checkpoints/meta-llama/Llama-2-7b-hf "Llama-2-7b-hf"
-# eval_one_ckpt ../checkpoints/1.7B_v1_topk4/12000 "1.7B_v1_topk4"
-# eval_one_ckpt ../checkpoints/1.7B_v2_start0_step8/12000 "1.7B_v2_start0_step8"
-# eval_one_ckpt ../checkpoints/1.7B_v4_topk4/12000 "1.7B_v4_topk4"
-# eval_one_ckpt ../checkpoints/1.7B_v5_last4/12000 "1.7B_v5_last4"
 
 eval_one_ckpt ../checkpoints/7B_1/12000 "7B_1"

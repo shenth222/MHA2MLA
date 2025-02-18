@@ -42,8 +42,4 @@ torchrun --nproc_per_node 2 --master_port 24559 \
     -m src.mla_train_nt \
     --config-file ../configs/mla/${MODEL_NAME}.yaml
 
-feishu_msg -u 18055481550 -m "${MODEL_NAME}"
-
 eval_one_ckpt ../checkpoints/${MODEL_NAME}/24000 ${MODEL_NAME} ../configs/mla/${MODEL_NAME}.yaml
-
-feishu_msg -u 18055481550 -m "finish evaluation ${MODEL_NAME}"
