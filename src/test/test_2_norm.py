@@ -9,6 +9,7 @@ torchrun --nproc_per_node=8 run_train.py --config-file examples/config_tiny_llam
 """
 
 import argparse
+import os
 import yaml
 from typing import Dict, cast
 from types import MethodType
@@ -254,6 +255,15 @@ def get_args():
         required=True,
         help="Path to the YAML or python config file",
     )
+    parser.add_argument(
+        "--output-dir",
+        type=str,
+    )
+    parser.add_argument(
+        "--sample-size",
+        type=int,
+        default=1024,
+    )
     return parser.parse_args()
 
 
@@ -414,14 +424,15 @@ def main():
             continue
         module._forward = module.forward
         module.forward = MethodType(get_rotary_forward(module_name=name), module)
-    num = 1024
-    bsz = 1
+    num = args._get_args
+    bsz = None
     query_states = []
     key_states = []
     with torch.no_grad():
         for batch in dataloader:
             batch = {key: value.to("cuda") for key, value in batch.items()}
-            print(model(**batch))
+            if bsz is None:
+                bsz = batch["input_ids"].shape[0]
             query, key = flatten_avg_query_key_states(
                 query_states_dict, key_states_dict
             )
@@ -449,7 +460,7 @@ def main():
         qk_states = qk_states.view(
             layer_num, model.config.num_key_value_heads, -1, dim
         ).sum(dim=2)
-    with open("../images/2-norm/qk_tensor.pth", "wb") as f:
+    with open(os.path.join(args.output_dir, "qk_tensor.pth"), "wb") as f:
         torch.save(qk_states, f)
 
 
