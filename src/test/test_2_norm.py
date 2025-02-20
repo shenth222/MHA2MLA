@@ -9,6 +9,7 @@ torchrun --nproc_per_node=8 run_train.py --config-file examples/config_tiny_llam
 """
 
 import argparse
+import os
 import yaml
 from typing import Dict, cast
 from types import MethodType
@@ -254,6 +255,15 @@ def get_args():
         required=True,
         help="Path to the YAML or python config file",
     )
+    parser.add_argument(
+        "--output-dir",
+        type=str,
+    )
+    parser.add_argument(
+        "--sample-size",
+        type=int,
+        default=1024,
+    )
     return parser.parse_args()
 
 
@@ -289,10 +299,11 @@ def flatten_avg_query_key_states(query_states: dict, key_states: dict):
 
     def flatten_dict(states: dict):
         f_states = []
-        for k, v in states.items(): # states: {module_name: hidden_states}
+        for k, v in states.items():  # states: {module_name: hidden_states}
             item = []
-            v = v.squeeze() # bsz,seqlen,head,head_dim
-            v = v[:, :4, :, :]
+            v = v.squeeze()  # bsz,seqlen,head,head_dim
+            if len(v.shape)==3:
+                v = v.unsqueeze(0)
             v = torch.norm(
                 v.reshape(v.shape[0], v.shape[1], v.shape[2], 2, -1).transpose(-1, -2),
                 p=2,
@@ -396,9 +407,6 @@ def visualize(query_states, key_states):
         fig.savefig(f"{dir}/key_layer{st}_{ed}.png")
 
 
-
-
-
 def main():
     args = get_args()
     config_file = args.config_file
@@ -416,13 +424,15 @@ def main():
             continue
         module._forward = module.forward
         module.forward = MethodType(get_rotary_forward(module_name=name), module)
-    num=128
-    query_states=[]
-    key_states=[]
+    num = args._get_args
+    bsz = None
+    query_states = []
+    key_states = []
     with torch.no_grad():
         for batch in dataloader:
             batch = {key: value.to("cuda") for key, value in batch.items()}
-            print(model(**batch))
+            if bsz is None:
+                bsz = batch["input_ids"].shape[0]
             query, key = flatten_avg_query_key_states(
                 query_states_dict, key_states_dict
             )
@@ -430,52 +440,7 @@ def main():
             key_states.append(key)
             query_states_dict.clear()
             key_states_dict.clear()
-            num -= 1
-            if num == 0:
-                break
-    # hidden_states:[bsz, seqlen, num_heads, head_dim] 8 2048 9 64
-
-    
-    query_states = torch.stack(query_states)
-    key_states = torch.stack(key_states)
-    print(query_states.shape)
-    print(key_states.shape)
-    query_states = torch.mean(query_states, dim=0,keepdim=False) # [n_layer][n_head][n_dim/2]
-    key_states = torch.mean(key_states, dim=0,keepdim=False)
-    visualize(query_states, key_states)
-    qk_states = query_states+key_states
-    with open("/home/binguo/data/MLA-FT/images/2-norm/qk_tensor.pkl", "wb") as f:
-        pickle.dump(qk_states, f)
-
-
-def main_llama3():
-    args = get_args()
-    config_file = args.config_file
-    trainer = DistributedTrainer(config_file)
-    dataloader = get_dataloader(trainer)
-    dataloader = list(dataloader.values())[0]
-    del trainer
-    from transformers import AutoModelForCausalLM
-    model=AutoModelForCausalLM.from_pretrained("/home/binguo/data/models/meta-llama/Llama-3.1-8B",device="auto",dtype=torch.bfloat16).eval()
-    tokenizer_smollm=AutoTokenizer.from_pretrained("EleutherAI/smollm")
-    tokenizer_llama=AutoTokenizer.from_pretrained("/home/binguo/data/models/meta-llama/Llama-3.1-8B")
-    num=128
-    query_states=[]
-    key_states=[]
-    with torch.no_grad():
-        for batch in dataloader:
-            batch["input_ids"]=tokenizer_smollm.decode(batch["input_ids"])
-            batch["input_ids"]=tokenizer_llama(batch["input_ids"],return_tensors="pt")["input_ids"]
-            batch = {key: value.to("cuda") for key, value in batch.items()}
-            print(model(batch["input_ids"]))
-            query, key = flatten_avg_query_key_states(
-                query_states_dict, key_states_dict
-            )
-            query_states.append(query)
-            key_states.append(key)
-            query_states_dict.clear()
-            key_states_dict.clear()
-            num -= 1
+            num -= bsz
             if num == 0:
                 break
     # hidden_states:[bsz, seqlen, num_heads, head_dim] 8 2048 9 64
@@ -484,9 +449,19 @@ def main_llama3():
     key_states = torch.stack(key_states)
     print(query_states.shape)
     print(key_states.shape)
-    query_states = torch.mean(query_states, dim=0,keepdim=False)
-    key_states = torch.mean(key_states, dim=0,keepdim=False)
-    visualize(query_states, key_states)
+    query_states = torch.mean(
+        query_states, dim=0, keepdim=False
+    )  # [n_layer][n_head][n_dim/2]
+    key_states = torch.mean(key_states, dim=0, keepdim=False)
+    # visualize(query_states, key_states)
+    qk_states = query_states + key_states
+    if qk_states.shape[1] != model.config.num_key_value_heads:
+        layer_num, _, dim = query_states.shape
+        qk_states = qk_states.view(
+            layer_num, model.config.num_key_value_heads, -1, dim
+        ).sum(dim=2)
+    with open(os.path.join(args.output_dir, "qk_tensor.pth"), "wb") as f:
+        torch.save(qk_states, f)
 
 
 if __name__ == "__main__":
