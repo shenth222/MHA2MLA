@@ -8,7 +8,7 @@ from datasets import load_dataset, concatenate_datasets, load_from_disk
 from botocore.exceptions import ClientError
 
 
-num_proc = 128
+num_proc = 512
 s3 = boto3.client(
     "s3"
 )
@@ -37,25 +37,25 @@ ds = load_dataset(
 
 batch_size = 100000
 
-# for start_idx in range(0, len(ds), batch_size):
-#     end_idx = min(start_idx + batch_size, len(ds))  # 确保不越界
-#     print(f"Processing batch: {start_idx} to {end_idx}")
-#     batch_ds = ds.select(range(start_idx, end_idx))
-#     batch_ds = batch_ds.map(
-#         download_contents, input_columns="blob_id", num_proc=num_proc
-#     )
-#     batch_ds = batch_ds.filter(lambda x: x["download_success"])
-#     batch_ds = batch_ds.save_to_disk(
-#         f"./python_edu_batches/python_edu_{start_idx}_{end_idx}"
-#     )
+for start_idx in range(2 * batch_size, len(ds), batch_size):
+    end_idx = min(start_idx + batch_size, len(ds))  # 确保不越界
+    print(f"Processing batch: {start_idx} to {end_idx}")
+    batch_ds = ds.select(range(start_idx, end_idx))
+    batch_ds = batch_ds.map(
+        download_contents, input_columns="blob_id", num_proc=num_proc
+    )
+    batch_ds = batch_ds.filter(lambda x: x["download_success"])
+    batch_ds = batch_ds.save_to_disk(
+        f"./python_edu_batches/python_edu_{start_idx}_{end_idx}"
+    )
 
-# processed_batches = []
-# for start_idx in range(0, len(ds), batch_size):
-#     end_idx = min(start_idx + batch_size, len(ds))  # 确保不越界
-#     batch_ds = load_from_disk(f"./python_edu_batches/python_edu_{start_idx}_{end_idx}")
-#     processed_batches.append(batch_ds)
-# merged_ds = concatenate_datasets(processed_batches)
-# merged_ds.save_to_disk("./python_edu")
-# print(merged_ds[0])
-merged_ds=load_from_disk("./python_edu_batches/python_edu_0_100000")
-print(merged_ds.column_names)
+processed_batches = []
+for start_idx in range(0, len(ds), batch_size):
+    end_idx = min(start_idx + batch_size, len(ds))  # 确保不越界
+    batch_ds = load_from_disk(f"./python_edu_batches/python_edu_{start_idx}_{end_idx}")
+    processed_batches.append(batch_ds)
+merged_ds = concatenate_datasets(processed_batches)
+merged_ds.save_to_disk("./python_edu")
+print(merged_ds[0])
+# merged_ds=load_from_disk("./python_edu_batches/python_edu_0_100000")
+# print(merged_ds.column_names)

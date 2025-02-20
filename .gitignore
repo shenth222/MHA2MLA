@@ -4,7 +4,7 @@ checkpoints/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
-*$py.class
+*$py.MLA-FT/pj_scripts/continue_pretrain_1B.sh
 
 # C extensions
 *.so
@@ -168,11 +168,14 @@ cython_debug/
 
 # ckpt dataset and logs files
 /eval_results
+/old_eval_results
 /checkpoints
 /datasets
 /test_dbg
 wandb/
 /images
+/pj_scripts
+*.whl
 
 # debug setting
 /.vscode

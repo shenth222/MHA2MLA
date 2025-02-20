@@ -1,3 +1,4 @@
+# copied from https://github.com/huggingface/nanotron/blob/main/scripts/log_lighteval_to_wandb.py
 """
 This script use to log evaluation results to wandb.
 
@@ -23,7 +24,7 @@ def run(current_path: Path):
     def compute_avg_acc_of_a_benchmark(data, benchmark_prefix):
         sum_acc, sum_acc_norm, sum_acc_stderr, sum_acc_norm_stderr, count = 0, 0, 0, 0, 0
         for key, values in data.items():
-            if f"{benchmark_prefix}:" in key or f"{benchmark_prefix}_" in key:
+            if f"{benchmark_prefix}:" in key or f"{benchmark_prefix}_" in key or f"{benchmark_prefix}" in key:
                 # sum_acc += values["acc"]
                 sum_acc_norm += values["acc_norm"]
                 # sum_acc_stderr += values["acc_stderr"]
