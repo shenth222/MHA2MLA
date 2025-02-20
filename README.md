@@ -1,13 +1,13 @@
-# MLA-FT
+# MHA2MLA
 
-This repo contains the code for the paper "Towards Efficient Key-Value Cache: Enabling Multi-Head Latent Attention in Pretrained Large Language Models".
+This repo contains the code for the paper "Towards Economical Inference: Enabling DeepSeek's Multi-Head Latent Attention in Any Transformer-based LLMs".
 
 
-![alt text](img/image.png)
+![alt text](img/overview.png)
 
 ## Models
 
-* SmolLm: https://huggingface.co/blog/smollm
+* SmolLM: https://huggingface.co/blog/smollm
 
 * Llama-2-7b-hf: https://huggingface.co/meta-llama/Llama-2-7b-hf
 
