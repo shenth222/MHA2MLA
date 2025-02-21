@@ -16,6 +16,7 @@ class SvdInit:
 
     @staticmethod
     def method_II(k, v, r=8):
+        # Separately decompose W_k_nope and W_v into truncated SVDs, allocating dimensions to each
         U_k, S_k, V_k = torch.svd(k)
         U_k, S_k, V_k = U_k[:, :r], S_k[:r], V_k[:, :r]
         U_v, S_v, V_v = torch.svd(v)
@@ -77,6 +78,7 @@ class SvdInit:
 
     @staticmethod
     def method_VII(k, v, r=8):
+        # jointly factorize the con-catenated matrix
         U_kv, S_kv, V_kv = torch.svd(torch.cat([k, v], dim=1))
         U_kv, S_kv, V_kv = U_kv[:, :r], S_kv[:r], V_kv[:, :r]
         W_down = U_kv

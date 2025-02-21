@@ -237,6 +237,52 @@ def test_load_weight_nt():
                 
 
 
+def count_parameters():
+    from transformers import AutoModel
+    li =[
+        # 135M
+        # "/home/binguo/data/models/HuggingFaceTB/SmolLM-135M",
+        # "/home/binguo/data/MLA-FT/checkpoints/rope_v4_topk4_svd_method7_rank8/18000_hf",
+        # "/home/binguo/data/MLA-FT/checkpoints/rope_v4_topk4_svd_method7_rank16/18000_hf",
+        # "/home/binguo/data/MLA-FT/checkpoints/rope_v4_topk4_svd_method7_rank32/18000_hf",
+        # 360M
+        # "/home/binguo/data/models/HuggingFaceTB/SmolLM-360M",
+        # "/home/binguo/data/MLA-FT/checkpoints/360M_rope_v4_topk4_svd_method7_rank8/18000_hf",
+        # "/home/binguo/data/MLA-FT/checkpoints/360M_rope_v4_topk4_svd_method7_rank16/18000_hf",
+        # "/home/binguo/data/MLA-FT/checkpoints/360M_rope_v4_topk4_svd_method7_rank32/18000_hf",
+        # 1.7B
+        # "/home/binguo/data/models/HuggingFaceTB/SmolLM-1.7B",
+        "/home/binguo/data/MLA-FT/checkpoints/1.7B_rope_v4_topk4_svd_method7_rank8/",
+        "/home/binguo/data/MLA-FT/checkpoints/1.7B_rope_v4_topk4_svd_method7_rank16/",
+        "/home/binguo/data/MLA-FT/checkpoints/1.7B_rope_v4_topk4_svd_method7_rank32/",
+        # 7B
+        # "/home/binguo/data/MLA-FT/checkpoints/7B_rope_v4_topk8_svd_method7_rank16",
+        # "/home/binguo/data/MLA-FT/checkpoints/7B_rope_v4_topk8_svd_method7_rank32",
+        # "/home/binguo/data/MLA-FT/checkpoints/7B_rope_v4_topk8_svd_method7_rank64",
+        # "/home/binguo/data/models/meta-llama/Llama-2-7b-hf"
+    ]
+    import json, os
+
+    if "rope" in li[0]:
+        with open(os.path.join(li[0], "config.json")) as f:
+            config = json.load(f)
+        from ..mla.mla_patch_hf import mla_patch_hf
+        mla_patch_hf(config["RoPE"])
+
+    for model_path_hf in li:
+        model = AutoModel.from_pretrained(
+            model_path_hf,
+            torch_dtype=torch.bfloat16,  # 使用 torch_dtype 指定数据类型
+            device_map="cuda"            # 使用 device_map 指定设备
+        )
+
+        # attn_modules = {name: param for name, param in model.named_parameters() if "attn" in name and "0" in name}
+        # for name, param in attn_modules.items():
+        #     print(name, param.numel())
+        print(sum(p.numel() for p in model.parameters()))
+        del model
+
 if __name__ == "__main__":
     # test_load_weight_hf()
-    test_load_weight_nt()
+    # test_load_weight_nt()
+    count_parameters()
