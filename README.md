@@ -1,9 +1,20 @@
 # MHA2MLA
 
-This repo contains the code for the paper "Towards Economical Inference: Enabling DeepSeek's Multi-Head Latent Attention in Any Transformer-based LLMs".
+This repo contains the code for the paper ["Towards Economical Inference: Enabling DeepSeek's Multi-Head Latent Attention in Any Transformer-based LLMs"](https://arxiv.org/abs/2502.14837).
 
 
 ![alt text](img/overview.png)
+
+
+## News
+
+* [2025.02.21] The paper of MHA2MLA is publicly available: https://arxiv.org/abs/2502.14837
+* [2025.02.19] Released the first version of the MHA2MLA code, providing usage code for LlaMa fine-tuning and evaluating.
+
+## TO-DO
+
+- [ ] Provide the code for incorporating the projection matrix and inference.
+
 
 ## Models
 
@@ -49,7 +60,6 @@ torchrun --nproc_per_node=1  \
     --is_mla
 ```
 
-
 ## Datasets
 
 First download the datasets.
@@ -93,6 +103,15 @@ torchrun --nproc_per_node 2 \
 >    --sample-size 1024
 > ```
 
+| Partial-RoPE version | Strategy |
+| :----: | --- |
+| 0    | full-RoPE  |
+| 1    | $\mathcal{S}_{\text{high}}$ |
+| 2    | $\mathcal{S}_{\text{uniform}}$ |
+| 3    | $\mathcal{S}_{\text{middle}}$ |
+| 4    | $\mathcal{S}_{\text{2-norm}}$ |
+| 5    | $\mathcal{S}_{\text{low}}$ |
+
 ## Multiple-Head Latent Attention Fine-Tuning
 
 ```bash
@@ -101,6 +120,11 @@ torchrun --nproc_per_node 2 \
     --config-file configs/rope/v5_last8_cfg.yaml \
     --rope-cfg configs/rope/v5_last8_rope.yaml
 ```
+
+| SVD version | Strategy |
+| :----: | --- |
+| 2 | SVD $_{split}$ |
+| 7 | SVD $_{joint}$ |
 
 ## Lighteval Evaluation
 
@@ -180,4 +204,17 @@ torchrun --nproc_per_node=${NUM_GPUS} \
     --backend "HQQ" \
     --nbits 4 \
     --residual_length 128 \
+```
+
+## Citation
+```
+@misc{ji2025economicalinferenceenablingdeepseeks,
+      title={Towards Economical Inference: Enabling DeepSeek's Multi-Head Latent Attention in Any Transformer-based LLMs}, 
+      author={Tao Ji and Bin Guo and Yuanbin Wu and Qipeng Guo and Lixing Shen and Zhan Chen and Xipeng Qiu and Qi Zhang and Tao Gui},
+      year={2025},
+      eprint={2502.14837},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL},
+      url={https://arxiv.org/abs/2502.14837}, 
+}
 ```

@@ -302,7 +302,7 @@ def flatten_avg_query_key_states(query_states: dict, key_states: dict):
         for k, v in states.items():  # states: {module_name: hidden_states}
             item = []
             v = v.squeeze()  # bsz,seqlen,head,head_dim
-            if len(v.shape)==3:
+            if len(v.shape) == 3:
                 v = v.unsqueeze(0)
             v = torch.norm(
                 v.reshape(v.shape[0], v.shape[1], v.shape[2], 2, -1).transpose(-1, -2),
@@ -464,5 +464,30 @@ def main():
         torch.save(qk_states, f)
 
 
+def partial_rope(query_states, key_states, index, rotary_embedding,position_ids):
+    # query_states:[bsz, seqlen, num_heads, head_dim]
+    # key_states:[bsz, seqlen, num_heads, head_dim]
+    # index:[num_heads, head_dim // 2]
+    cos,sin = rotary_embedding(query_states,position_ids)
+    q_embed, k_embed = rotary_embedding.apply_rotary_pos_emb(
+        query_states, key_states, cos, sin
+    )
+    mask = torch.zeros((q_embed.size(2),q_embed.size(3)//2), dtype=torch.bool, device=q_embed.device)
+    mask.scatter_(1, index, 1)
+    mask_for_k = (
+        torch.cat((mask, mask), dim=1).unsqueeze(0).unsqueeze(1).to(q_embed.device)
+    )
+    mask_for_q = torch.repeat_interleave(
+            input=mask_for_k, repeats=cfg["n_gqa_group"], dim=2
+    ).to(q_embed.device)
+    q_embed = torch.where(mask_for_q == 1, q_embed, query_states)
+    k_embed = torch.where(mask_for_k == 1, k_embed, key_states)
+    return q_embed, k_embed
+
+def rope_lite():
+    pass
+
+
 if __name__ == "__main__":
-    main()
+    # main()
+    rope_lite()
