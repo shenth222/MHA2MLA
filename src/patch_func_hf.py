@@ -20,6 +20,7 @@ from transformers import Cache
 def create_custom_apply_rotary_pos_emb_hf(cfg):
 
     def apply_rotary_pos_emb_v0(q, k, cos, sin, position_ids=None, unsqueeze_dim=1):
+        # Full-RoPE
         cos = cos.unsqueeze(unsqueeze_dim)
         sin = sin.unsqueeze(unsqueeze_dim)
         q_embed = (q * cos) + (rotate_half(q) * sin)
@@ -27,6 +28,7 @@ def create_custom_apply_rotary_pos_emb_hf(cfg):
         return q_embed, k_embed
 
     def apply_rotary_pos_emb_v1(q, k, cos, sin, position_ids=None, unsqueeze_dim=1):
+        # retain the fastest-rotating (high-frequency) subspaces
         cos = cos.unsqueeze(unsqueeze_dim)
         sin = sin.unsqueeze(unsqueeze_dim)
         q_embed = (q * cos) + (rotate_half(q) * sin)
@@ -58,6 +60,7 @@ def create_custom_apply_rotary_pos_emb_hf(cfg):
         return q_embed, k_embed
 
     def apply_rotary_pos_emb_v2(q, k, cos, sin, position_ids=None, unsqueeze_dim=1):
+        # select subspaces with equidistant intervals
         cos = cos.unsqueeze(unsqueeze_dim)
         sin = sin.unsqueeze(unsqueeze_dim)
         q_embed = (q * cos) + (rotate_half(q) * sin)
@@ -70,6 +73,7 @@ def create_custom_apply_rotary_pos_emb_hf(cfg):
         return q, k
 
     def apply_rotary_pos_emb_v3(q, k, cos, sin, position_ids=None, unsqueeze_dim=1):
+        # retain the fastest-rotating (high-frequency) subspaces and the slowest-rotating (low-frequency) subspaces
         cos = cos.unsqueeze(unsqueeze_dim)
         sin = sin.unsqueeze(unsqueeze_dim)
         q_embed = (q * cos) + (rotate_half(q) * sin)
@@ -98,6 +102,7 @@ def create_custom_apply_rotary_pos_emb_hf(cfg):
     def apply_rotary_pos_emb_v4(
         q, k, cos, sin, position_ids=None, layer_idx=0, unsqueeze_dim=1
     ):
+        # retain the subspaces with higher 2-norm score
         cos = cos.unsqueeze(unsqueeze_dim)
         sin = sin.unsqueeze(unsqueeze_dim)
         q_embed = (q * cos) + (rotate_half(q) * sin)
@@ -115,6 +120,7 @@ def create_custom_apply_rotary_pos_emb_hf(cfg):
         return q_embed, k_embed
 
     def apply_rotary_pos_emb_v5(q, k, cos, sin, position_ids=None, unsqueeze_dim=1):
+        # retain the slowest-rotating (low-frequency) subspaces
         cos = cos.unsqueeze(unsqueeze_dim)
         sin = sin.unsqueeze(unsqueeze_dim)
         q_embed = (q * cos) + (rotate_half(q) * sin)

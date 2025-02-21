@@ -249,25 +249,5 @@ def main():
     else:
         trainer.train()
 
-def merge():
-    original_model_path = "/home/binguo/data/MLA-FT/checkpoints/rope_v4_topk4_ae_kv_rank8_silu/0_hf"
-    model_name_path = "../checkpoints/rope_v4_topk4_ae_kv_rank8_silu/checkpoint-2000"
-    from .patch_func_hf import low_rank_kv_patch_func_hf
-    import json
-    with open(os.path.join(model_name_path,"config.json"),"r") as f:
-        config = json.load(f)
-    low_rank_kv_patch_func_hf(config["RoPE"])
-    original_model = AutoModelForCausalLM.from_pretrained(original_model_path)
-    model = AttnForTraing.from_pretrained(model_name_path)
-    with torch.no_grad():
-        for layer_idx, layer in enumerate(original_model.model.layers):
-            attn = model.model[layer_idx]
-            layer.self_attn.W_down_k.weight.data[:] = attn.W_down_k.weight.detach()
-            layer.self_attn.W_up_k.weight.data[:] = attn.W_up_k.weight.detach()
-            layer.self_attn.W_down_v.weight.data[:] = attn.W_down_v.weight.detach()
-            layer.self_attn.W_up_v.weight.data[:] = attn.W_up_v.weight.detach()
-    original_model.save_pretrained("../checkpoints/rope_v4_topk4_ae_kv_rank8_silu/0_hf")
-
 if __name__ == "__main__":
-    # main()
-    merge()
+    main()
