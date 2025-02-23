@@ -2,7 +2,7 @@
 #################### 环境变量 ####################
 
 export CUDA_VISIBLE_DEVICES="0,1,2,3"
-export HF_HOME="/home/binguo/data/hf-home"
+export HF_HOME="~/data/hf-home"
 export NUM_GPUS=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
 export MASTER_PORT="auto"
 export PYTHONPATH=..:$PYTHONPATH
@@ -18,7 +18,7 @@ eval_one_ckpt() {
         -m src.original_conversation.convert_nanotron_to_hf \
         --checkpoint_path ${model_name_or_path} \
         --save_path "${model_name_or_path}_hf" \
-        --tokenizer_name /home/binguo/data/models/HuggingFaceTB/SmolLM-135M
+        --tokenizer_name ~/data/models/HuggingFaceTB/SmolLM-135M
 
     accelerate launch --multi_gpu --num_processes=${NUM_GPUS} \
         -m src.evaluation.eval_partial_rope --cfg_RoPE ${cfg_RoPE} \

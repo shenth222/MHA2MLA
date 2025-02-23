@@ -19,6 +19,6 @@ tasks:
   dataset_loading_processes: 1
   multichoice_continuations_start_space: null
   num_fewshot_seeds: null
-  custom_tasks: /home/binguo/data/MLA-FT/src/evaluation/tasks.py
+  custom_tasks: ../src/evaluation/tasks.py
   # tasks: "custom|openbook_qa|0|1,custom|winogrande|0|1"
   tasks: "custom|hellaswag|0|1,custom|arc|0|1,custom|piqa|0|1,custom|mmlu_pro|0|1,custom|trivia_qa|0|1,custom|winogrande|0|1,custom|openbook_qa|0|1"

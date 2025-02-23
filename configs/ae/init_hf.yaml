@@ -46,8 +46,8 @@ TrainingArguments:
 # model
 ModelArguments:
   dtype: bfloat16
-  model_name_or_path: /home/binguo/data/models/HuggingFaceTB/SmolLM-135M
-  tokenizer_name_or_path: /home/binguo/data/models/HuggingFaceTB/SmolLM-135M
+  model_name_or_path: ~/data/models/HuggingFaceTB/SmolLM-135M
+  tokenizer_name_or_path: ~/data/models/HuggingFaceTB/SmolLM-135M
 
 
 # dataset
@@ -97,7 +97,7 @@ ModelConfig:
     last_k_rope_dim: 0
     uniform_start_point: 0
     uniform_step: 1
-    qk_tensor_path: '/home/binguo/data/MLA-FT/utils/qk_tensor_135M.pth'
+    qk_tensor_path: '../utils/qk_tensor_135M.pth'
     n_gqa_group: 3
   AE:
     version: 2

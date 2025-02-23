@@ -19,7 +19,7 @@ set -e
 
 torchrun --nproc_per_node 1 --master_port 24558 \
     -m src.auto_encoder.merge \
-    --original_model_path /home/binguo/data/models/HuggingFaceTB/SmolLM-135M_nt \
+    --original_model_path ~/data/models/HuggingFaceTB/SmolLM-135M_nt \
     --ae_model_path ../checkpoints/rope_v4_topk4_ae_v2_rank8_null_init/checkpoint-2000 \
     --save_path ../checkpoints/rope_v4_topk4_ae_v2_rank8_null/0
 
