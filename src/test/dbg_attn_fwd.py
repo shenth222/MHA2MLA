@@ -95,7 +95,7 @@ config_hf=LlamaConfig_hf(
         "last_k_rope_dim": 0,
         "uniform_start_point": 0,
         "uniform_step": 4,
-        "qk_tensor_path": '/home/binguo/data/MLA-FT/utils/qk_tensor_135M.pth',
+        "qk_tensor_path": '../utils/qk_tensor_135M.pth',
         "n_gqa_group": 3,
     },
     SVD={

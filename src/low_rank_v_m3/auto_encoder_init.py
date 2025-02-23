@@ -220,14 +220,14 @@ def main():
 def merge():
     from .patch_func_hf import low_rank_patch_hf
     low_rank_patch_hf()
-    original_model = AutoModelForCausalLM.from_pretrained("/home/binguo/data/MLA-FT/checkpoints/rope_v0_svd_v_method3_rank8_silu/0_hf")
-    model = AttnForTraing.from_pretrained("/home/binguo/data/MLA-FT/checkpoints/rope_v0_svd_v_method2_rank8_silu_auto_encoder_m3/checkpoint-2000")
+    original_model = AutoModelForCausalLM.from_pretrained("../checkpoints/rope_v0_svd_v_method3_rank8_silu/0_hf")
+    model = AttnForTraing.from_pretrained("../checkpoints/rope_v0_svd_v_method2_rank8_silu_auto_encoder_m3/checkpoint-2000")
     with torch.no_grad():
         for layer_idx, layer in enumerate(original_model.model.layers):
             attn = model.model[layer_idx]
             layer.self_attn.W_down_v.weight.data[:] = attn.W_down_v.weight.detach()
             layer.self_attn.W_up_v.weight.data[:] = attn.W_up_v.weight.detach()
-    original_model.save_pretrained("/home/binguo/data/MLA-FT/checkpoints/rope_v0_svd_v_method2_rank8_silu_auto_encoder_l1/0_hf")
+    original_model.save_pretrained("../checkpoints/rope_v0_svd_v_method2_rank8_silu_auto_encoder_l1/0_hf")
 
 if __name__ == "__main__":
     # main()

@@ -7,12 +7,12 @@ import logging
 os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2"
 
 _model_paths = [
-    "/home/binguo/data/models/HuggingFaceTB/SmolLM-135M",
-    "/home/binguo/data/models/HuggingFaceTB/SmolLM-360M",
-    "/home/binguo/data/models/HuggingFaceTB/SmolLM-1.7B",
-    "/home/binguo/data/models/meta-llama/Llama-3.2-1B",
-    "/home/binguo/data/models/meta-llama/Llama-3.2-3B",
-    "/home/binguo/data/models/meta-llama/Llama-3.1-8B",
+    "~/data/models/HuggingFaceTB/SmolLM-135M",
+    "~/data/models/HuggingFaceTB/SmolLM-360M",
+    "~/data/models/HuggingFaceTB/SmolLM-1.7B",
+    "~/data/models/meta-llama/Llama-3.2-1B",
+    "~/data/models/meta-llama/Llama-3.2-3B",
+    "~/data/models/meta-llama/Llama-3.1-8B",
 ]
 
 
@@ -43,7 +43,7 @@ def get_rope_config(model, rope_scale=8):
             "last_k_rope_dim": 0,
             "uniform_start_point": 0,
             "uniform_step": rope_scale,
-            "qk_tensor_path": "/home/binguo/data/MLA-FT/utils/qk_tensor_135M.pth",
+            "qk_tensor_path": "../utils/qk_tensor_135M.pth",
             "n_gqa_group": 3,
         },
         {
@@ -52,7 +52,7 @@ def get_rope_config(model, rope_scale=8):
             "last_k_rope_dim": 0,
             "uniform_start_point": 0,
             "uniform_step": rope_scale,
-            "qk_tensor_path": "/home/binguo/data/MLA-FT/utils/qk_tensor_135M.pth",
+            "qk_tensor_path": "../utils/qk_tensor_135M.pth",
             "n_gqa_group": 3,
         },
         {
@@ -61,7 +61,7 @@ def get_rope_config(model, rope_scale=8):
             "last_k_rope_dim": head_dim//(4*rope_scale),
             "uniform_start_point": 0,
             "uniform_step": rope_scale,
-            "qk_tensor_path": "/home/binguo/data/MLA-FT/utils/qk_tensor_135M.pth",
+            "qk_tensor_path": "../utils/qk_tensor_135M.pth",
             "n_gqa_group": 3,
         },
         {
@@ -70,7 +70,7 @@ def get_rope_config(model, rope_scale=8):
             "last_k_rope_dim": 0,
             "uniform_start_point": 0,
             "uniform_step": rope_scale,
-            "qk_tensor_path": "/home/binguo/data/MLA-FT/utils/qk_tensor_135M.pth",
+            "qk_tensor_path": "../utils/qk_tensor_135M.pth",
             "n_gqa_group": 3,
         },
         {
@@ -79,7 +79,7 @@ def get_rope_config(model, rope_scale=8):
             "last_k_rope_dim": head_dim//(2*rope_scale),
             "uniform_start_point": 0,
             "uniform_step": rope_scale,
-            "qk_tensor_path": "/home/binguo/data/MLA-FT/utils/qk_tensor_135M.pth",
+            "qk_tensor_path": "../utils/qk_tensor_135M.pth",
             "n_gqa_group": 3,
         },
     ]
