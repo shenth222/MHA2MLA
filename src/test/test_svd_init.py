@@ -6,12 +6,12 @@ import logging
 os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2"
 
 _model_paths=[
-    "/home/binguo/data/models/HuggingFaceTB/SmolLM-135M",
-    "/home/binguo/data/models/HuggingFaceTB/SmolLM-360M",
-    "/home/binguo/data/models/HuggingFaceTB/SmolLM-1.7B",
-    "/home/binguo/data/models/meta-llama/Llama-3.2-1B",
-    "/home/binguo/data/models/meta-llama/Llama-3.2-3B",
-    "/home/binguo/data/models/meta-llama/Llama-3.1-8B",
+    "~/data/models/HuggingFaceTB/SmolLM-135M",
+    "~/data/models/HuggingFaceTB/SmolLM-360M",
+    "~/data/models/HuggingFaceTB/SmolLM-1.7B",
+    "~/data/models/meta-llama/Llama-3.2-1B",
+    "~/data/models/meta-llama/Llama-3.2-3B",
+    "~/data/models/meta-llama/Llama-3.1-8B",
 ]
 
 

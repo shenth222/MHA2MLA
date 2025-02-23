@@ -104,7 +104,7 @@ profiler: null # 性能分析器
 
 tokenizer:
   tokenizer_max_length: null # 分词器最大长度
-  tokenizer_name_or_path: /home/binguo/data/models/HuggingFaceTB/SmolLM-360M # 分词器名称或路径
+  tokenizer_name_or_path: ~/data/models/HuggingFaceTB/SmolLM-360M # 分词器名称或路径
   tokenizer_revision: null # 分词器版本
 
 tokens:

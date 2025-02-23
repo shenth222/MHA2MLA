@@ -3,7 +3,7 @@ checkpoints:
   checkpoint_interval: 2000
   checkpoints_path: ../checkpoints/1.7B_rope_v2_start0_step8_svd_method2_rank4
   checkpoints_path_is_shared_file_system: false
-  resume_checkpoint_path: /cpfs01/shared/llm_ddd/doushihan/taoji/code/MLA-FT/checkpoints/1.7B_rope_v2_start0_step8_svd_method2_rank4/8000
+  resume_checkpoint_path: ../checkpoints/1.7B_rope_v2_start0_step8_svd_method2_rank4/8000
   save_final_state: true
   save_initial_state: true
   load_lr_scheduler: true

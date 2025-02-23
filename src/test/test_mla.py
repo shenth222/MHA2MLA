@@ -3,8 +3,8 @@ from ..mla.mla_patch_hf import mla_patch_hf
 import importlib
 import torch
 
-model_path_hf = "/home/binguo/data/models/HuggingFaceTB/SmolLM-135M_mla"
-model_path_nt = "/home/binguo/data/models/HuggingFaceTB/SmolLM-135M_nt"
+model_path_hf = "~/data/models/HuggingFaceTB/SmolLM-135M_mla"
+model_path_nt = "~/data/models/HuggingFaceTB/SmolLM-135M_nt"
 
 head_dim = 64
 rope_scale = 8
@@ -15,7 +15,7 @@ rope_cfgs = [
         "last_k_rope_dim": 0,
         "uniform_start_point": 0,
         "uniform_step": rope_scale,
-        "qk_tensor_path": "/home/binguo/data/MLA-FT/utils/qk_tensor_135M.pth",
+        "qk_tensor_path": "../utils/qk_tensor_135M.pth",
         "n_gqa_group": 3,
     },
     {
@@ -24,7 +24,7 @@ rope_cfgs = [
         "last_k_rope_dim": 0,
         "uniform_start_point": 0,
         "uniform_step": rope_scale,
-        "qk_tensor_path": "/home/binguo/data/MLA-FT/utils/qk_tensor_135M.pth",
+        "qk_tensor_path": "../utils/qk_tensor_135M.pth",
         "n_gqa_group": 3,
     },
     {
@@ -33,7 +33,7 @@ rope_cfgs = [
         "last_k_rope_dim": head_dim // (4 * rope_scale),
         "uniform_start_point": 0,
         "uniform_step": rope_scale,
-        "qk_tensor_path": "/home/binguo/data/MLA-FT/utils/qk_tensor_135M.pth",
+        "qk_tensor_path": "../utils/qk_tensor_135M.pth",
         "n_gqa_group": 3,
     },
     {
@@ -42,7 +42,7 @@ rope_cfgs = [
         "last_k_rope_dim": 0,
         "uniform_start_point": 0,
         "uniform_step": rope_scale,
-        "qk_tensor_path": "/home/binguo/data/MLA-FT/utils/qk_tensor_135M.pth",
+        "qk_tensor_path": "../utils/qk_tensor_135M.pth",
         "n_gqa_group": 3,
     },
     {
@@ -51,7 +51,7 @@ rope_cfgs = [
         "last_k_rope_dim": head_dim // (2 * rope_scale),
         "uniform_start_point": 0,
         "uniform_step": rope_scale,
-        "qk_tensor_path": "/home/binguo/data/MLA-FT/utils/qk_tensor_135M.pth",
+        "qk_tensor_path": "../utils/qk_tensor_135M.pth",
         "n_gqa_group": 3,
     },
 ]
@@ -241,25 +241,25 @@ def count_parameters():
     from transformers import AutoModel
     li =[
         # 135M
-        # "/home/binguo/data/models/HuggingFaceTB/SmolLM-135M",
-        # "/home/binguo/data/MLA-FT/checkpoints/rope_v4_topk4_svd_method7_rank8/18000_hf",
-        # "/home/binguo/data/MLA-FT/checkpoints/rope_v4_topk4_svd_method7_rank16/18000_hf",
-        # "/home/binguo/data/MLA-FT/checkpoints/rope_v4_topk4_svd_method7_rank32/18000_hf",
+        # "~/data/models/HuggingFaceTB/SmolLM-135M",
+        # "../checkpoints/rope_v4_topk4_svd_method7_rank8/18000_hf",
+        # "../checkpoints/rope_v4_topk4_svd_method7_rank16/18000_hf",
+        # "../checkpoints/rope_v4_topk4_svd_method7_rank32/18000_hf",
         # 360M
-        # "/home/binguo/data/models/HuggingFaceTB/SmolLM-360M",
-        # "/home/binguo/data/MLA-FT/checkpoints/360M_rope_v4_topk4_svd_method7_rank8/18000_hf",
-        # "/home/binguo/data/MLA-FT/checkpoints/360M_rope_v4_topk4_svd_method7_rank16/18000_hf",
-        # "/home/binguo/data/MLA-FT/checkpoints/360M_rope_v4_topk4_svd_method7_rank32/18000_hf",
+        # "~/data/models/HuggingFaceTB/SmolLM-360M",
+        # "../checkpoints/360M_rope_v4_topk4_svd_method7_rank8/18000_hf",
+        # "../checkpoints/360M_rope_v4_topk4_svd_method7_rank16/18000_hf",
+        # "../checkpoints/360M_rope_v4_topk4_svd_method7_rank32/18000_hf",
         # 1.7B
-        # "/home/binguo/data/models/HuggingFaceTB/SmolLM-1.7B",
-        "/home/binguo/data/MLA-FT/checkpoints/1.7B_rope_v4_topk4_svd_method7_rank8/",
-        "/home/binguo/data/MLA-FT/checkpoints/1.7B_rope_v4_topk4_svd_method7_rank16/",
-        "/home/binguo/data/MLA-FT/checkpoints/1.7B_rope_v4_topk4_svd_method7_rank32/",
+        # "~/data/models/HuggingFaceTB/SmolLM-1.7B",
+        "../checkpoints/1.7B_rope_v4_topk4_svd_method7_rank8/",
+        "../checkpoints/1.7B_rope_v4_topk4_svd_method7_rank16/",
+        "../checkpoints/1.7B_rope_v4_topk4_svd_method7_rank32/",
         # 7B
-        # "/home/binguo/data/MLA-FT/checkpoints/7B_rope_v4_topk8_svd_method7_rank16",
-        # "/home/binguo/data/MLA-FT/checkpoints/7B_rope_v4_topk8_svd_method7_rank32",
-        # "/home/binguo/data/MLA-FT/checkpoints/7B_rope_v4_topk8_svd_method7_rank64",
-        # "/home/binguo/data/models/meta-llama/Llama-2-7b-hf"
+        # "../checkpoints/7B_rope_v4_topk8_svd_method7_rank16",
+        # "../checkpoints/7B_rope_v4_topk8_svd_method7_rank32",
+        # "../checkpoints/7B_rope_v4_topk8_svd_method7_rank64",
+        # "~/data/models/meta-llama/Llama-2-7b-hf"
     ]
     import json, os
 

@@ -3,5 +3,5 @@ top_k_rope_dim: 0
 last_k_rope_dim: 4
 uniform_start_point: 0
 uniform_step: 1
-qk_tensor_path: /cpfs01/shared/llm_ddd/doushihan/taoji/code/MLA-FT/utils/qk_tensor_1.7B.pth
+qk_tensor_path: ../utils/qk_tensor_1.7B.pth
 n_gqa_group: 1
