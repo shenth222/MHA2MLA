@@ -466,7 +466,7 @@ class LongBenchV1Dataset(Dataset):
         # fmt: on
         self.datasets = [
             load_dataset(
-                "/home/binguo/data/datasets/THUDM/LongBench",
+                "~/data/datasets/THUDM/LongBench",
                 subset,
                 split="test",
                 trust_remote_code=True,

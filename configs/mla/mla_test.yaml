@@ -74,7 +74,7 @@ model:
       last_k_rope_dim: 0
       uniform_start_point: 0
       uniform_step: 1
-      qk_tensor_path: '/home/binguo/data/MLA-FT/utils/qk_tensor_135M.pth'
+      qk_tensor_path: '../utils/qk_tensor_135M.pth'
       n_gqa_group: 3
     SVD:
       method: 2
@@ -115,7 +115,7 @@ profiler: null # 性能分析器
 
 tokenizer:
   tokenizer_max_length: null # 分词器最大长度
-  tokenizer_name_or_path: /home/binguo/data/models/HuggingFaceTB/SmolLM-135M # 分词器名称或路径
+  tokenizer_name_or_path: ~/data/models/HuggingFaceTB/SmolLM-135M # 分词器名称或路径
   tokenizer_revision: null # 分词器版本
 
 tokens:

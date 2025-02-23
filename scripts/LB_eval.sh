@@ -36,8 +36,8 @@ model_names=(
 for model_name in "${model_names[@]}"; do
     torchrun --nproc_per_node=${NUM_GPUS} \
         -m src.evaluation.longbench \
-        --model_path /home/binguo/data/MLA-FT/checkpoints/${model_name}/24000_hf \
-        --tokenizer_path /home/binguo/data/MLA-FT/checkpoints/${model_name}/24000_hf \
+        --model_path ../checkpoints/${model_name}/24000_hf \
+        --tokenizer_path ../checkpoints/${model_name}/24000_hf \
         --longbench True \
         --lb_max_tokens 2048 \
         --lb_batch_size ${BSZ} \
@@ -47,8 +47,8 @@ for model_name in "${model_names[@]}"; do
 
     torchrun --nproc_per_node=${NUM_GPUS} \
         -m src.evaluation.longbench \
-        --model_path /home/binguo/data/MLA-FT/checkpoints/${model_name}/24000_hf \
-        --tokenizer_path /home/binguo/data/MLA-FT/checkpoints/${model_name}/24000_hf \
+        --model_path ../checkpoints/${model_name}/24000_hf \
+        --tokenizer_path ../checkpoints/${model_name}/24000_hf \
         --longbench True \
         --lb_max_tokens 2048 \
         --lb_batch_size ${BSZ} \
@@ -62,8 +62,8 @@ for model_name in "${model_names[@]}"; do
 
     torchrun --nproc_per_node=${NUM_GPUS} \
         -m src.evaluation.longbench \
-        --model_path /home/binguo/data/MLA-FT/checkpoints/${model_name}/24000_hf \
-        --tokenizer_path /home/binguo/data/MLA-FT/checkpoints/${model_name}/24000_hf \
+        --model_path ../checkpoints/${model_name}/24000_hf \
+        --tokenizer_path ../checkpoints/${model_name}/24000_hf \
         --longbench True \
         --lb_max_tokens 2048 \
         --lb_batch_size ${BSZ} \

@@ -20,7 +20,7 @@ eval_one_ckpt() {
         -m src.conversation.convert_nanotron_to_hf \
         --checkpoint_path ${model_name_or_path} \
         --save_path "${model_name_or_path}_hf" \
-        --tokenizer_name /home/binguo/data/models/HuggingFaceTB/SmolLM-135M \
+        --tokenizer_name ~/data/models/HuggingFaceTB/SmolLM-135M \
         --is_mla
  
     accelerate launch --multi_gpu --num_processes=${NUM_GPUS} \

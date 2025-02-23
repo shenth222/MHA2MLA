@@ -114,6 +114,8 @@ torchrun --nproc_per_node 2 \
 
 ## Multiple-Head Latent Attention Fine-Tuning
 
+Use the following command for MLA fine-tuning:
+
 ```bash
 torchrun --nproc_per_node 2 \
     -m src.mla_train_nt \
@@ -123,8 +125,8 @@ torchrun --nproc_per_node 2 \
 
 | SVD version | Strategy |
 | :----: | --- |
-| 2 | SVD $_{split}$ |
-| 7 | SVD $_{joint}$ |
+| 2 |  $SVD_{split}$ |
+| 7 |  $SVD_{joint}$ |
 
 ## Lighteval Evaluation
 
