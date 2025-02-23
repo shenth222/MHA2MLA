@@ -13,7 +13,6 @@ import os
 import yaml
 from typing import Dict, cast
 from types import MethodType
-import pickle
 import seaborn as sns
 import torch
 
@@ -336,7 +335,7 @@ def get_fig_ax():
 
 
 def visualize(query_states, key_states):
-    dir = "/home/binguo/data/MLA-FT/images/2-norm"
+    dir = "../images/2-norm"
     num_layers = query_states.shape[0]
     # query
     for idx in range(0, num_layers, 12):
@@ -424,7 +423,7 @@ def main():
             continue
         module._forward = module.forward
         module.forward = MethodType(get_rotary_forward(module_name=name), module)
-    num = args._get_args
+    num = args.sample_size
     bsz = None
     query_states = []
     key_states = []
@@ -433,6 +432,7 @@ def main():
             batch = {key: value.to("cuda") for key, value in batch.items()}
             if bsz is None:
                 bsz = batch["input_ids"].shape[0]
+            model(**batch)
             query, key = flatten_avg_query_key_states(
                 query_states_dict, key_states_dict
             )
@@ -447,8 +447,6 @@ def main():
 
     query_states = torch.stack(query_states)
     key_states = torch.stack(key_states)
-    print(query_states.shape)
-    print(key_states.shape)
     query_states = torch.mean(
         query_states, dim=0, keepdim=False
     )  # [n_layer][n_head][n_dim/2]
@@ -464,30 +462,121 @@ def main():
         torch.save(qk_states, f)
 
 
-def partial_rope(query_states, key_states, index, rotary_embedding,position_ids):
+def partial_rope(query_states, key_states, index, rotary_embedding, position_ids):
     # query_states:[bsz, seqlen, num_heads, head_dim]
     # key_states:[bsz, seqlen, num_heads, head_dim]
     # index:[num_heads, head_dim // 2]
-    cos,sin = rotary_embedding(query_states,position_ids)
+    cos, sin = rotary_embedding(query_states, position_ids)
     q_embed, k_embed = rotary_embedding.apply_rotary_pos_emb(
         query_states, key_states, cos, sin
     )
-    mask = torch.zeros((q_embed.size(2),q_embed.size(3)//2), dtype=torch.bool, device=q_embed.device)
+    mask = torch.zeros(
+        (k_embed.size(2), k_embed.size(3) // 2), dtype=torch.bool, device=q_embed.device
+    )
     mask.scatter_(1, index, 1)
     mask_for_k = (
         torch.cat((mask, mask), dim=1).unsqueeze(0).unsqueeze(1).to(q_embed.device)
     )
     mask_for_q = torch.repeat_interleave(
-            input=mask_for_k, repeats=cfg["n_gqa_group"], dim=2
+        input=mask_for_k, repeats=int(query_states.size(2) // key_states.size(2)), dim=2
     ).to(q_embed.device)
     q_embed = torch.where(mask_for_q == 1, q_embed, query_states)
     k_embed = torch.where(mask_for_k == 1, k_embed, key_states)
     return q_embed, k_embed
 
-def rope_lite():
-    pass
+def calculate_attn_score(query_states, key_states, index, rotary_embedding, position_ids):
+    # query_states:[bsz, seqlen, num_heads, head_dim]
+    # key_states:[bsz, seqlen, num_heads, head_dim]
+    new_query_states, new_key_states = partial_rope(query_states, key_states, index, rotary_embedding,position_ids)
+    new_query_states = new_query_states.transpose(1, 2)
+    new_key_states = new_key_states.transpose(1, 2)
+    from transformers.models.llama.modeling_llama import repeat_kv
+    new_key_states = repeat_kv(new_key_states, new_query_states.size(1)//new_key_states.size(1))
+    attn_score = torch.einsum("bhqd,bhkd->bhqk", new_query_states, new_key_states)
+    attn_score = attn_score / (query_states.size(-1) ** 0.5)
+    attn_weights = torch.softmax(attn_score, dim=-1)
+    return attn_weights
+
+def rope_lite(query_states,key_states,rotary_embedding,position_ids):
+    query_states = query_states.squeeze()
+    key_states = key_states.squeeze()
+    bsz, seqlen, num_attention_heads, head_dim = query_states.shape
+    _ , _ , num_key_value_heads , _ = key_states.shape
+    index_all = torch.arange(0, head_dim // 2, device=query_states.device).repeat(num_key_value_heads,1)
+    index_r = torch.arange(0, 0, device=query_states.device).repeat(num_key_value_heads,1)
+    attn_base = calculate_attn_score(query_states, key_states, index_all, rotary_embedding, position_ids)
+    gqa_group_size = query_states.size(2) // key_states.size(2)
+    for i in range(head_dim//2):
+        index_remaing = torch.full((index_all.size(0),index_all.size(1)-index_r.size(1)), dtype=torch.int64, fill_value=0)
+        for j in range(index_remaing.shape[0]):
+            mask = ~torch.isin(index_all[j], index_r[j])
+            index_remaing[j,:] = index_all[j][mask]
+        print(index_r.shape)
+        print(index_remaing.shape)
+        index_remaing = index_remaing.to(device=query_states.device)
+        distance = torch.arange(0,0,device=query_states.device).repeat(num_key_value_heads,1)
+        for j in range(index_remaing.shape[1]):
+            index = torch.cat((index_r,index_remaing[:,j].unsqueeze(1)),dim=1)
+            attn_new = calculate_attn_score(query_states, key_states, index, rotary_embedding, position_ids)
+            l1_distance = torch.abs(attn_base - attn_new).mean(dim=(0,2,3))
+            l1_distance = l1_distance.reshape(-1,gqa_group_size).mean(dim=1,keepdim=False).unsqueeze(1)
+            distance = torch.cat((distance,l1_distance),dim=1)
+        # print(distance.shape)
+        min_index = torch.argmin(distance,dim=1).reshape(-1,1)
+        index_r = torch.cat((index_r,torch.gather(index_remaing, 1, min_index)),dim=1)
+    return index_r
+
+def main_rope_lite():
+    args = get_args()
+    config_file = args.config_file
+    trainer = DistributedTrainer(config_file)
+    model = trainer.model
+    dataloader = get_dataloader(trainer)
+    dataloader = list(dataloader.values())[0]
+    model.eval()
+    model.to("cuda")
+    from flash_attn.layers.rotary import RotaryEmbedding as FlashRotaryEmbedding
+
+    for name, module in model.named_modules():
+        module.to("cuda")
+        if not isinstance(module, FlashRotaryEmbedding):
+            continue
+        module._forward = module.forward
+        module.forward = MethodType(get_rotary_forward(module_name=name), module)
+    bsz = None
+    r = 4
+    query_states = []
+    key_states = []
+    with torch.no_grad():
+        for batch in dataloader:
+            batch = {key: value.to("cuda") for key, value in batch.items()}
+            assert "input_mask" in batch
+            assert torch.all(batch["input_mask"] == 1)
+            model(**batch)
+            position_ids = torch.cumsum(batch["input_mask"], dim=-1, dtype=torch.int32) - 1
+            if bsz is None:
+                bsz = batch["input_ids"].shape[0]
+                print(bsz)
+            break
+    i=0
+    qk_tensor = []
+    print("start search")
+    with torch.no_grad():
+        for (_,query_states),(_,key_states) in zip(query_states_dict.items(),key_states_dict.items()):
+            query_states = query_states.to("cuda").squeeze()
+            key_states = key_states.to("cuda").squeeze()
+            rotary_embedding = model.model.decoder[i].pp_block.attn.rotary_embedding
+            i=i+1
+            index_r = rope_lite(query_states, key_states, rotary_embedding, position_ids)[:,:r]
+            t = torch.zeros((key_states.size(2), key_states.size(3) // 2), dtype=torch.bfloat16, device=key_states.device).scatter_(1, index_r, 1)
+            qk_tensor.append(t)
+            print(f"finish search {i} layer")
+
+    qk_tensor = torch.stack(qk_tensor)
+    with open(os.path.join(args.output_dir, "qk_tensor.pth"), "wb") as f:
+        torch.save(qk_tensor, f)
 
 
 if __name__ == "__main__":
-    # main()
-    rope_lite()
+    main()
+    # main_rope_lite()

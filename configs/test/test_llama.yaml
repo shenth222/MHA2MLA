@@ -2,7 +2,7 @@ checkpoints:
   checkpoint_interval: 10 # 保存检查点的步数间隔
   checkpoints_path: ../checkpoints/test # 检查点保存的路径
   checkpoints_path_is_shared_file_system: false # 检查点路径是否在共享文件系统上
-  resume_checkpoint_path: /home/binguo/data/models/meta-llama/Llama-3.1-8B_nanotron # 恢复训练时的检查点路径
+  resume_checkpoint_path: ~/data/models/meta-llama/Llama-3.1-8B_nanotron # 恢复训练时的检查点路径
   # resume_checkpoint_path: null # 恢复训练时的检查点路径
   save_final_state: true # 是否保存最终状态
   save_initial_state: true # 是否保存初始状态
@@ -105,7 +105,7 @@ profiler: null # 性能分析器
 
 tokenizer:
   tokenizer_max_length: null # 分词器最大长度
-  tokenizer_name_or_path: /home/binguo/data/models/meta-llama/Llama-3.1-8B # 分词器名称或路径
+  tokenizer_name_or_path: ~/data/models/meta-llama/Llama-3.1-8B # 分词器名称或路径
   tokenizer_revision: null # 分词器版本
 
 tokens:

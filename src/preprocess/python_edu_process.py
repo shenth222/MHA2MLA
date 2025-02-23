@@ -1,6 +1,6 @@
 import os
 
-os.environ["HF_HOME"] = "/home/binguo/data/hf-home"
+os.environ["HF_HOME"] = "~/data/hf-home"
 
 import boto3
 import gzip

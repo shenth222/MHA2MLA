@@ -26,7 +26,7 @@ def apply_rotary_pos_emb_test(q, k, cos, sin, position_ids=None, unsqueeze_dim=1
 def main():
     modeling_llama.apply_rotary_pos_emb = apply_rotary_pos_emb_test
     inputs= "Hello, What is your name?"
-    model_name_or_path="/home/binguo/data/models/HuggingFaceTB/SmolLM-135M"
+    model_name_or_path="~/data/models/HuggingFaceTB/SmolLM-135M"
     tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
     model = AutoModelForCausalLM.from_pretrained(model_name_or_path)
     inputs = tokenizer(inputs, return_tensors="pt")
