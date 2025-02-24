@@ -9,11 +9,12 @@ This repo contains the code for the paper ["Towards Economical Inference: Enabli
 ## News
 
 * [2025.02.21] The paper of MHA2MLA is publicly available: https://arxiv.org/abs/2502.14837
-* [2025.02.19] Released the first version of the MHA2MLA code, providing usage code for LlaMa fine-tuning and evaluating.
+* [2025.02.19] Released the first version of the MHA2MLA code, providing usage code for Llama fine-tuning and evaluating.
 
 ## TO-DO
 
-- [ ] Provide the code for incorporating the projection matrix and inference.
+- [ ] ~~Provide the code for incorporating the projection matrix and inference.~~
+- [ ] Thanks to DeepSeek for open-sourcing the [FlashMLA](https://github.com/deepseek-ai/FlashMLA) inference framework. It’s theoretically possible to save more GPU memory usage using this framework. Let’s see how economical MHA2MLA + FlashMLA (+ KV quanto) can be!
 
 
 ## Models
