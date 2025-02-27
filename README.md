@@ -108,6 +108,16 @@ torchrun --nproc_per_node 4 \
 | 2 |  $SVD_{split}$ |
 | 7 |  $SVD_{joint}$ |
 
+> If you want to use the partial-RoPE version 4, you should get the `qk_tensor` first.
+> Using the following command, you can get the `qk_tensor`:
+> ```bash
+>torchrun --nproc_per_node 1 \
+>    src/test/test_2_norm.py \
+>    --config-file configs/test/1B_2norm.yaml
+>    --output-dir utils/ \
+>    --sample-size 1024
+> ```
+
 ## Lighteval Evaluation
 
 For the partial-RoPE model, use the following command:
@@ -200,16 +210,6 @@ torchrun --nproc_per_node 2 \
     --config-file configs/rope/v4_topk4_cfg.yaml \
     --rope-cfg configs/rope/v4_topk4_rope.yaml
 ```
-
-> If you want to use the partial-RoPE version 4, you should get the `qk_tensor` first.
-> Using the following command, you can get the `qk_tensor`:
-> ```bash
->torchrun --nproc_per_node 1 \
->    src/test/test_2_norm.py \
->    --config-file configs/test/1B_2norm.yaml
->    --output-dir utils/ \
->    --sample-size 1024
-> ```
 
 ## Citation
 ```
