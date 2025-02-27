@@ -83,7 +83,7 @@ conda create -n mla-ft python=3.11
 pip install -r requirements.txt
 ```
 
-## Multiple-Head Latent Attention Fine-Tuning
+## MHA2MLA Fine-Tuning
 
 
 First, prepare a configuration file that can refer to the [MLA-FT configuration](./configs/mla/rope_v4_topk4_svd_method7_rank16.yaml). Then, use the following command for MLA fine-tuning:
