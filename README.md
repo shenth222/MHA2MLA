@@ -83,27 +83,16 @@ conda create -n mla-ft python=3.11
 pip install -r requirements.txt
 ```
 
-## Partial-RoPE Fine-Tuning
+## Multiple-Head Latent Attention Fine-Tuning
 
-Once the checkpoint in nanotron format is ready, you can use the following command for partial-RoPE fine-tuning (FT). The config file can refer to [general configuration](./configs/rope/v4_topk4_cfg.yaml) and the [partial-RoPE configuration](./configs/mla/v4_topk4_rope.yaml).
 
+First, prepare a configuration file that can refer to the [MLA-FT configuration](./configs/mla/rope_v4_topk4_svd_method7_rank16.yaml). Then, use the following command for MLA fine-tuning:
 
 ```bash
-torchrun --nproc_per_node 2 \
-    -m src.run_train \
-    --config-file configs/rope/v5_last8_cfg.yaml \
-    --rope-cfg configs/rope/v5_last8_rope.yaml
+torchrun --nproc_per_node 4 \
+    -m src.mla_train_nt \
+    --config-file ../configs/mla/rope_v4_topk4_svd_method7_rank16.yaml
 ```
-
-> If you want to use the partial-RoPE version 4, you should get the `qk_tensor` first.
-> Using the following command, you can get the `qk_tensor`:
-> ```bash
->torchrun --nproc_per_node 1 \
->    src/test/test_2_norm.py \
->    --config-file configs/test/1B_2norm.yaml
->    --output-dir utils/ \
->    --sample-size 1024
-> ```
 
 | Partial-RoPE version | Strategy |
 | :----: | --- |
@@ -113,16 +102,6 @@ torchrun --nproc_per_node 2 \
 | 3    | $\mathcal{S}_{\text{middle}}$ |
 | 4    | $\mathcal{S}_{\text{2-norm}}$ |
 | 5    | $\mathcal{S}_{\text{low}}$ |
-
-## Multiple-Head Latent Attention Fine-Tuning
-
-Use the following command for MLA fine-tuning:
-
-```bash
-torchrun --nproc_per_node 4 \
-    -m src.mla_train_nt \
-    --config-file ../configs/mla/rope_v4_topk4_svd_method7_rank16.yaml
-```
 
 | SVD version | Strategy |
 | :----: | --- |
@@ -208,6 +187,29 @@ torchrun --nproc_per_node=${NUM_GPUS} \
     --nbits 4 \
     --residual_length 128 \
 ```
+
+
+## Partial-RoPE Fine-Tuning For Ablation Experiment
+
+If you want to conduct an ablation experiment using only partial-RoPE without SVD, you can use the following command. The config file can refer to [general configuration](./configs/rope/v4_topk4_cfg.yaml) and the [partial-RoPE configuration](./configs/mla/v4_topk4_rope.yaml).
+
+
+```bash
+torchrun --nproc_per_node 2 \
+    -m src.run_train \
+    --config-file configs/rope/v4_topk4_cfg.yaml \
+    --rope-cfg configs/rope/v4_topk4_rope.yaml
+```
+
+> If you want to use the partial-RoPE version 4, you should get the `qk_tensor` first.
+> Using the following command, you can get the `qk_tensor`:
+> ```bash
+>torchrun --nproc_per_node 1 \
+>    src/test/test_2_norm.py \
+>    --config-file configs/test/1B_2norm.yaml
+>    --output-dir utils/ \
+>    --sample-size 1024
+> ```
 
 ## Citation
 ```
