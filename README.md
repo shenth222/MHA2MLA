@@ -15,6 +15,7 @@ This repo contains the code for the paper ["Towards Economical Inference: Enabli
 
 - [ ] ~~Provide the code for incorporating the projection matrix and inference.~~
 - [ ] Thanks to DeepSeek for open-sourcing the [FlashMLA](https://github.com/deepseek-ai/FlashMLA) inference framework. It’s theoretically possible to save more GPU memory usage using this framework. Let’s see how economical MHA2MLA + FlashMLA (+ KV quanto) can be!
+- [ ] Release the code of MHA2MLA based on HuggingFace `Transformers`
 
 
 ## Models
