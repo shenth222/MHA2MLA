@@ -8,7 +8,8 @@ This repo contains the code for the paper ["Towards Economical Inference: Enabli
 
 ## News
 
-* [2025.03.03] The three [MLA checkpoints](https://huggingface.co/collections/fnlp/mha2mla-67c51287dfc6cd46127e1b92) ($d_{kv}$=16/32/64) derived from `Llama-2-7B` are publicly available.
+* [2025.03.04] The four [MLA checkpoints](https://huggingface.co/collections/fnlp/mha2mla-67c51287dfc6cd46127e1b92) ($d_{kv}$=8/16/32/128) derived from `SmolLM-135M/360M/1B7` are publicly available.
+* [2025.03.03] The four [MLA checkpoints](https://huggingface.co/collections/fnlp/mha2mla-67c51287dfc6cd46127e1b92) ($d_{kv}$=16/32/64/256) derived from `Llama-2-7B` are publicly available.
 * [2025.02.21] The paper of MHA2MLA is publicly available: https://arxiv.org/abs/2502.14837
 * [2025.02.19] Released the first version of the MHA2MLA code, providing usage code for Llama fine-tuning and evaluating.
 
