@@ -22,7 +22,6 @@ from .svd_low_rank import SvdInit
 
 
 class CustomLlamaAttention(nn.Module):
-    """Multi-headed attention from 'Attention Is All You Need' paper"""
 
     def __init__(self, config: LlamaConfig, layer_idx: Optional[int] = None):
         super().__init__()
@@ -174,8 +173,6 @@ class CustomLlamaAttention(nn.Module):
             value_states = self.W_up_v(c_v)
 
         # merge k_c and k_r into key_states
-        # TODO: c_kv up+nope_mask填充的过程等同线性变换，可以优化成一个矩阵，推理时可以融合到后面的矩阵乘法，即q_proj矩阵中
-        # 需要添加两个矩阵：1.矩阵a负责r维向量映射到k_c维向量，2.矩阵b负责维度顺序的变换(置换矩阵)
         key_states = torch.zeros(
             bsz,
             c_kv.size(1),
@@ -552,7 +549,6 @@ def custom_load_pretrained_model(
     )
     new_k_r_weight = model.model.layers[0].self_attn.W_k_r.weight
     assert not (old_k_r_weight == new_k_r_weight).all()
-    # 调用原始的加载方法
     return outputs
 
 
@@ -569,7 +565,7 @@ def mla_patch_hf(rope_cfg=None):
 
     if rope_cfg is not None:
         # replace apply_rotary_pos_emb function in llama model
-        from ..patch_func_hf import create_custom_apply_rotary_pos_emb_hf
+        from ..partial_rope.patch_func_hf import create_custom_apply_rotary_pos_emb_hf
 
         modeling_llama.apply_rotary_pos_emb = create_custom_apply_rotary_pos_emb_hf(
             rope_cfg

@@ -53,15 +53,6 @@ class CacheArguments:
     residual_length: int = 128
 
 
-# cache_config = QuantizedCacheConfig(
-#     backend=backend,
-#     nbits=nbits,
-#     residual_length=0,
-#     compute_dtype=model.dtype,
-#     device=model.device,
-# )
-# past_key_values = QUANTIZED_CACHE_CLASS[backend](cache_config)
-
 
 logger = logging.getLogger(__name__)
 
@@ -84,10 +75,6 @@ class RunLongBenchCallback(TrainerCallback):
         self.tokenizer.padding_side = "left"
         self.is_world_process_zero = self.trainer.is_world_process_zero()
 
-        # dataset = LongBenchV2Dataset(args, self.tokenizer)
-        # dataloader = DataLoader(dataset, batch_size=self.args.lb_batch_size, collate_fn=dataset.collate_fn)
-        # self.dataloaderV2 = self.trainer.accelerator.prepare(dataloader)
-
         dataset = LongBenchV1Dataset(args, self.tokenizer)
         dataloader = DataLoader(
             dataset, batch_size=self.args.lb_batch_size, collate_fn=dataset.collate_fn
@@ -109,104 +96,8 @@ class RunLongBenchCallback(TrainerCallback):
 
     @torch.no_grad()
     def run(self, output_dir: Optional[str] = None):
-        # self.runV2(self.dataloaderV2, "lbv2", output_dir)
         self.runV1(self.dataloaderV1, "lbv1", output_dir)
 
-    # def runV2(
-    #     self,
-    #     dataloader,
-    #     task: str,
-    #     output_dir: Optional[str] = None,
-    #     soft_eval: bool = False,
-    # ):
-    #     with torch.cuda.device(self.model.device):
-    #         torch.cuda.empty_cache()
-    #     if output_dir is not None and not os.path.exists(output_dir):
-    #         output_dir = None
-    #         logger.warning(f"{task}: {output_dir=} does not exist, skipping output.")
-    #     self.model.eval()
-    #     candidates = ["A", "B", "C", "D"]
-    #     candidates.extend([f" {c}" for c in candidates])
-    #     rst = []
-    #     for batch in tqdm(dataloader, disable=not self.is_world_process_zero):
-    #         _id = batch.pop("_id")
-    #         difficulty = batch.pop("difficulty")
-    #         length = batch.pop("length")
-    #         answer = batch.pop("answer")
-    #         is_correct, prob = self.inferV2(batch, candidates, answer)
-    #         assert (
-    #             len(_id)
-    #             == len(difficulty)
-    #             == len(length)
-    #             == len(answer)
-    #             == len(prob)
-    #             == len(is_correct)
-    #         ), f"{len(_id)=}, {len(difficulty)=}, {len(length)=}, {len(answer)=}, {len(prob)=}, {len(is_correct)=}"
-    #         for i, d, l, a, c, p in zip(
-    #             _id, difficulty, length, answer, is_correct, prob
-    #         ):
-    #             rst.append((i, d, l, a, c, *p))
-    #     rst = gather_object(rst)
-    #     rst_bak = rst
-    #     rst = []
-    #     rst_keys = {}
-    #     for _id, *rest in rst_bak:
-    #         if _id not in rst_keys:
-    #             rst_keys[_id] = len(rst)
-    #             rst.append((_id, *rest))
-    #     logger.warning_once(f"{task} all gather {len(rst)=}")
-    #     assert len(rst) == len(dataloader.dataset)
-
-    #     if self.is_world_process_zero:
-    #         df = pd.DataFrame(
-    #             rst,
-    #             columns=[
-    #                 "_id",
-    #                 "difficulty",
-    #                 "length",
-    #                 "answer",
-    #                 "correct",
-    #                 *candidates,
-    #             ],
-    #         )
-    #         name = LEN2NAME[self.args.lb_max_tokens]
-    #         if output_dir is not None:
-    #             run_name = (
-    #                 f"_{self.trainer.args.run_name}"
-    #                 if self.trainer.args.run_name
-    #                 else ""
-    #             )
-    #             file_path = os.path.join(output_dir, f"{task}{run_name}_{name}.csv")
-    #             if os.path.exists(file_path):
-    #                 logger.warning(f"{file_path} already exists, overwriting.")
-    #             else:
-    #                 logger.info(f"Saving {task} to {file_path}")
-    #             df.to_csv(file_path, index=False)
-    #         acc_mean = df["correct"].mean()
-    #         logger.info(f"{task} accuracy: {acc_mean * 100:.0f}%")
-
-    # def inferV2(self, batch, candidates: list[str], answers: list[str]):
-    #     # assert self.model.device == self.trainer.accelerator.device
-    #     # for key, value in batch.items():
-    #     #     batch[key] = value[0].to(self.trainer.accelerator.device)
-    #     ans_range = [
-    #         self.tokenizer(token, return_tensors="pt").input_ids.item()
-    #         for token in candidates
-    #     ]
-    #     logits = self.model(**batch).logits
-    #     select_idx = torch.tensor(ans_range).to(logits.device)
-    #     logits = logits[:, -1, select_idx]
-    #     probs = torch.softmax(logits, dim=-1).cpu().tolist()
-    #     # print(probs)
-    #     is_correct = []
-    #     assert len(probs) == len(answers)
-    #     for prob, answer in zip(probs, answers):
-    #         prob_dict = defaultdict(float)
-    #         for c, p in zip(candidates, prob):
-    #             prob_dict[c.strip()] += p
-    #         max_candidate = max(prob_dict, key=prob_dict.get)  # type: ignore
-    #         is_correct.append(max_candidate == answer)
-    #     return is_correct, probs
 
     def runV1(
         self,

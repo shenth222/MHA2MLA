@@ -78,6 +78,7 @@ Install pytorch and other packages.
 
 ```bash
 conda create -n mla-ft python=3.11
+pip install torch==2.4.0 torchvision==0.19.0
 pip install -r requirements.txt
 ```
 
@@ -117,10 +118,9 @@ torchrun --nproc_per_node 2 \
 Use the following command for MLA fine-tuning:
 
 ```bash
-torchrun --nproc_per_node 2 \
+torchrun --nproc_per_node 4 \
     -m src.mla_train_nt \
-    --config-file configs/rope/v5_last8_cfg.yaml \
-    --rope-cfg configs/rope/v5_last8_rope.yaml
+    --config-file ../configs/mla/rope_v4_topk4_svd_method7_rank16.yaml
 ```
 
 | SVD version | Strategy |

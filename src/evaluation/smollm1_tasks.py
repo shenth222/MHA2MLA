@@ -124,12 +124,10 @@ def get_prompt_function(task_name):
     import importlib
     import sys
 
-    # 尝试从当前文件搜索函数
     current_module = sys.modules[__name__]
     if hasattr(current_module, task_name):
         return getattr(current_module, task_name)
 
-    # 如果本文件没有，尝试从指定模块加载
     try:
         module = importlib.import_module("lighteval.tasks.default_prompts")
         return getattr(module, task_name)

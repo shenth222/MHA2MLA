@@ -45,12 +45,12 @@ def cli_evaluate():  # noqa: C901
         cfg_RoPE = yaml.load(f, Loader=yaml.FullLoader)
         if "RoPE" in cfg_RoPE:
             cfg_RoPE=cfg_RoPE["RoPE"]
-    from ..patch_func_hf import create_custom_apply_rotary_pos_emb_hf
+    from ..partial_rope.patch_func_hf import create_custom_apply_rotary_pos_emb_hf
     from transformers.models.llama import modeling_llama
 
     modeling_llama.apply_rotary_pos_emb = create_custom_apply_rotary_pos_emb_hf(cfg_RoPE)
     if cfg_RoPE["partial_rope_version"] == 4:
-        from ..patch_func_hf import custom_forward_LlamaAttention,custom_forward_LlamaFlashAttention2,custom_forward_LlamaSdpaAttention
+        from ..partial_rope.patch_func_hf import custom_forward_LlamaAttention,custom_forward_LlamaFlashAttention2,custom_forward_LlamaSdpaAttention
         modeling_llama.LlamaAttention.forward = custom_forward_LlamaAttention
         modeling_llama.LlamaFlashAttention2.forward = custom_forward_LlamaFlashAttention2
         modeling_llama.LlamaSdpaAttention.forward = custom_forward_LlamaSdpaAttention

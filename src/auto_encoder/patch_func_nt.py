@@ -79,7 +79,7 @@ class CustomConfig(nanotron.config.config.Config):
 
 
 class AutoEncoderV1(nn.Module):
-    # 对k_nope与v低秩分解，不共享cache
+    # Low-rank decomposition of k_nope and v without sharing cache.
 
     def __init__(
         self,
@@ -172,7 +172,7 @@ class AutoEncoderV1(nn.Module):
 
 
 class AutoEncoderV2(nn.Module):
-    # 对k_nope与v低秩分解，不共享cache
+    # Low-rank decomposition of k_nope and v with shared cache.
 
     def __init__(
         self,
@@ -248,7 +248,7 @@ class AutoEncoderV2(nn.Module):
 
 
 class AutoEncoderV3(nn.Module):
-    # 对k_nope与v低秩分解，不共享cache
+    # Low-rank decomposition of k_nope and v with shared cache. The difference from v2 is that W_down_k and W_up_k are specific to individual heads.
 
     def __init__(
         self,
@@ -803,14 +803,6 @@ def custom_load_weights(
             dtype = filtered_state_dict[
                 f"{attn_module_prefix}.auto_encoder.W_down_k.weight"
             ].dtype
-            # U, S, V = torch.svd(
-            #     torch.eye(attn_module.auto_encoder.W_down_k.in_features).to(
-            #         dtype=torch.float32
-            #     )
-            # )
-            # U = U[:, :low_rank].to(dtype=dtype)
-            # S = S[:low_rank].to(dtype=dtype)
-            # V = V[:, :low_rank].to(dtype=dtype)
             in_features = attn_module.auto_encoder.W_down_k.in_features
             out_features = attn_module.auto_encoder.W_down_k.out_features
             filtered_state_dict[f"{attn_module_prefix}.auto_encoder.W_down_k.weight"][
@@ -827,14 +819,6 @@ def custom_load_weights(
             dtype = filtered_state_dict[
                 f"{attn_module_prefix}.auto_encoder.W_down_v.weight"
             ].dtype
-            # U, S, V = torch.svd(
-            #     torch.eye(attn_module.auto_encoder.W_down_v.in_features).to(
-            #         dtype=torch.float32
-            #     )
-            # )
-            # U = U[:, :low_rank].to(dtype=dtype)
-            # S = S[:low_rank].to(dtype=dtype)
-            # V = V[:, :low_rank].to(dtype=dtype)
             in_features = attn_module.auto_encoder.W_down_v.in_features
             out_features = attn_module.auto_encoder.W_down_v.out_features
             filtered_state_dict[f"{attn_module_prefix}.auto_encoder.W_down_v.weight"][
@@ -883,7 +867,7 @@ def ae_patch_func_nt(rope_cfg=None):
 
     nanotron.serialize.load_weights = custom_load_weights
     nanotron.trainer.load_weights = custom_load_weights
-    from ..patch_func import create_custom_apply_rotary_pos_emb
+    from ..partial_rope.patch_func import create_custom_apply_rotary_pos_emb
 
     llama.LlamaRotaryEmbedding.apply_rotary_pos_emb = (
         create_custom_apply_rotary_pos_emb(rope_cfg)

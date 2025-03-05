@@ -9,12 +9,9 @@ import inspect
 
 def apply_rotary_pos_emb_test(q, k, cos, sin, position_ids=None, unsqueeze_dim=1):
     stack = inspect.stack()
-    # 找到调用者的类名或模块名
     for frame in stack:
-        # 获取调用者的 `self` 实例
         caller_instance = frame.frame.f_locals.get('self', None)
         if caller_instance:
-            # 打印调用者的id
             print(caller_instance.layer_idx)
             break
     cos = cos.unsqueeze(unsqueeze_dim)

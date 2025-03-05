@@ -5,7 +5,7 @@ def apply_activation(x:torch.Tensor, activation_fn:str):
     if activation_fn is not None:
         activation_fn = activation_fn.lower()
     if activation_fn is None:
-        return x  # 不使用激活函数
+        return x
     elif activation_fn == "relu":
         return F.relu(x)
     elif activation_fn == "sigmoid":

@@ -1,58 +1,134 @@
 import torch
+from transformers import LlamaForCausalLM, AutoTokenizer,AutoModelForCausalLM
+import numpy as np
+from datasets import load_dataset
+import argparse
 
-# config
-hidden_size= 576
-num_attention_heads=9
-num_key_value_heads=3
-low_rank=8
-head_dim = hidden_size // num_attention_heads
+def calculate_loss_direct(model, input_ids, attention_mask):
+    """Calculate the loss of the sequence directly."""
+    with torch.no_grad():
+        outputs = model(
+            input_ids=input_ids,
+            attention_mask=attention_mask,
+            labels=input_ids 
+        )
+    return outputs.loss.item()
 
-# Traing Linear
-q_proj = torch.nn.Linear(hidden_size, hidden_size,bias=False)
-nope_mask = torch.ones(head_dim*num_key_value_heads, hidden_size)
-false_indices = torch.randperm(head_dim*num_key_value_heads)[:low_rank*num_key_value_heads]
-nope_mask[false_indices] = False
-nope_mask_for_q = nope_mask.reshape(num_key_value_heads,head_dim).repeat_interleave(3, dim=0).reshape(-1)
-W_k_r = torch.nn.Linear(hidden_size, (nope_mask==False).sum().item(),bias=False)
-W_down_k = torch.nn.Linear(hidden_size, low_rank*num_key_value_heads,bias=False)
-W_down_v = torch.nn.Linear(hidden_size, low_rank*num_key_value_heads,bias=False)
-W_up_k = torch.nn.Linear(low_rank*num_key_value_heads, hidden_size-(nope_mask==False).sum().item(),bias=False)
-W_up_v = torch.nn.Linear(low_rank*num_key_value_heads, hidden_size,bias=False)
-o_proj = torch.nn.Linear(hidden_size, hidden_size,bias=False)
-hidden_states = torch.randn((2,3,hidden_size))
+def calculate_loss_with_kvcache(model, input_ids, attention_mask):
+    """Calculate the loss of the sequence using key-value cache."""
+    total_loss = 0
+    past_key_values = None
+    seq_len = input_ids.shape[1]
+    
+    with torch.no_grad():
+        for i in range(0, seq_len-1):  
+            current_input_ids = input_ids[:, i:i+1]  
+            current_attention_mask = attention_mask[:, :i+1]  
+            
+            outputs = model(
+                input_ids=current_input_ids,
+                attention_mask=attention_mask[:, :i+1],  
+                past_key_values=past_key_values,
+                labels=None, 
+                use_cache=True
+            )
+            logits = outputs.logits.view(-1, model.config.vocab_size)
+            labels = input_ids[:,i+1:i+2]
+            loss_fn = torch.nn.CrossEntropyLoss(reduction="none")
+            loss = loss_fn(logits, labels.view(-1))
+            past_key_values = outputs.past_key_values
+            total_loss += loss.item()
+    
+    return total_loss / (seq_len - 1) 
 
-# function
-def apply_rope(q,k):
-    return q, k
 
-# Converting training to inference
-# q
-new_q_weight = []
-for i in range(num_attention_heads//num_key_value_heads):
-    group_nope_mask=nope_mask_for_q[...,i*head_dim*num_key_value_heads:(i+1)*head_dim*num_key_value_heads]
-    q_weight = q_proj.weight.T()[...,i*head_dim:(i+1)*head_dim]
-    new_q_weight.append(torch.cat([q_weight[...,~nope_mask_for_q],q_weight[...,nope_mask_for_q]@(W_down_k.weight.T())], dim=0).T())
-new_q_weight = torch.cat(new_q_weight, dim=0)
-new_q_proj = torch.nn.Linear(hidden_size, (nope_mask==False).sum().item()+low_rank*num_attention_heads,bias=False)
-new_q_proj.weight = torch.nn.Parameter(new_q_weight.T())
-# v and o_oroj
-new_o_proj = torch.nn.Linear(low_rank*num_key_value_heads, hidden_size,bias=False)
-new_o_proj.weight = torch.nn.Parameter(W_up_v.weight.T()@o_proj.weight.T())
+def main1():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--model_name", type=str, required=True, help="The model name or path")
+    parser.add_argument("--is_mla", action="store_true", help="Whether the model is a MLA model")
+    parser.add_argument("--is_inference", action="store_true", help="Whether the model is a MLA inference model")
+    args = parser.parse_args()
+    # Monkey Patching
+    if args.is_mla and not args.is_inference:
+        import json,os
+        from ..mha2mla.monkey_patch import mla_monkey_patch
+        with open(os.path.join(args.model_name,"config.json"),"r") as f:
+            model_config = json.load(f)
+        mla_monkey_patch(model_config["RoPE"])
+    if args.is_mla and args.is_inference:
+        import json,os
+        from ..mha2mla.monkey_patch import infer_monkey_patch
+        with open(os.path.join(args.model_name,"config.json"),"r") as f:
+            model_config = json.load(f)
+        infer_monkey_patch(model_config["RoPE"])
 
-# inference
-bsz,q_len,hidden_size = hidden_states.size()
-# q
-query_states = new_q_proj(hidden_states)
-rope_q = torch.zeros((bsz,q_len,hidden_size))
-rope_q[...,~nope_mask_for_q] = query_states[...,:(nope_mask==False).sum().item()].view(bsz,q_len,num_attention_heads,head_dim).transpose(1,2)
-nope_q = query_states[...,(nope_mask==False).sum().item():].view(bsz,q_len,num_attention_heads,low_rank).transpose(1,2)
-# k
-rope_k = torch.zeros((bsz,q_len,num_key_value_heads*head_dim))
-rope_k[...,~nope_mask] = W_k_r(hidden_states)
-rope_k = rope_k.view(bsz,q_len,num_key_value_heads,head_dim).transpose(1,2)
-nope_k = W_down_k(hidden_states).view(bsz,q_len,num_key_value_heads,low_rank).transpose(1,2)
-# attention
-rope_q,rope_k = apply_rope(rope_q,rope_k)
-query_states = torch.cat([rope_q, nope_q], dim=-1)
-key_states = torch.cat([rope_k, nope_k], dim=-1)
-value_states = W_down_v(hidden_states).view(bsz,q_len,num_key_value_heads,low_rank).transpose(1,2)
+    model_name = args.model_name
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = LlamaForCausalLM.from_pretrained(model_name, torch_dtype=torch.bfloat16).cuda()
+    model.eval()
+    
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model = model.to(device)
+    
+    text = "Hello, this is a test sentence to verify the loss calculation."
+    inputs = tokenizer(text, return_tensors="pt")
+    inputs = {k: v.to(device) for k, v in inputs.items()}
+    
+    direct_loss = calculate_loss_direct(model, inputs["input_ids"], inputs["attention_mask"])
+    print(f"finished direct loss")
+    kvcache_loss = calculate_loss_with_kvcache(model, inputs["input_ids"], inputs["attention_mask"])
+
+    print(f"Direct Loss: {direct_loss:.6f}")
+    print(f"KV Cache Loss: {kvcache_loss:.6f}")
+    print(f"Difference: {abs(direct_loss - kvcache_loss):.6f}")
+
+
+
+
+def estimate_kvcache_memory(sentence: str, model_hidden_size: int, num_heads: int, dtype_size: int = 4):
+
+    token_kvcache_size = (model_hidden_size * 2) / num_heads
+    token_kvcache_size *= dtype_size
+
+    num_tokens = len(sentence)
+
+    total_memory_bytes = token_kvcache_size * num_heads * num_tokens
+
+    total_memory_mb = total_memory_bytes / (1024 * 1024)
+
+    return total_memory_mb
+
+def main2():
+    from transformers.cache_utils import DynamicCache
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--model_name", type=str, required=True, help="The model name or path")
+    parser.add_argument("--is_mla", action="store_true", help="Whether the model is a MLA model")
+    args = parser.parse_args()
+    # Monkey Patching
+    if args.is_mla:
+        import json,os
+        from ..mha2mla.monkey_patch import infer_patch
+        with open(os.path.join(args.model_name,"config.json"),"r") as f:
+            model_config = json.load(f)
+        infer_patch(model_config["RoPE"])
+
+    tokenizer = AutoTokenizer.from_pretrained(args.model_name)
+    model = AutoModelForCausalLM.from_pretrained(args.model_name, torch_dtype=torch.bfloat16).cuda()
+    input_text = "Just give a simple introduction to what Python is."*1
+    inputs = tokenizer(input_text, return_tensors="pt")
+    inputs = {k: v.to(model.device) for k, v in inputs.items()}
+    past_key_values = DynamicCache()
+    num = 3
+    generation_kwargs = {"do_sample": False, "temperature": 1.0, "top_p": 1.0, "max_new_tokens": 128*num, "min_new_tokens": 128*num,"use_cache":True,"past_key_values":past_key_values}
+    begin_mem = torch.cuda.memory_allocated()
+    out_fp16 = model.generate(**inputs, **generation_kwargs)
+    generated_text = tokenizer.batch_decode(out_fp16)
+    print(generated_text)
+    print(past_key_values.key_cache[0].shape)
+    print(past_key_values.value_cache[0].shape)
+
+    end_mem = torch.cuda.max_memory_allocated()
+    print(f"{(end_mem - begin_mem) / 1024 ** 2} MiB VRAM used")
+
+if __name__ == "__main__":
+    main1()

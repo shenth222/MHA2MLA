@@ -1,63 +1,6 @@
-import torch
-from transformers import LlamaConfig as LlamaConfig_hf
-from nanotron.config import LlamaConfig as LlamaConfig_nt
-from torch.nn import functional as F
-from transformers.models.llama.modeling_llama import repeat_kv
-
-
 import argparse
-import os
-import math
-from pathlib import Path
-from torch import nn
-
-import torch
-from nanotron import distributed as dist
-from nanotron import logging
-from nanotron.config import (
-    GenerationArgs,
-    LoggingArgs,
-    ParallelismArgs,
-    get_config_from_file,
-)
-from nanotron.generation.decode import (
-    GenerationInput,
-    TokenizerConfig,
-    decode_text,
-    decode_tokenized,
-)
-from nanotron.logging import log_rank, set_ranks_logging_level
-from nanotron.models import build_model
-from nanotron.parallel import ParallelContext
-from nanotron.parallel.parameters import sanity_check
-from nanotron.parallel.pipeline_parallel.engine import (
-    OneForwardOneBackwardPipelineEngine,
-)
-from nanotron.parallel.pipeline_parallel.tensor_pointer import TensorPointer
-from nanotron.parallel.tensor_parallel.enum import TensorParallelLinearMode
-from nanotron.random import (
-    RandomStates,
-    get_current_random_state,
-    get_synced_random_state,
-    set_random_seed,
-)
-from nanotron.serialize import load_weights
-from nanotron.trainer import CONFIG_TO_MODEL_CLASS, mark_tied_parameters
-
-from ..mla.mla_patch_hf import (
-    CustomLlamaSdpaAttention,
-    mla_patch_hf,
-    CustomLlamaAttention,
-    CustomLlamaFlashAttention2,
-)
-from ..mla.mla_patch_nt import CustomCausalSelfAttention, mla_patch_nt
-
-
-from transformers.cache_utils import Cache, StaticCache
-import argparse
-import torch
 import yaml
-from typing import Dict, Optional, Tuple, cast
+from typing import Dict, cast
 
 import numpy as np
 from nanotron import logging
@@ -86,7 +29,7 @@ from torch.utils.data import DataLoader
 
 try:
     from huggingface_hub import __version__ as hf_hub_version
-    from transformers import AutoTokenizer, AutoModelForCausalLM
+    from transformers import AutoTokenizer
     from transformers import __version__ as tf_version
 except ImportError:
     hf_hub_version = None
@@ -288,24 +231,6 @@ def get_dataloader(trainer: DistributedTrainer) -> Dict[str, DataLoader]:
     return dataloaders
 
 
-def compare_instances(instance1, instance2):
-    attrs1 = set(dir(instance1))
-    attrs2 = set(dir(instance2))
-
-    common_attrs = attrs1.intersection(attrs2)
-
-    for attr in common_attrs:
-        if not attr.startswith("__"):
-            value1 = getattr(instance1, attr)
-            value2 = getattr(instance2, attr)
-
-            if value1 != value2:
-                print(f"属性 '{attr}' 不同:")
-                print(f"  实例1: {value1}")
-                print(f"  实例2: {value2}")
-                print("-" * 40)
-
-
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -320,48 +245,21 @@ def get_args():
 if __name__ == "__main__":
     args = get_args()
     config_file = args.config_file
-    torch.set_default_dtype(torch.bfloat16)
 
     # Monkey patch
-    from ..auto_encoder.patch_func_nt import (
-        ae_patch_func_nt,
-        CustomModelArgs,
-        CustomLlamaConfig,
-        CustomConfig,
-    )
-    from ..auto_encoder.patch_func_hf import ae_patch_func_hf
+    from .mla_patch_nt import mla_patch_nt,CustomModelArgs,CustomLlamaConfig,CustomConfig
     import yaml
-
     with open(config_file, "r") as fin:
         config = yaml.safe_load(fin)
-    rope_cfg = config["model"]["model_config"]["RoPE"]
-    ae_patch_func_nt(rope_cfg)
-    ae_patch_func_hf(rope_cfg)
+    rope_cfg=config["model"]["model_config"]["RoPE"]
+    mla_patch_nt(rope_cfg)
 
     from nanotron import trainer as nt_trainer
-
     # Load trainer and data
-    trainer = nt_trainer.DistributedTrainer(config_file, config_class=CustomConfig)
-    model = trainer.model
+    trainer = nt_trainer.DistributedTrainer(config_file,config_class=CustomConfig)
     # print(trainer.unwrapped_model.config.rope_interleaved)
     dataloader = get_dataloader(trainer)
-    model_nanotron = trainer.model
-    dataloader = list(dataloader.values())[0]
-    model_hf = AutoModelForCausalLM.from_pretrained(
-        "../checkpoints/test_nt/0_hf"
-    ).cuda()
-    num = 1
-    with torch.no_grad():
-        model_nanotron.eval()
-        for batch in dataloader:
-            batch = {key: value.to("cuda") for key, value in batch.items()} # dict_keys(['input_ids', 'input_mask', 'label_ids', 'label_mask'])
-            input_ids = batch["input_ids"]
-            input_mask = batch["input_mask"]
-            print(model_nanotron(**batch))
-            print(model_hf(input_ids=batch["input_ids"],labels=batch["input_ids"],attention_mask=batch["input_mask"]).loss)
-            # print(sum(p.numel() for p in model_hf.parameters()))
-            # print(model_nanotron)
-            # print(model_hf)
-            num -= 1
-            if num == 0:
-                break
+
+    # LlamaRotaryEmbedding.partial_rope_cfg = cfg
+    # Train
+    trainer.train(dataloader)

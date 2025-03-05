@@ -18,7 +18,6 @@ _model_paths=[
 model_path = _model_paths[5]
 r = 32
 
-# 保存到同目录下的log文件
 logging.basicConfig(level=logging.INFO, filename='log.txt', filemode='a')
 logger = logging.getLogger(__name__)
 model = AutoModel.from_pretrained(model_path, device_map="auto")
@@ -138,7 +137,6 @@ for k, v in zip(K, V):
 err_norm_K = [x / K_nums for x in err_K]
 err_norm_V = [x / V_nums for x in err_V]
 
-# 使用科学计数法并保留三位小数格式化输出
 def format_scientific(values):
     return [f"{v:.3e}" for v in values]
 

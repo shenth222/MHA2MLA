@@ -272,8 +272,8 @@ def count_parameters():
     for model_path_hf in li:
         model = AutoModel.from_pretrained(
             model_path_hf,
-            torch_dtype=torch.bfloat16,  # 使用 torch_dtype 指定数据类型
-            device_map="cuda"            # 使用 device_map 指定设备
+            torch_dtype=torch.bfloat16, 
+            device_map="cuda"           
         )
 
         # attn_modules = {name: param for name, param in model.named_parameters() if "attn" in name and "0" in name}

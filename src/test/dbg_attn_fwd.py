@@ -46,7 +46,7 @@ from nanotron.trainer import CONFIG_TO_MODEL_CLASS, mark_tied_parameters
 
 from ..mla.mla_patch_hf import CustomLlamaSdpaAttention,mla_patch_hf,CustomLlamaAttention,CustomLlamaFlashAttention2
 from ..mla.mla_patch_nt import CustomCausalSelfAttention,mla_patch_nt
-torch.manual_seed(42)  # 114514 是随机种子值，可以替换为任意整数
+torch.manual_seed(42)
 
 
 
@@ -56,16 +56,12 @@ def undo_repeat_kv(hidden_states: torch.Tensor, num_key_value_groups: int) -> to
     (batch, num_attention_heads, seqlen, head_dim) back to (batch, num_key_value_heads, seqlen, head_dim).
     """
     batch, num_attention_heads, slen, head_dim = hidden_states.shape
-    # 计算原始的 num_key_value_heads
     num_key_value_heads = num_attention_heads // num_key_value_groups
-    # 将 hidden_states 重塑为 (batch, num_key_value_heads, num_key_value_groups, slen, head_dim)
     hidden_states = hidden_states.reshape(batch, num_key_value_heads, num_key_value_groups, slen, head_dim)
-    # 取每个组的第一个元素（因为重复的值是相同的）
     hidden_states = hidden_states[:, :, 0, :, :]
     return hidden_states
 
 
-# 实例化
 config_hf=LlamaConfig_hf(
     vocab_size=32000,
     hidden_size=576,
@@ -120,7 +116,7 @@ llama_config_params = {
     "rms_norm_eps": config_hf.rms_norm_eps,
     "rope_scaling": config_hf.rope_scaling,
     "rope_theta": config_hf.rope_theta,
-    "rope_interleaved": False,  # 默认值
+    "rope_interleaved": False,
     "tie_word_embeddings": config_hf.tie_word_embeddings,
     "use_cache": config_hf.use_cache,
     "vocab_size": config_hf.vocab_size,
@@ -131,7 +127,6 @@ mla_patch_hf(config_hf.RoPE)
 mla_patch_nt(config_hf.RoPE)
 
 
-# 创建 LlamaConfig 实例
 config_llama = LlamaConfig_nt(**llama_config_params)
 setattr(config_llama, "RoPE", config_hf.RoPE)
 setattr(config_llama, "SVD", config_hf.SVD)
@@ -154,10 +149,8 @@ attn_nt=CustomCausalSelfAttention(config_llama,layer_idx=0,parallel_config=paral
 attn_hf.load_state_dict(torch.load("state_dict.pth"))
 attn_nt.load_state_dict(torch.load("state_dict.pth"))
 
-# 输入数据
 import pickle
 fwd_param_dict=pickle.load(open("forward_args_hf.pkl","rb"))
-# 转换为下三角矩阵
 inputs_nt = fwd_param_dict["hidden_states"].transpose(0, 1)
 mask_nt = torch.ones((inputs_nt.size(1), inputs_nt.size(0)), dtype=torch.bool)
 

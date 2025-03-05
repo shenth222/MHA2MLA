@@ -517,7 +517,7 @@ def custom_load_weights(
         ["W_down_k" not in module_name for module_name in model.state_dict()]
     ) or any(
         [
-            "W_down_k" in str(file_name.absolute())  # 使用完整路径
+            "W_down_k" in str(file_name.absolute())
             for file_name in (root_folder / "model").glob("**/*")
         ]
     ):
@@ -796,7 +796,7 @@ def mla_patch_nt(rope_cfg=None):
     )
 
     if rope_cfg is not None:
-        from ..patch_func import create_custom_apply_rotary_pos_emb
+        from ..partial_rope.patch_func_nt import create_custom_apply_rotary_pos_emb
 
         llama.LlamaRotaryEmbedding.apply_rotary_pos_emb = (
             create_custom_apply_rotary_pos_emb(rope_cfg)

@@ -303,10 +303,8 @@ def compute_perplexity(
     logs = defaultdict(list)
     loss_fn = CrossEntropyLoss(reduction="none")
 
-    # 收集所有样本
     all_data = list(itertools.islice(dataset, num_samples))
 
-    # 将数据分成多个batch
     num_batches = (len(all_data) + batch_size - 1) // batch_size
 
     for batch_start in range(0, len(all_data), batch_size):
@@ -315,31 +313,27 @@ def compute_perplexity(
         if not is_smollm1:
             batch_data = [item[data_column] for item in all_data[batch_start:batch_end]]
 
-            # 首先获取原始token长度（不带padding的）
             original_lengths = tokenizer(
                 batch_data,
-                return_tensors=None,  # 不转换为tensor，这样可以得到原始长度
+                return_tensors=None, 
                 truncation=False,
                 padding=False,
             )
             original_token_lengths = [len(ids) for ids in original_lengths["input_ids"]]
 
-            # 检查原始长度是否满足要求
             assert all(
                 length >= num_tokens for length in original_token_lengths
             ), f"All samples must have original length >= num_tokens ({num_tokens}). Got lengths: {original_token_lengths}"
 
-            # 对当前batch进行编码
             encodings = tokenizer(
                 batch_data,
                 return_tensors="pt",
-                padding=True,  # 添加padding
-                truncation=True,  # 允许截断
+                padding=True,  
+                truncation=True, 
                 max_length=num_tokens
-                * 2,  # 设置最大长度为num_tokens的两倍，确保有足够长度
+                * 2, 
             )
 
-            # 只使用前num_tokens个token
             batch_input_ids = encodings.input_ids[:, :num_tokens]
         else:
 
@@ -380,14 +374,12 @@ def compute_perplexity(
                 )  # [current_batch_size, vocab_size]
                 past_key_values = outputs.past_key_values
 
-                # 获取下一个token作为标签
                 labels = (
                     batch_input_ids[:, idx + 1 : idx + 2].to(logits.device).view(-1)
                 )  # [current_batch_size]
                 neg_log_likelihood = loss_fn(logits, labels)  # [current_batch_size]
                 perplexity = neg_log_likelihood.exp()  # [current_batch_size]
 
-                # 计算当前batch的平均值
                 batch_nll = neg_log_likelihood.mean().item()
                 batch_ppl = perplexity.mean().item()
 
@@ -396,9 +388,8 @@ def compute_perplexity(
                 f"nll: {batch_nll:>5.2f}, ppl: {batch_ppl:>8.2f}"
             )
 
-            # 为当前batch中的每个样本存储数据
             for batch_idx in range(current_batch_size):
-                global_sample_idx = batch_start + batch_idx + 1  # 全局样本索引
+                global_sample_idx = batch_start + batch_idx + 1
                 logs["data_idx"].append(global_sample_idx)
                 logs["input_length"].append(idx + 1)
                 logs["nll"].append(neg_log_likelihood[batch_idx].item())
@@ -415,7 +406,6 @@ def compute_perplexity(
                 )  # in GB
                 logs["latency"].append(time.time() - start_t)
 
-            # 每500个token保存一次
             if num_processed_tokens % 500 == 0:
                 try:
                     pd.DataFrame(logs).to_csv(output_file, index=False)
@@ -427,7 +417,6 @@ def compute_perplexity(
             if num_tokens and num_processed_tokens >= num_tokens:
                 break
 
-        # 每个batch处理完后清空GPU缓存
         if past_key_values is not None:
             del past_key_values
         torch.cuda.empty_cache()
@@ -522,14 +511,14 @@ def main():
             cfg_RoPE = yaml.load(f, Loader=yaml.FullLoader)
             if "RoPE" in cfg_RoPE:
                 cfg_RoPE = cfg_RoPE["RoPE"]
-        from ..patch_func_hf import create_custom_apply_rotary_pos_emb_hf
+        from ..partial_rope.patch_func_hf import create_custom_apply_rotary_pos_emb_hf
         from transformers.models.llama import modeling_llama
 
         modeling_llama.apply_rotary_pos_emb = create_custom_apply_rotary_pos_emb_hf(
             cfg_RoPE
         )
         if cfg_RoPE["partial_rope_version"] == 4:
-            from ..patch_func_hf import (
+            from ..partial_rope.patch_func_hf import (
                 custom_forward_LlamaAttention,
                 custom_forward_LlamaFlashAttention2,
                 custom_forward_LlamaSdpaAttention,

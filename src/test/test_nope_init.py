@@ -19,7 +19,6 @@ _model_paths = [
 model_path = _model_paths[0]
 
 
-# 保存到同目录下的log文件
 logging.basicConfig(level=logging.DEBUG, filename="log.txt", filemode="a")
 logger = logging.getLogger(__name__)
 model = AutoModel.from_pretrained(model_path, device_map="auto")
@@ -322,7 +321,6 @@ def cal_svd_init_err(model,r,rope_cfg,kwargs:dict):
     err_norm_K = [x / K_nums for x in err_K]
     err_norm_V = [x / V_nums for x in err_V]
 
-    # 使用科学计数法并保留三位小数格式化输出
     def format_scientific(values):
         return [f"{v:.3e}" for v in values]
 
@@ -347,22 +345,13 @@ def cal_svd_init_err(model,r,rope_cfg,kwargs:dict):
 
 
 def lists_to_md_table(*lists):
-    """
-    将多个列表转换为 Markdown 表格，每个列表作为一行。
-    :param lists: 多个列表，例如 [1, 2, 3], ['a', 'b', 'c']
-    :return: Markdown 表格的字符串
-    """
-    # 检查所有列表长度是否一致
     if len(set(len(lst) for lst in lists)) > 1:
-        raise ValueError("所有列表的长度必须一致")
-    # 生成表头分隔线
+        raise ValueError("All lists must have the same length")
     header_separator = "| " + " | ".join(["---"] * len(lists[0])) + " |"
-    # 生成表格内容
     table_rows = []
     for lst in lists:
         row = "| " + " | ".join(map(str, lst)) + " |"
         table_rows.append(row)
-    # 组合成完整的表格
     md_table = "\n".join(table_rows[0:1]+[header_separator] + table_rows[1:])
     return md_table
 

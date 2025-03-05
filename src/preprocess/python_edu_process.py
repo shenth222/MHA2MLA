@@ -38,7 +38,7 @@ ds = load_dataset(
 batch_size = 100000
 
 for start_idx in range(2 * batch_size, len(ds), batch_size):
-    end_idx = min(start_idx + batch_size, len(ds))  # 确保不越界
+    end_idx = min(start_idx + batch_size, len(ds)) 
     print(f"Processing batch: {start_idx} to {end_idx}")
     batch_ds = ds.select(range(start_idx, end_idx))
     batch_ds = batch_ds.map(
@@ -51,7 +51,7 @@ for start_idx in range(2 * batch_size, len(ds), batch_size):
 
 processed_batches = []
 for start_idx in range(0, len(ds), batch_size):
-    end_idx = min(start_idx + batch_size, len(ds))  # 确保不越界
+    end_idx = min(start_idx + batch_size, len(ds)) 
     batch_ds = load_from_disk(f"./python_edu_batches/python_edu_{start_idx}_{end_idx}")
     processed_batches.append(batch_ds)
 merged_ds = concatenate_datasets(processed_batches)
