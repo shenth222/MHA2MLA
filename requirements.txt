@@ -95,7 +95,7 @@ msgspec==0.18.6
 multidict==6.1.0
 multiprocess==0.70.14
 murmurhash==1.0.11
--e git+https://github.com/huggingface/nanotron@2cde8f63519f15aa449803441ec70225644bd25d#egg=nanotron
+nanotron @ git+https://github.com/huggingface/nanotron@2cde8f63519f15aa449803441ec70225644bd25d#egg=nanotron
 networkx==3.4.2
 ninja==1.11.1.3
 nltk==3.9.1

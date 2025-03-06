@@ -2,7 +2,11 @@ from dataclasses import dataclass
 import torch
 from transformers import AutoTokenizer, AutoModel, Trainer, TrainingArguments
 from transformers import LlamaConfig, LlamaForCausalLM, AutoModelForCausalLM
-from transformers import HfArgumentParser
+from torch.utils.data import DataLoader
+import datasets
+from transformers.utils import is_datasets_available
+from transformers.trainer_utils import seed_worker
+from transformers import HfArgumentParser,DataCollatorForLanguageModeling
 from nanotron.data.nanoset import Nanoset
 import os
 from typing import Dict, List, Tuple, Union
@@ -26,7 +30,6 @@ class DataArguments:
     dataset_weights: List[float] = None
     dataset_name_or_path: str = None
     sequence_length: int = 2048
-
 
 class CustomNanoset(Nanoset):
     def __getitem__(self, idx: int) -> Dict[str, np.ndarray]:
@@ -180,7 +183,6 @@ def main():
         model = model.to(dtype=torch.float16)
 
     train_dataset = load_dataset(dataset_args, training_args , tokenizer)
-
     resume_from_checkpoint = training_args.resume_from_checkpoint
     optimizer, lr_scheduler = load_optimizer_scheduler(model, training_args, model_args)
     trainer = Trainer(

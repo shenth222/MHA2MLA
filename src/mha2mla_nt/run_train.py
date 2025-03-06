@@ -252,17 +252,14 @@ if __name__ == "__main__":
     import yaml
     with open(config_file, "r") as fin:
         config = yaml.safe_load(fin)
-        rope_cfg=config["model"]["model_config"]["RoPE"]
-    if "SVD" in config["model"]["model_config"]:
+    if "SVD" in config["model"]["model_config"] and config["model"]["model_config"]["SVD"]["method"]!=0:
         mla_monkey_patch(config["model"]["model_config"]["RoPE"])
     else:
-        partial_rope_monkey_patch(rope_cfg)
+        partial_rope_monkey_patch(config["model"]["model_config"]["RoPE"])
     from nanotron import trainer as nt_trainer
     # Load trainer and data
     trainer = nt_trainer.DistributedTrainer(config_file,config_class=CustomConfig)
-    # print(trainer.unwrapped_model.config.rope_interleaved)
     dataloader = get_dataloader(trainer)
 
-    # LlamaRotaryEmbedding.partial_rope_cfg = cfg
     # Train
     trainer.train(dataloader)

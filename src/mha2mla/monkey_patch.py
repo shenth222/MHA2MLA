@@ -158,7 +158,7 @@ def create_custom_apply_rotary_pos_emb_hf(cfg):
         "full-rope":0,
         "high":1,
         "uniform":2,
-        "top-k":4,
+        "2-norm":4,
         "low":5,
     }
     if isinstance(version, str):
