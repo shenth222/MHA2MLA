@@ -1,7 +1,11 @@
 from dataclasses import dataclass
 import torch
-from transformers import AutoTokenizer, Trainer, TrainingArguments
-from transformers import LlamaConfig, LlamaForCausalLM
+from transformers import AutoTokenizer, AutoModel, Trainer, TrainingArguments
+from transformers import LlamaConfig, LlamaForCausalLM, AutoModelForCausalLM
+from torch.utils.data import DataLoader
+import datasets
+from transformers.utils import is_datasets_available
+from transformers.trainer_utils import seed_worker
 from transformers import HfArgumentParser,DataCollatorForLanguageModeling
 from nanotron.data.nanoset import Nanoset
 import os
