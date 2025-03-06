@@ -1,15 +1,11 @@
 from dataclasses import dataclass
 import torch
-from transformers import AutoTokenizer, AutoModel, Trainer, TrainingArguments
-from transformers import LlamaConfig, LlamaForCausalLM, AutoModelForCausalLM
-from torch.utils.data import DataLoader
-import datasets
-from transformers.utils import is_datasets_available
-from transformers.trainer_utils import seed_worker
+from transformers import AutoTokenizer, Trainer, TrainingArguments
+from transformers import LlamaConfig, LlamaForCausalLM
 from transformers import HfArgumentParser,DataCollatorForLanguageModeling
 from nanotron.data.nanoset import Nanoset
 import os
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List
 import numpy as np
 import yaml
 
@@ -44,7 +40,6 @@ class CustomNanoset(Nanoset):
         """
         item = super().__getitem__(idx)
         return item
-
 
 def load_dataset(dataset_args, training_args, tokenizer):
     """Load dataset from configuration."""
@@ -185,12 +180,18 @@ def main():
     train_dataset = load_dataset(dataset_args, training_args , tokenizer)
     resume_from_checkpoint = training_args.resume_from_checkpoint
     optimizer, lr_scheduler = load_optimizer_scheduler(model, training_args, model_args)
+    data_collator = DataCollatorForLanguageModeling(
+        tokenizer=tokenizer,
+        mlm=False,
+        return_tensors="pt",
+    )
     trainer = Trainer(
         model=model,
         tokenizer=tokenizer,
         args=training_args,
         train_dataset=train_dataset,
         optimizers=(optimizer, lr_scheduler),
+        data_collator=data_collator,
     )
     # train
     if resume_from_checkpoint is not None:

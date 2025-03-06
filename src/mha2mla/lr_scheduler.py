@@ -2,8 +2,6 @@ import math
 import logging
 from nanotron.logging import log_rank
 from functools import partial
-from typing import List
-import torch
 from torch.optim import Optimizer
 from types import SimpleNamespace
 from torch.optim.lr_scheduler import LambdaLR

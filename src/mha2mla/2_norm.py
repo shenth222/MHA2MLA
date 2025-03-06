@@ -1,13 +1,8 @@
 from dataclasses import dataclass
 import torch
-from transformers import AutoTokenizer, AutoModel, Trainer, TrainingArguments
-from transformers import LlamaConfig, LlamaForCausalLM, AutoModelForCausalLM
+from transformers import TrainingArguments
 from transformers import HfArgumentParser, DataCollatorForLanguageModeling
-from nanotron.data.nanoset import Nanoset
 import os
-from typing import Dict, List, Tuple, Union
-import numpy as np
-import yaml
 from tqdm import tqdm
 import datasets
 
@@ -117,18 +112,17 @@ def main():
             model(**batch)
             num -= batch["input_ids"].shape[0]
             p_bar.update(batch["input_ids"].shape[0])
-            assert False,batch["input_ids"].shape
-            # for name,module in model.named_modules():
-            #     if not isinstance(module, LlamaAttention):
-            #         continue
-            #     idx = int(name.split(".")[2])
-            #     bsz,q_len,_ = hidden_states_dict[name].shape
-            #     q = module.q_proj(hidden_states_dict[name]).reshape(bsz,q_len,model_config.num_attention_heads,head_dim) # [bsz,q_len,num_heads,head_dim]
-            #     k = module.k_proj(hidden_states_dict[name]).reshape(bsz,q_len,model_config.num_key_value_heads,head_dim)
-            #     query_states[idx].append(cal_2_norm(q).mean(dim=1,keepdim=False).cpu()) # [bsz,num_heads,head_dim//2]
-            #     key_states[idx].append(cal_2_norm(k).mean(dim=1,keepdim=False).cpu())
-            # if num <= 0:
-            #     break
+            for name,module in model.named_modules():
+                if not isinstance(module, LlamaAttention):
+                    continue
+                idx = int(name.split(".")[2])
+                bsz,q_len,_ = hidden_states_dict[name].shape
+                q = module.q_proj(hidden_states_dict[name]).reshape(bsz,q_len,model_config.num_attention_heads,head_dim) # [bsz,q_len,num_heads,head_dim]
+                k = module.k_proj(hidden_states_dict[name]).reshape(bsz,q_len,model_config.num_key_value_heads,head_dim)
+                query_states[idx].append(cal_2_norm(q).mean(dim=1,keepdim=False).cpu()) # [bsz,num_heads,head_dim//2]
+                key_states[idx].append(cal_2_norm(k).mean(dim=1,keepdim=False).cpu())
+            if num <= 0:
+                break
     query_states = torch.stack([torch.cat(query_states[i],dim=0) for i in range(num_layers)],dim=0) # [num_layers,sample_size,num_heads,head_dim//2]
     key_states = torch.stack([torch.cat(key_states[i],dim=0) for i in range(num_layers)],dim=0)
     query_states = torch.mean(query_states,dim=1,keepdim=False) # [num_layers,num_heads,head_dim//2]
