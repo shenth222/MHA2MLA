@@ -21,7 +21,7 @@ from transformers.utils import is_flash_attn_greater_or_equal_2_10
 
 from ..mla.NopeIndex import IndexForNope
 from ..mla.svd_low_rank import SvdInit
-from ..mla.utils import apply_activation
+from .utils import apply_activation
 
 
 class AutoEncoderV1(nn.Module):

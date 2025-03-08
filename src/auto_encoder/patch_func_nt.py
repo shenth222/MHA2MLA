@@ -57,7 +57,7 @@ from transformers.modeling_flash_attention_utils import _flash_attention_forward
 
 from ..mla.NopeIndex import IndexForNope
 from ..mla.svd_low_rank import SvdInit
-from ..mla.utils import apply_activation
+from .utils import apply_activation
 
 
 @dataclass

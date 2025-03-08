@@ -119,7 +119,9 @@ def create_custom_apply_rotary_pos_emb_hf(cfg):
         topk_indices = torch.topk(qk_tensor[layer_idx], k=top_k_dim, dim=1)[1]
         mask = torch.zeros_like(qk_tensor[layer_idx])
         mask.scatter_(1, topk_indices, 1)
-        mask_for_k = torch.cat((mask, mask), dim=1).unsqueeze(0).unsqueeze(2).to(k.device)
+        mask_for_k = (
+            torch.cat((mask, mask), dim=1).unsqueeze(0).unsqueeze(2).to(k.device)
+        )
         mask_for_q = torch.repeat_interleave(
             input=mask_for_k, repeats=cfg["n_gqa_group"], dim=1
         ).to(q.device)
@@ -153,11 +155,11 @@ def create_custom_apply_rotary_pos_emb_hf(cfg):
 
     version = cfg["partial_rope_version"]
     version_str2int = {
-        "full-rope":0,
-        "high":1,
-        "uniform":2,
-        "2-norm":4,
-        "low":5,
+        "full-rope": 0,
+        "high": 1,
+        "uniform": 2,
+        "2-norm": 4,
+        "low": 5,
     }
     if isinstance(version, str):
         version = version_str2int[version]
@@ -580,9 +582,14 @@ class IndexForNope:
 
     @staticmethod
     def get_index_for_nope_v4(rope_cfg, **kwargs):
-        if IndexForNope._qk_tensor_cache is None or rope_cfg["qk_tensor_path"] != IndexForNope._qk_tensor_path:
+        if (
+            IndexForNope._qk_tensor_cache is None
+            or rope_cfg["qk_tensor_path"] != IndexForNope._qk_tensor_path
+        ):
             with open(rope_cfg["qk_tensor_path"], "rb") as fin:
-                IndexForNope._qk_tensor_cache = torch.load(fin)  # [layer_num, k_head_num, head_dim//2]
+                IndexForNope._qk_tensor_cache = torch.load(
+                    fin
+                )  # [layer_num, k_head_num, head_dim//2]
                 IndexForNope._qk_tensor_path = rope_cfg["qk_tensor_path"]
                 assert len(IndexForNope._qk_tensor_cache.shape) == 3
         qk_tensor = IndexForNope._qk_tensor_cache
@@ -600,7 +607,7 @@ class IndexForNope:
         last_k_rope_dim = rope_cfg["last_k_rope_dim"]
         half = head_dim // 2
         nope_mask = torch.ones((half), dtype=torch.bool)
-        nope_mask[half-last_k_rope_dim:half] = False
+        nope_mask[half - last_k_rope_dim : half] = False
         nope_mask = torch.cat([nope_mask, nope_mask], dim=0)
         return nope_mask
 
@@ -624,7 +631,8 @@ class IndexForNope:
         else:
             nope_mask = nope_mask.repeat(repeats=(kwargs["head_num"],))
         return nope_mask
-    
+
+
 class SvdInit:
     @staticmethod
     def method_I(k, v, r=8):
@@ -716,8 +724,8 @@ class SvdInit:
         assert k.dtype == v.dtype, "k and v must have the same dtype"
         logger.info(f"Using SVD method {svd_method} with rank {r}")
         original_dtype = k.dtype
-        k=k.to(torch.float32)
-        v=v.to(torch.float32)
+        k = k.to(torch.float32)
+        v = v.to(torch.float32)
         versions = {
             1: SvdInit.method_I,
             2: SvdInit.method_II,
@@ -864,7 +872,7 @@ class CustomLlamaAttention(nn.Module):
         if past_key_value is not None:
             # sin and cos are specific to RoPE models; cache_position needed for the static cache
             cache_kwargs = {"sin": sin, "cos": cos, "cache_position": cache_position}
-            r_dim,c_dim = k_r.size(-1),c_kv.size(-1)
+            r_dim, c_dim = k_r.size(-1), c_kv.size(-1)
             k_r, c_kv = past_key_value.update(
                 k_r.view(bsz, q_len, self.num_key_value_heads, -1).transpose(1, 2),
                 c_kv.view(bsz, q_len, self.num_key_value_heads, -1).transpose(1, 2),
@@ -1187,7 +1195,6 @@ class CustomLlamaSdpaAttention(CustomLlamaAttention):
         return attn_output, None, past_key_value
 
 
-
 class CustomLlamaMLAForInfer(CustomLlamaAttention):
 
     def __init__(self, config: LlamaConfig, layer_idx: Optional[int] = None):
@@ -1195,11 +1202,17 @@ class CustomLlamaMLAForInfer(CustomLlamaAttention):
         self.is_inference = False
 
     def matrix_fusion(self):
-        assert self.config.SVD["method"] == 7, "only support SVD method 7 which is SVD_{joint}"
+        assert (
+            self.config.SVD["method"] == 7
+        ), "only support SVD method 7 which is SVD_{joint}"
         self.is_inference = True
         # q_proj
         group_size = self.num_heads // self.num_key_value_heads
-        nope_mask_for_q = self.nope_mask.reshape(self.num_key_value_heads,1,self.head_dim).repeat_interleave(group_size, dim=-2).reshape(-1)
+        nope_mask_for_q = (
+            self.nope_mask.reshape(self.num_key_value_heads, 1, self.head_dim)
+            .repeat_interleave(group_size, dim=-2)
+            .reshape(-1)
+        )
         self.nope_mask_for_q = nope_mask_for_q
         self.W_q_r = nn.Linear(
             in_features=self.hidden_size,
@@ -1211,7 +1224,7 @@ class CustomLlamaMLAForInfer(CustomLlamaAttention):
         self.W_q_r.weight[:] = self.q_proj.weight.T[..., ~self.nope_mask_for_q].T
         self.W_down_q = nn.Linear(
             in_features=self.hidden_size,
-            out_features= self.num_heads * self.num_key_value_heads * self.low_rank,
+            out_features=self.num_heads * self.num_key_value_heads * self.low_rank,
             dtype=self.q_proj.weight.dtype,
             device=self.q_proj.weight.device,
             bias=False,
@@ -1221,24 +1234,40 @@ class CustomLlamaMLAForInfer(CustomLlamaAttention):
         W_o_proj = []
         for i in range(self.num_key_value_heads):
             # q
-            head_nope_mask = self.nope_mask[...,i* self.head_dim:(i+1)*self.head_dim]
+            head_nope_mask = self.nope_mask[
+                ..., i * self.head_dim : (i + 1) * self.head_dim
+            ]
             head_k_nope_dim = self.W_up_k.out_features // self.num_key_value_heads
-            head_W_up_k = self.W_up_k.weight[i*head_k_nope_dim:(i+1)*head_k_nope_dim,:]
+            head_W_up_k = self.W_up_k.weight[
+                i * head_k_nope_dim : (i + 1) * head_k_nope_dim, :
+            ]
             # o
-            head_W_up_v = self.W_up_v.weight[i*self.head_dim:(i+1)*self.head_dim,:]
+            head_W_up_v = self.W_up_v.weight[
+                i * self.head_dim : (i + 1) * self.head_dim, :
+            ]
             for j in range(group_size):
                 # q
-                head_w_q_nope = self.q_proj.weight.T[..., (i*group_size+j)*self.head_dim:(i*group_size+j+1)*self.head_dim]
-                head_w_q_nope = head_w_q_nope[...,head_nope_mask]
-                W_q_nope.append(head_w_q_nope@(head_W_up_k))
+                head_w_q_nope = self.q_proj.weight.T[
+                    ...,
+                    (i * group_size + j)
+                    * self.head_dim : (i * group_size + j + 1)
+                    * self.head_dim,
+                ]
+                head_w_q_nope = head_w_q_nope[..., head_nope_mask]
+                W_q_nope.append(head_w_q_nope @ (head_W_up_k))
                 # o
-                head_w_o_proj = self.o_proj.weight[...,(i*group_size+j)*self.head_dim:(i*group_size+j+1)*self.head_dim]
-                W_o_proj.append((head_W_up_v.T)@(head_w_o_proj.T))
-        W_q_nope = torch.cat(W_q_nope,dim=-1)
-        o_oroj_weight = torch.cat(W_o_proj,dim=0)
+                head_w_o_proj = self.o_proj.weight[
+                    ...,
+                    (i * group_size + j)
+                    * self.head_dim : (i * group_size + j + 1)
+                    * self.head_dim,
+                ]
+                W_o_proj.append((head_W_up_v.T) @ (head_w_o_proj.T))
+        W_q_nope = torch.cat(W_q_nope, dim=-1)
+        o_oroj_weight = torch.cat(W_o_proj, dim=0)
         self.W_down_q.weight[:] = W_q_nope.T
         self.o_proj = nn.Linear(
-            in_features=self.num_heads * self.num_key_value_heads * self.low_rank ,
+            in_features=self.num_heads * self.num_key_value_heads * self.low_rank,
             out_features=self.hidden_size,
             dtype=self.q_proj.weight.dtype,
             device=self.q_proj.weight.device,
@@ -1265,7 +1294,7 @@ class CustomLlamaMLAForInfer(CustomLlamaAttention):
         assert not self.config.pretraining_tp > 1, "not support pretraining_tp>1"
         # prepare q_r and k_r
         query_states = torch.zeros(
-            (bsz,q_len,self.num_heads * self.head_dim),
+            (bsz, q_len, self.num_heads * self.head_dim),
             device=hidden_states.device,
             dtype=hidden_states.dtype,
         )
@@ -1302,7 +1331,7 @@ class CustomLlamaMLAForInfer(CustomLlamaAttention):
         q_r = query_states[..., ~self.nope_mask_for_q]
         k_r = key_states[..., ~self.nope_mask]
 
-        # prepare c_kv 
+        # prepare c_kv
         if self.is_share_W_down:
             c_kv = self.W_down_k(hidden_states)
         else:
@@ -1310,8 +1339,14 @@ class CustomLlamaMLAForInfer(CustomLlamaAttention):
                 [self.W_down_k(hidden_states), self.W_down_v(hidden_states)], dim=-1
             )
         q_r = q_r.view(bsz, q_len, self.num_heads, -1).transpose(1, 2)
-        k_r = k_r.view(bsz, q_len, self.num_key_value_heads, -1).transpose(1, 2) # [bsz,q_len,num_key_value_heads,head_rope_dim]
-        c_kv = c_kv.view(bsz, q_len, 1, self.low_rank*self.num_key_value_heads).transpose(1, 2) # [bsz,q_len,1 ,self.low_rank * self.num_key_value_heads]
+        k_r = k_r.view(bsz, q_len, self.num_key_value_heads, -1).transpose(
+            1, 2
+        )  # [bsz,q_len,num_key_value_heads,head_rope_dim]
+        c_kv = c_kv.view(
+            bsz, q_len, 1, self.low_rank * self.num_key_value_heads
+        ).transpose(
+            1, 2
+        )  # [bsz,q_len,1 ,self.low_rank * self.num_key_value_heads]
 
         # prepare q_nope
         q_nope = self.W_down_q(hidden_states)
@@ -1329,10 +1364,10 @@ class CustomLlamaMLAForInfer(CustomLlamaAttention):
                 cache_kwargs,
             )
 
-        query_states = torch.cat([q_nope,q_r],dim=-1)
+        query_states = torch.cat([q_nope, q_r], dim=-1)
 
         return query_states, k_r, c_kv
-    
+
     def forward(
         self,
         hidden_states: torch.Tensor,
@@ -1366,21 +1401,28 @@ class CustomLlamaMLAForInfer(CustomLlamaAttention):
         k_r = repeat_kv(k_r, self.num_key_value_groups)
         c_kv = repeat_kv(c_kv, self.num_heads)
         head_rope_dim = (self.nope_mask_for_q == False).sum().item() // self.num_heads
-        attn_weights_rope = torch.matmul(query_states[...,-head_rope_dim:], k_r.transpose(2, 3)) / math.sqrt(self.head_dim)
-        attn_weights_nope = torch.matmul(query_states[...,:-head_rope_dim], c_kv.transpose(2, 3)) / math.sqrt(self.head_dim)
+        attn_weights_rope = torch.matmul(
+            query_states[..., -head_rope_dim:], k_r.transpose(2, 3)
+        ) / math.sqrt(self.head_dim)
+        attn_weights_nope = torch.matmul(
+            query_states[..., :-head_rope_dim], c_kv.transpose(2, 3)
+        ) / math.sqrt(self.head_dim)
         attn_weights = attn_weights_rope + attn_weights_nope
         assert attention_mask is not None, "attention_mask is required"
         if attention_mask is not None:  # no matter the length, we just slice it
             causal_mask = attention_mask[:, :, :, : k_r.shape[-2]]
             attn_weights = attn_weights + causal_mask
-        attn_weights = nn.functional.softmax(attn_weights, dim=-1, dtype=torch.float32).to(query_states.dtype)
-        attn_weights = nn.functional.dropout(attn_weights, p=self.attention_dropout, training=self.training)
+        attn_weights = nn.functional.softmax(
+            attn_weights, dim=-1, dtype=torch.float32
+        ).to(query_states.dtype)
+        attn_weights = nn.functional.dropout(
+            attn_weights, p=self.attention_dropout, training=self.training
+        )
         attn_output = torch.matmul(attn_weights, c_kv)
         attn_output = attn_output.transpose(1, 2).reshape(bsz, q_len, -1)
         attn_output = self.o_proj(attn_output)
 
         return attn_output, None, past_key_value
-
 
 
 def state_dict_svd_init(model, state_dict):
@@ -1394,20 +1436,28 @@ def state_dict_svd_init(model, state_dict):
         assert (nope_mask == model.model.layers[layer_idx].self_attn.nope_mask).all()
         W_k = state_dict.pop(f"model.layers.{layer_idx}.self_attn.k_proj.weight").t()
         W_v = state_dict.pop(f"model.layers.{layer_idx}.self_attn.v_proj.weight").t()
-        state_dict[f"model.layers.{layer_idx}.self_attn.W_k_r.weight"][:] = W_k[
-            ..., ~nope_mask
-        ].t()
+        state_dict[f"model.layers.{layer_idx}.self_attn.W_k_r.weight"] = (
+            W_k[..., ~nope_mask].t().contiguous()
+        )
         W_down_k, W_up_k, W_down_v, W_up_v = SvdInit.init(
             W_k[..., nope_mask],
             W_v,
             svd_method=model.config.SVD["method"],
             r=model.config.SVD["low_rank"] * model.config.num_key_value_heads,
         )
-        state_dict[f"model.layers.{layer_idx}.self_attn.W_down_k.weight"][:] = W_down_k
-        state_dict[f"model.layers.{layer_idx}.self_attn.W_up_k.weight"][:] = W_up_k
+        state_dict[f"model.layers.{layer_idx}.self_attn.W_down_k.weight"] = (
+            W_down_k.contiguous()
+        )
+        state_dict[f"model.layers.{layer_idx}.self_attn.W_up_k.weight"] = (
+            W_up_k.contiguous()
+        )
         if not model.model.layers[layer_idx].self_attn.is_share_W_down:
-            state_dict[f"model.layers.{layer_idx}.self_attn.W_down_v.weight"][:] = W_down_v
-        state_dict[f"model.layers.{layer_idx}.self_attn.W_up_v.weight"][:] = W_up_v
+            state_dict[f"model.layers.{layer_idx}.self_attn.W_down_v.weight"] = (
+                W_down_v.contiguous()
+            )
+        state_dict[f"model.layers.{layer_idx}.self_attn.W_up_v.weight"] = (
+            W_up_v.contiguous()
+        )
     return state_dict
 
 @classmethod
@@ -1431,13 +1481,16 @@ def custom_load_pretrained_model(
     gguf_path=None,
     weights_only=True,
 ):
-    if all(["W_k_r" not in k for k in state_dict.keys()]) and isinstance(
-        model.model, modeling_llama.LlamaPreTrainedModel
-    ):
+    is_svd_init = bool(
+        all(["W_k_r" not in k for k in state_dict.keys()])
+        and any(["W_k_r" in k for k in model.state_dict().keys()])
+    )  # weather the the model is initialized by SVD
+    if is_svd_init:
         # replace the original llama weights with the mla weights
         state_dict = state_dict_svd_init(model, state_dict)
         loaded_keys = list(state_dict.keys())
-    old_k_r_weight = model.model.layers[0].self_attn.W_k_r.weight
+    import copy
+    old_k_r_weight = copy.deepcopy(model.model.layers[0].self_attn.W_k_r.weight)
     outputs = cls.original_load_pretrained_model(
         model,
         state_dict,
@@ -1458,7 +1511,8 @@ def custom_load_pretrained_model(
         weights_only,
     )
     new_k_r_weight = model.model.layers[0].self_attn.W_k_r.weight
-    assert not (old_k_r_weight == new_k_r_weight).all()
+    if is_svd_init:
+        assert not (old_k_r_weight == new_k_r_weight).all()
     return outputs
 
 def partial_rope_monkey_patch(rope_cfg):
@@ -1476,6 +1530,7 @@ def partial_rope_monkey_patch(rope_cfg):
         )
         modeling_llama.LlamaSdpaAttention.forward = custom_forward_LlamaSdpaAttention
 
+
 def mla_monkey_patch(rope_cfg=None):
     """
     Monkey patching the LLAMA model to use the custom attention.
@@ -1486,9 +1541,15 @@ def mla_monkey_patch(rope_cfg=None):
         "sdpa": CustomLlamaSdpaAttention,
     }
 
-    if not hasattr(modeling_llama.LlamaPreTrainedModel, 'original_load_pretrained_model'):
-        modeling_llama.LlamaPreTrainedModel.original_load_pretrained_model = modeling_llama.LlamaPreTrainedModel._load_pretrained_model
-        modeling_llama.LlamaPreTrainedModel._load_pretrained_model = custom_load_pretrained_model
+    if not hasattr(
+        modeling_llama.LlamaPreTrainedModel, "original_load_pretrained_model"
+    ):
+        modeling_llama.LlamaPreTrainedModel.original_load_pretrained_model = (
+            modeling_llama.LlamaPreTrainedModel._load_pretrained_model
+        )
+        modeling_llama.LlamaPreTrainedModel._load_pretrained_model = (
+            custom_load_pretrained_model
+        )
 
     if rope_cfg is not None:
         partial_rope_monkey_patch(rope_cfg)
@@ -1512,7 +1573,10 @@ def infer_monkey_patch(rope_cfg=None):
     }
 
     import transformers
-    transformers.modeling_attn_mask_utils.AttentionMaskConverter._ignore_causal_mask_sdpa = custom_ignore_causal_mask_sdpa
+
+    transformers.modeling_attn_mask_utils.AttentionMaskConverter._ignore_causal_mask_sdpa = (
+        custom_ignore_causal_mask_sdpa
+    )
 
     if rope_cfg is not None:
         partial_rope_monkey_patch(rope_cfg)
