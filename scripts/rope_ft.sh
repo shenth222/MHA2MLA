@@ -1,11 +1,12 @@
 #!/bin/bash
 set -e
 #################### Environment ####################
-export CUDA_VISIBLE_DEVICES="3"
+export CUDA_VISIBLE_DEVICES="0,1"
 export PYTHONPATH=..:$PYTHONPATH
 export CUDA_DEVICE_MAX_CONNECTIONS=1
 export MASTER_PORT="auto"
 export WANDB_PROJECT="mla_smollm_ft_nt"
+export HF_HOME="~/data/hf-home"
 
 #################### Main ####################
 
@@ -15,8 +16,8 @@ export WANDB_PROJECT="mla_smollm_ft_nt"
 #     --output_dir ./qk_tensor_hf_test.pth \
 #     --sample_size 1024
 
-torchrun --nproc_per_node 4 --master_port 24575 \
+torchrun --nproc_per_node 2 --master_port 24575 \
     ../src/mha2mla/run_train.py \
-    --config_file ../configs_hf/rope/135M_4GPU.yaml \
-    --partial_rope_config ../configs_hf/rope/v0.yaml
-    # --partial_rope_config ../configs_hf/rope/v4_topk4_rope.yaml
+    --config_file ../configs_hf/rope/135M_2GPU.yaml \
+    --partial_rope_config ../configs_hf/rope/rope_v4_topk4.yaml \
+    --svd_config ../configs_hf/rope/svd_method7_rank8.yaml
