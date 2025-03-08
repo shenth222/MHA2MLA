@@ -357,7 +357,7 @@ class LongBenchV1Dataset(Dataset):
         # fmt: on
         self.datasets = [
             load_dataset(
-                "~/data/datasets/THUDM/LongBench",
+                "THUDM/LongBench",
                 subset,
                 split="test",
                 trust_remote_code=True,

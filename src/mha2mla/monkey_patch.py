@@ -1394,7 +1394,7 @@ def state_dict_svd_init(model, state_dict):
         assert (nope_mask == model.model.layers[layer_idx].self_attn.nope_mask).all()
         W_k = state_dict.pop(f"model.layers.{layer_idx}.self_attn.k_proj.weight").t()
         W_v = state_dict.pop(f"model.layers.{layer_idx}.self_attn.v_proj.weight").t()
-        state_dict[f"model.layers.{layer_idx}.self_attn.W_k_r.weight"] = W_k[
+        state_dict[f"model.layers.{layer_idx}.self_attn.W_k_r.weight"][:] = W_k[
             ..., ~nope_mask
         ].t()
         W_down_k, W_up_k, W_down_v, W_up_v = SvdInit.init(
@@ -1403,11 +1403,11 @@ def state_dict_svd_init(model, state_dict):
             svd_method=model.config.SVD["method"],
             r=model.config.SVD["low_rank"] * model.config.num_key_value_heads,
         )
-        state_dict[f"model.layers.{layer_idx}.self_attn.W_down_k.weight"] = W_down_k
-        state_dict[f"model.layers.{layer_idx}.self_attn.W_up_k.weight"] = W_up_k
+        state_dict[f"model.layers.{layer_idx}.self_attn.W_down_k.weight"][:] = W_down_k
+        state_dict[f"model.layers.{layer_idx}.self_attn.W_up_k.weight"][:] = W_up_k
         if not model.model.layers[layer_idx].self_attn.is_share_W_down:
-            state_dict[f"model.layers.{layer_idx}.self_attn.W_down_v.weight"] = W_down_v
-        state_dict[f"model.layers.{layer_idx}.self_attn.W_up_v.weight"] = W_up_v
+            state_dict[f"model.layers.{layer_idx}.self_attn.W_down_v.weight"][:] = W_down_v
+        state_dict[f"model.layers.{layer_idx}.self_attn.W_up_v.weight"][:] = W_up_v
     return state_dict
 
 @classmethod

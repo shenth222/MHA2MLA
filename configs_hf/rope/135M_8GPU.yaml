@@ -2,10 +2,10 @@
 seed: 42
 max_steps: 18000
 report_to: wandb
-run_name: hf_test
+run_name: mla_hf_test
 save_strategy : steps
 save_steps: 0.1
-output_dir: ../checkpoints/test
+output_dir: ../checkpoints/mla_test
 overwrite_output_dir: true
 logging_strategy: steps
 logging_steps: 100
@@ -13,18 +13,20 @@ resume_from_checkpoint: null
 per_device_train_batch_size: 8
 remove_unused_columns: True
 gradient_accumulation_steps: 1
-bf16: true
 dataloader_drop_last: true
+bf16: true
+deepspeed: ../configs_hf/rope/ds_config.json
 # optim
 optim: adamw_torch_fused
 max_grad_norm: 1.0
-learning_rate: 5.0e-4
+learning_rate: 1.0e-4
+warmup_steps: 1800
 adam_beta1: 0.9
 adam_beta2: 0.95
 adam_epsilon: 1.0e-8
 weight_decay: 0.01
 # lr scheduler
-# lr_scheduler_type : constant
+# lr_scheduler_type: "cosine"
 use_constant_with_warmup_decay_scheduler: true
 lr_scheduler_kwargs: {"lr_decay_starting_step": 16200, "lr_decay_steps": 1800, "lr_decay_style": "1-sqrt", "lr_warmup_steps": 900, "lr_warmup_style": "linear", "min_decay_lr": 0}
 
@@ -41,7 +43,7 @@ dataset_folders:
   - ../../../data/smollm1_corpus/python-edu
   - ../../../data/smollm1_corpus/open-web-math
   - ../../../data/smollm1_corpus/stackoverflow
-dataset_weights: # 各数据集的权重
+dataset_weights:
   - 0.7
   - 0.15
   - 0.08

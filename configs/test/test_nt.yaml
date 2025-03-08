@@ -80,7 +80,7 @@ model:
       method: 0
 
 optimizer:
-  accumulate_grad_in_fp32: true # 是否在FP32中累积梯度
+  accumulate_grad_in_fp32: false # 是否在FP32中累积梯度
   clip_grad: 1.0 # 梯度裁剪值
   learning_rate_scheduler:
     learning_rate: 0.0001 # 学习率

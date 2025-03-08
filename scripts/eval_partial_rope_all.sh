@@ -2,7 +2,6 @@
 #################### 环境变量 ####################
 
 export CUDA_VISIBLE_DEVICES="0,1,2,3"
-export HF_HOME="~/data/hf-home"
 export NUM_GPUS=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
 export MASTER_PORT="auto"
 export PYTHONPATH=..:$PYTHONPATH
@@ -21,7 +20,7 @@ eval_one_ckpt() {
     #     --tokenizer_name ~/data/models/HuggingFaceTB/SmolLM-135M
 
     accelerate launch --multi_gpu --num_processes=${NUM_GPUS} \
-        ../src/mha2mla/eval.py --partial_rope_config ${cfg_RoPE} --is_mla \
+        ../src/mha2mla/eval.py --partial_rope_config ${cfg_RoPE} \
         accelerate \
         --model_args "pretrained=${model_name_or_path},revision=main,dtype=bfloat16,max_length=2048" \
         --override_batch_size 48 \
@@ -48,4 +47,4 @@ eval_all() {
 
 #################### 任务执行 ####################
 
-eval_one_ckpt /home/binguo/data/MLA-FT/checkpoints/test/checkpoint-18000 hf_test ../configs_hf/rope/v4_topk4_rope.yaml
+eval_one_ckpt /cpfs01/shared/llm_ddd/doushihan/taoji/code/MLA-FT/checkpoints/test_lr4e-5/checkpoint-18000 hf_test_lr4e-5 ../configs_hf/rope/rope_v4_topk4.yaml
