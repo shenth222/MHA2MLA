@@ -13,5 +13,5 @@
     "steps_per_print": 100,
     "wall_clock_breakdown": false,
     "dtype": "bf16",
-    "accumulate_in_fp32": true
+    "data_types": {"grad_accum_dtype": "fp32"}
 }

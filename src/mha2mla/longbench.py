@@ -10,7 +10,7 @@ from transformers import HfArgumentParser, AutoTokenizer, AutoModelForCausalLM
 import logging
 import jieba
 import pandas as pd
-import torch
+import torch#
 import transformers
 from accelerate.utils import gather_object
 from datasets import load_dataset
@@ -590,7 +590,6 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 def main():
-    # 使用 HfArgumentParser 解析命令行参数
     parser = HfArgumentParser(
         (TrainingArguments, LongBenchArguments, MLAArguments, CacheArguments)
     )
@@ -608,12 +607,8 @@ def main():
 
         with open(os.path.join(model_path, "config.json")) as f:
             config = json.load(f)
-        from ..mla.mla_patch_hf import mla_patch_hf
-        from ..mla.mla_patch_nt import mla_patch_nt, CustomLlamaConfig
-
-        mla_patch_nt(config["RoPE"])
-        mla_patch_hf(config["RoPE"])
-        globals()["NanotronLlamaConfig"] = CustomLlamaConfig
+        from monkey_patch import mla_monkey_patch
+        mla_monkey_patch(config["RoPE"])
 
     if mla_args.dtype == "float32":
         dtype = torch.float32
@@ -622,12 +617,10 @@ def main():
     elif mla_args.dtype == "bfloat16":
         dtype = torch.bfloat16
 
-    # 加载模型和分词器
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
     model = AutoModelForCausalLM.from_pretrained(model_path).to(device, dtype=dtype)
     tokenizer.pad_token = tokenizer.eos_token
 
-    # 初始化 Trainer
     trainer = Trainer(
         model=model,
         args=training_args,
@@ -639,7 +632,6 @@ def main():
     # trainer.callback_handler.callbacks.append(longbench_callback)
     trainer.add_callback(longbench_callback)
 
-    # 开始评估
     trainer.callback_handler.on_evaluate(
         trainer.args, trainer.state, trainer.control, None
     )
