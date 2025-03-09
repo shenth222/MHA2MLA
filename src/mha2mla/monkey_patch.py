@@ -1481,10 +1481,12 @@ def custom_load_pretrained_model(
     gguf_path=None,
     weights_only=True,
 ):
-    is_svd_init = bool(
-        all(["W_k_r" not in k for k in state_dict.keys()])
-        and any(["W_k_r" in k for k in model.state_dict().keys()])
-    )  # weather the the model is initialized by SVD
+    is_svd_init = False
+    if state_dict is not None:
+        is_svd_init = bool(
+            all(["W_k_r" not in k for k in state_dict.keys()])
+            and any(["W_k_r" in k for k in model.state_dict().keys()])
+        )  # weather the the model is initialized by SVD
     if is_svd_init:
         # replace the original llama weights with the mla weights
         state_dict = state_dict_svd_init(model, state_dict)

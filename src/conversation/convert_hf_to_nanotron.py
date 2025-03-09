@@ -119,11 +119,12 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if args.is_mla:
         from ..mha2mla.monkey_patch import mla_monkey_patch as mla_monkey_patch_hf
-        from ..mha2mla_nt.monkey_patch import mla_monkey_patch as mla_monkey_patch_nt
+        from ..mha2mla_nt.monkey_patch import mla_monkey_patch as mla_monkey_patch_nt,CustomLlamaConfig
         from transformers import AutoConfig
         config = AutoConfig.from_pretrained(args.checkpoint_path)
         mla_monkey_patch_hf(config.RoPE)
         mla_monkey_patch_nt(config.RoPE)
+        globals()["NanotronLlamaConfig"] = CustomLlamaConfig
     if args.auto_encoder:
         import json,os
         with open(os.path.join(args.checkpoint_path,"config.json")) as f:

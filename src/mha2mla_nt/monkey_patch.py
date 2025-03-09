@@ -1449,14 +1449,13 @@ def partial_rope_monkey_patch(rope_cfg):
     llama.LlamaRotaryEmbedding.apply_rotary_pos_emb = (
         create_custom_apply_rotary_pos_emb(rope_cfg)
     )
+    if "CustomLlamaConfig" in nanotron.trainer.CONFIG_TO_MODEL_CLASS:
+        return
     nanotron.config.models_config.LlamaConfig = CustomLlamaConfig
     nanotron.trainer.CONFIG_TO_MODEL_CLASS.update(
         {"CustomLlamaConfig": nanotron.trainer.CONFIG_TO_MODEL_CLASS["LlamaConfig"]}
     )
-    globals()["NanotronLlamaConfig"] = CustomLlamaConfig
     if rope_cfg["partial_rope_version"]==4:
-        IndexForNope._qk_tensor_cache=torch.load(rope_cfg["qk_tensor_path"])
-        IndexForNope._qk_tensor_path=rope_cfg["qk_tensor_path"]
         from nanotron.models.llama import LlamaModel, LlamaDecoderLayer, CausalSelfAttention
 
         LlamaModel.forward_with_hidden_states = custom_forward_with_hidden_states_for_v4
@@ -1474,7 +1473,9 @@ def mla_monkey_patch(rope_cfg=None):
     nanotron.trainer.CONFIG_TO_MODEL_CLASS.update(
         {"CustomLlamaConfig": nanotron.trainer.CONFIG_TO_MODEL_CLASS["LlamaConfig"]}
     )
-    globals()["NanotronLlamaConfig"] = CustomLlamaConfig
+    if rope_cfg["partial_rope_version"]==4:
+        IndexForNope._qk_tensor_cache=torch.load(rope_cfg["qk_tensor_path"])
+        IndexForNope._qk_tensor_path=rope_cfg["qk_tensor_path"]
 
     def custom_load_model_checkpoint(self, model: NanotronModel) -> NanotronModel:
         unwrapped_model = (
