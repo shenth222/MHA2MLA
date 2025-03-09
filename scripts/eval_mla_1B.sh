@@ -23,7 +23,6 @@ eval_one_ckpt() {
         --tokenizer_name ../checkpoints/HuggingFaceTB/SmolLM-1.7B \
         --is_mla
 
-
     accelerate launch --num_processes=${NUM_GPUS} \
         -m src.evaluation.eval_mla --cfg_RoPE ${cfg_RoPE} \
         accelerate \
