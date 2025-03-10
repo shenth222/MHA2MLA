@@ -3,19 +3,11 @@ checkpoints:
   checkpoint_interval: 2000
   checkpoints_path: ../checkpoints/1.7B_rope_v4_top4_svd_method2_rank8
   checkpoints_path_is_shared_file_system: false
-<<<<<<< HEAD
-  resume_checkpoint_path: ../checkpoints/1.7B_rope_v4_top4_svd_method2_rank8/10000
-  save_final_state: true
-  save_initial_state: true
-  load_lr_scheduler: true
-  load_optimizer: true
-=======
   resume_checkpoint_path: ../checkpoints/HuggingFaceTB/SmolLM-1.7B_nt
   save_final_state: true
   save_initial_state: true
   load_lr_scheduler: false
   load_optimizer: false
->>>>>>> feature/low-rank-approx
 
 data_stages:
 - data:

@@ -16,13 +16,8 @@ eval_one_ckpt() {
         -m src.original_conversation.convert_nanotron_to_hf \
         --checkpoint_path ${model_name_or_path} \
         --save_path "${model_name_or_path}_hf" \
-<<<<<<< HEAD
-        --tokenizer_name ../checkpoints/meta-llama/Llama-2-7b-hf
-        # --tokenizer_name ../checkpoints/HuggingFaceTB/SmolLM-1.7B
-=======
         --tokenizer_name ../checkpoints/HuggingFaceTB/SmolLM-1.7B
         # --tokenizer_name ../checkpoints/meta-llama/Llama-2-7b-hf
->>>>>>> feature/low-rank-approx
 
     accelerate launch --multi_gpu --num_processes=${NUM_GPUS} \
         -m lighteval accelerate \
