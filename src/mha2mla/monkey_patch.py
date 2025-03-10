@@ -1201,7 +1201,7 @@ class CustomLlamaMLAForInfer(CustomLlamaAttention):
         super().__init__(config, layer_idx)
         self.is_inference = False
 
-    def matrix_fusion(self):
+    def matrix_absorb(self):
         assert (
             self.config.SVD["method"] == 7
         ), "only support SVD method 7 which is SVD_{joint}"
@@ -1214,15 +1214,15 @@ class CustomLlamaMLAForInfer(CustomLlamaAttention):
             .reshape(-1)
         )
         self.nope_mask_for_q = nope_mask_for_q
-        self.W_q_r = nn.Linear(
+        self.W_q_r_absorbed = nn.Linear(
             in_features=self.hidden_size,
             out_features=(~nope_mask_for_q).sum().item(),
             dtype=self.q_proj.weight.dtype,
             device=self.q_proj.weight.device,
             bias=False,
         )
-        self.W_q_r.weight[:] = self.q_proj.weight.T[..., ~self.nope_mask_for_q].T
-        self.W_down_q = nn.Linear(
+        self.W_q_r_absorbed.weight[:] = self.q_proj.weight.T[..., ~self.nope_mask_for_q].T
+        self.W_down_q_absorbed = nn.Linear(
             in_features=self.hidden_size,
             out_features=self.num_heads * self.num_key_value_heads * self.low_rank,
             dtype=self.q_proj.weight.dtype,
@@ -1265,18 +1265,17 @@ class CustomLlamaMLAForInfer(CustomLlamaAttention):
                 W_o_proj.append((head_W_up_v.T) @ (head_w_o_proj.T))
         W_q_nope = torch.cat(W_q_nope, dim=-1)
         o_oroj_weight = torch.cat(W_o_proj, dim=0)
-        self.W_down_q.weight[:] = W_q_nope.T
-        self.o_proj = nn.Linear(
+        self.W_down_q_absorbed.weight[:] = W_q_nope.T
+        self.o_proj_absorbed = nn.Linear(
             in_features=self.num_heads * self.num_key_value_heads * self.low_rank,
             out_features=self.hidden_size,
             dtype=self.q_proj.weight.dtype,
             device=self.q_proj.weight.device,
             bias=False,
         )
-        self.o_proj.weight[:] = o_oroj_weight.T
-        self.q_proj = nn.Sequential()
+        self.o_proj_absorbed.weight[:] = o_oroj_weight.T
 
-    def get_qk_states(
+    def get_qk_states_for_decode(
         self,
         hidden_states: torch.Tensor,
         attention_mask: Optional[torch.Tensor] = None,
@@ -1303,7 +1302,7 @@ class CustomLlamaMLAForInfer(CustomLlamaAttention):
             device=hidden_states.device,
             dtype=hidden_states.dtype,
         )
-        q_r = self.W_q_r(hidden_states)
+        q_r = self.W_q_r_absorbed(hidden_states)
         k_r = self.W_k_r(hidden_states)
         query_states[..., ~self.nope_mask_for_q] = q_r
         key_states[..., ~self.nope_mask] = k_r
@@ -1341,28 +1340,36 @@ class CustomLlamaMLAForInfer(CustomLlamaAttention):
         q_r = q_r.view(bsz, q_len, self.num_heads, -1).transpose(1, 2)
         k_r = k_r.view(bsz, q_len, self.num_key_value_heads, -1).transpose(
             1, 2
-        )  # [bsz,q_len,num_key_value_heads,head_rope_dim]
+        )  # [bsz,num_key_value_heads,q_len,head_rope_dim]
         c_kv = c_kv.view(
             bsz, q_len, 1, self.low_rank * self.num_key_value_heads
         ).transpose(
             1, 2
-        )  # [bsz,q_len,1 ,self.low_rank * self.num_key_value_heads]
+        )  # [bsz,1,q_len,self.low_rank * self.num_key_value_heads]
 
         # prepare q_nope
-        q_nope = self.W_down_q(hidden_states)
+        q_nope = self.W_down_q_absorbed(hidden_states)
         q_nope = q_nope.view(
             bsz, q_len, self.num_heads, self.low_rank * self.num_key_value_heads
         ).transpose(1, 2)
 
-        if past_key_value is not None:
-            # sin and cos are specific to RoPE models; cache_position needed for the static cache
-            cache_kwargs = {"sin": sin, "cos": cos, "cache_position": cache_position}
-            k_r, c_kv = past_key_value.update(
-                k_r,
-                c_kv,
-                self.layer_idx,
-                cache_kwargs,
-            )
+        assert past_key_value is not None
+        # sin and cos are specific to RoPE models; cache_position needed for the static cache
+        if len(past_key_value.value_cache)>0 and past_key_value.value_cache[0].shape[1] != 1: # change c_kv from prefill format to decode format
+            value_cache = past_key_value.value_cache
+            value_cache = [
+                value_cache[i].transpose(1, 2).reshape(bsz, -1, 1, self.low_rank * self.num_key_value_heads).transpose(1, 2)
+                for i in range(len(value_cache))
+            ]
+            past_key_value.value_cache = value_cache
+
+        cache_kwargs = {"sin": sin, "cos": cos, "cache_position": cache_position}
+        k_r, c_kv = past_key_value.update(
+            k_r,
+            c_kv,
+            self.layer_idx,
+            cache_kwargs,
+        )
 
         query_states = torch.cat([q_nope, q_r], dim=-1)
 
@@ -1383,10 +1390,25 @@ class CustomLlamaMLAForInfer(CustomLlamaAttention):
         **kwargs,
     ) -> Tuple[torch.Tensor, Optional[torch.Tensor], Optional[Tuple[torch.Tensor]]]:
         if not self.is_inference:
-            self.matrix_fusion()
+            self.matrix_absorb()
 
         bsz, q_len, _ = hidden_states.size()
-        query_states, k_r, c_kv = self.get_qk_states(
+        if q_len!=1 or not use_cache:
+            # Prefill stage
+            return super().forward(
+                hidden_states,
+                attention_mask,
+                position_ids,
+                past_key_value,
+                output_attentions,
+                use_cache,
+                cache_position,
+                position_embeddings,
+                **kwargs,
+            )
+
+        # Decode stage
+        query_states, k_r, c_kv = self.get_qk_states_for_decode(
             hidden_states,
             attention_mask,
             position_ids,
@@ -1420,7 +1442,7 @@ class CustomLlamaMLAForInfer(CustomLlamaAttention):
         )
         attn_output = torch.matmul(attn_weights, c_kv)
         attn_output = attn_output.transpose(1, 2).reshape(bsz, q_len, -1)
-        attn_output = self.o_proj(attn_output)
+        attn_output = self.o_proj_absorbed(attn_output)
 
         return attn_output, None, past_key_value
 
