@@ -1,7 +1,12 @@
 #!/bin/bash
 set -e
+<<<<<<< HEAD
 #################### 环境变量 ####################
 export CUDA_VISIBLE_DEVICES='2,3'
+=======
+#################### Environment ####################
+export CUDA_VISIBLE_DEVICES='0,1'
+>>>>>>> feature/low-rank-approx
 export PYTHONPATH=..:$PYTHONPATH
 export CUDA_DEVICE_MAX_CONNECTIONS=1
 export MASTER_PORT="auto"
@@ -9,6 +14,7 @@ export HF_HOME="~/data/hf-home"
 export WANDB_PROJECT="mla_smollm_ft_nt"
 export NUM_GPUS=$(echo $CUDA_VISIBLE_DEVICES | awk -F "," '{print NF}')
 
+<<<<<<< HEAD
 #################### 函数定义 ####################
 
 eval_one_ckpt() {
@@ -43,3 +49,18 @@ torchrun --nproc_per_node 2 --master_port 24559 \
     --config-file ../configs/mla/${MODEL_NAME}.yaml
 
 eval_one_ckpt ../checkpoints/${MODEL_NAME}/24000 ${MODEL_NAME} ../configs/mla/${MODEL_NAME}.yaml
+=======
+#################### Main ####################
+
+# torchrun --nproc_per_node 1 --master_port 24571 \
+#     ../src/mha2mla/2_norm.py \
+#     --config_file ../configs_hf/rope/135M_2GPU.yaml \
+#     --output_dir ./qk_tensor_hf_test_2.pth \
+#     --sample_size 1024
+
+torchrun --nproc_per_node 2 --master_port 24571 \
+    ../src/mha2mla/run_train.py \
+    --config_file ../configs_hf/rope/135M_2GPU.yaml \
+    --partial_rope_config ../configs_hf/rope/v4_topk4_rope.yaml \
+    --svd_config ../configs_hf/rope/svd_method7_rank8.yaml
+>>>>>>> feature/low-rank-approx
