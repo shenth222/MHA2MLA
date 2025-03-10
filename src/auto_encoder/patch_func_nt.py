@@ -57,7 +57,11 @@ from transformers.modeling_flash_attention_utils import _flash_attention_forward
 
 from ..mla.NopeIndex import IndexForNope
 from ..mla.svd_low_rank import SvdInit
+<<<<<<< HEAD
 from ..mla.utils import apply_activation
+=======
+from .utils import apply_activation
+>>>>>>> feature/low-rank-approx
 
 
 @dataclass
@@ -79,7 +83,11 @@ class CustomConfig(nanotron.config.config.Config):
 
 
 class AutoEncoderV1(nn.Module):
+<<<<<<< HEAD
     # 对k_nope与v低秩分解，不共享cache
+=======
+    # Low-rank decomposition of k_nope and v without sharing cache.
+>>>>>>> feature/low-rank-approx
 
     def __init__(
         self,
@@ -172,7 +180,11 @@ class AutoEncoderV1(nn.Module):
 
 
 class AutoEncoderV2(nn.Module):
+<<<<<<< HEAD
     # 对k_nope与v低秩分解，不共享cache
+=======
+    # Low-rank decomposition of k_nope and v with shared cache.
+>>>>>>> feature/low-rank-approx
 
     def __init__(
         self,
@@ -248,7 +260,11 @@ class AutoEncoderV2(nn.Module):
 
 
 class AutoEncoderV3(nn.Module):
+<<<<<<< HEAD
     # 对k_nope与v低秩分解，不共享cache
+=======
+    # Low-rank decomposition of k_nope and v with shared cache. The difference from v2 is that W_down_k and W_up_k are specific to individual heads.
+>>>>>>> feature/low-rank-approx
 
     def __init__(
         self,
@@ -803,6 +819,7 @@ def custom_load_weights(
             dtype = filtered_state_dict[
                 f"{attn_module_prefix}.auto_encoder.W_down_k.weight"
             ].dtype
+<<<<<<< HEAD
             # U, S, V = torch.svd(
             #     torch.eye(attn_module.auto_encoder.W_down_k.in_features).to(
             #         dtype=torch.float32
@@ -811,6 +828,8 @@ def custom_load_weights(
             # U = U[:, :low_rank].to(dtype=dtype)
             # S = S[:low_rank].to(dtype=dtype)
             # V = V[:, :low_rank].to(dtype=dtype)
+=======
+>>>>>>> feature/low-rank-approx
             in_features = attn_module.auto_encoder.W_down_k.in_features
             out_features = attn_module.auto_encoder.W_down_k.out_features
             filtered_state_dict[f"{attn_module_prefix}.auto_encoder.W_down_k.weight"][
@@ -827,6 +846,7 @@ def custom_load_weights(
             dtype = filtered_state_dict[
                 f"{attn_module_prefix}.auto_encoder.W_down_v.weight"
             ].dtype
+<<<<<<< HEAD
             # U, S, V = torch.svd(
             #     torch.eye(attn_module.auto_encoder.W_down_v.in_features).to(
             #         dtype=torch.float32
@@ -835,6 +855,8 @@ def custom_load_weights(
             # U = U[:, :low_rank].to(dtype=dtype)
             # S = S[:low_rank].to(dtype=dtype)
             # V = V[:, :low_rank].to(dtype=dtype)
+=======
+>>>>>>> feature/low-rank-approx
             in_features = attn_module.auto_encoder.W_down_v.in_features
             out_features = attn_module.auto_encoder.W_down_v.out_features
             filtered_state_dict[f"{attn_module_prefix}.auto_encoder.W_down_v.weight"][
@@ -883,7 +905,11 @@ def ae_patch_func_nt(rope_cfg=None):
 
     nanotron.serialize.load_weights = custom_load_weights
     nanotron.trainer.load_weights = custom_load_weights
+<<<<<<< HEAD
     from ..patch_func import create_custom_apply_rotary_pos_emb
+=======
+    from ..partial_rope.patch_func import create_custom_apply_rotary_pos_emb
+>>>>>>> feature/low-rank-approx
 
     llama.LlamaRotaryEmbedding.apply_rotary_pos_emb = (
         create_custom_apply_rotary_pos_emb(rope_cfg)

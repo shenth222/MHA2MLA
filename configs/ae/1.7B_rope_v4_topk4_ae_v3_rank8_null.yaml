@@ -1,21 +1,13 @@
 # SmolLM1 1.7B trained on 1T tokens
 checkpoints:
   checkpoint_interval: 2000
-  checkpoints_path: ../checkpoints/1.7B_rope_v4_top4_svd_method7_rank8
+  checkpoints_path: ../checkpoints/1.7B_rope_v4_topk4_ae_v3_rank8_null
   checkpoints_path_is_shared_file_system: false
-<<<<<<< HEAD
-  resume_checkpoint_path: ../checkpoints/1.7B_rope_v4_top4_svd_method7_rank8/10000
+  resume_checkpoint_path: ../checkpoints/1.7B_rope_v4_topk4_ae_v3_rank8_null/0
   save_final_state: true
-  save_initial_state: true
-  load_lr_scheduler: true
-  load_optimizer: true
-=======
-  resume_checkpoint_path: ../checkpoints/HuggingFaceTB/SmolLM-1.7B_nt
-  save_final_state: true
-  save_initial_state: true
+  save_initial_state: false
   load_lr_scheduler: false
   load_optimizer: false
->>>>>>> feature/low-rank-approx
 
 data_stages:
 - data:
@@ -36,32 +28,12 @@ data_stages:
     seed: 42
   name: training stage
   start_training_step: 1
-# - data:
-#     dataset: # we change data mixture to use python-edu
-#       dataset_folder: 
-#         - datasets/fineweb-edu-dedup
-#         - datasets/cosmopedia-v2
-#         - datasets/open-web-math
-#         - datasets/python-edu
-#         - datasets/stackoverflow
-#         - datasets/deepmind_mathematics
-#       dataset_weights:
-#         - 0.7
-#         - 0.15
-#         - 0.055
-#         - 0.08
-#         - 0.01
-#         - 0.005
-#     num_loading_workers: 1
-#     seed: 42
-#   name: training stage 2
-#   start_training_step: 300000
 general:
   benchmark_csv_path: null
   consumed_train_samples: null
   ignore_sanity_checks: true
   project: mla_smollm_ft_nt
-  run: 1.7B_rope_v4_top4_svd_method7_rank8
+  run: 1.7B_rope_v4_topk4_ae_v3_rank8_null
   seed: 42 # 8
   step: null
 logging:
@@ -95,18 +67,19 @@ model:
     use_cache: true
     vocab_size: 49152
     RoPE:
-      partial_rope_version: 4
+      partial_rope_version: 4  # 0 1 2 3 4 5
       top_k_rope_dim: 4
-      lask_k_rope_dim: 0
+      last_k_rope_dim: 0
       uniform_start_point: 0
-      uniform_step: 8
-      qk_tensor_path: ../utils/qk_tensor_1.7B.pth
+      uniform_step: 1
+      qk_tensor_path: '../utils/qk_tensor_1.7B.pth'
       n_gqa_group: 1
-    SVD:
-      method: 7
+    AE:
+      version: 3
       low_rank: 8
+      activation_fn: null
 
-     
+
 optimizer:
   accumulate_grad_in_fp32: true
   clip_grad: 1.0
@@ -125,7 +98,7 @@ optimizer:
     name: adamW
     torch_adam_is_fused: true
   weight_decay: 0.01
-  zero_stage: 0
+  zero_stage: 1
 parallelism:
   dp: 8 # 64
   expert_parallel_size: 1
@@ -142,10 +115,10 @@ tokenizer:
   tokenizer_name_or_path: ../checkpoints/HuggingFaceTB/SmolLM-1.7B
   tokenizer_revision: null
 tokens:
-  batch_accumulation_per_replica: 8
+  batch_accumulation_per_replica: 4
   limit_test_batches: 0
   limit_val_batches: 0
-  micro_batch_size: 4 # GBS = 8*4*8*sequence_length = 256*sequence_length = 0.5M tokens
+  micro_batch_size: 8 # GBS = 8*4*8*sequence_length = 256*sequence_length = 0.5M tokens
   sequence_length: 2048
   train_steps: 12000 # 500000
   val_check_interval: -1
