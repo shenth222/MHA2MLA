@@ -141,7 +141,7 @@ torchrun --nproc_per_node=4 \
 
 ## Inference
 
-Once prepareded local model checkpoint and [monkey patch file](../src/mha2mla/monkey_patch.py), you can perform model inference using the code provided below.
+Once prepareded local model checkpoint and [monkey patch file](src/mha2mla/monkey_patch.py), you can perform model inference using the code provided below.
 
 ```python
 import json,os
