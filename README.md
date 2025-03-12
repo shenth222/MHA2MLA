@@ -6,7 +6,7 @@ This repo contains the code for the paper ["Towards Economical Inference: Enabli
 
 ## News
 
-- [2025.03.09] Released the first version of inference code which implemtded using PyTorch, will try to integrate FlashMLA to update the inference code.
+- [2025.03.12] Released the inference code implemented using **PyTorch** (support for [FlashMLA](https://github.com/deepseek-ai/FlashMLA) inference requires additional development time). 
 - [2025.03.04] The four [MLA checkpoints](https://huggingface.co/collections/fnlp/mha2mla-67c51287dfc6cd46127e1b92) ($d_{kv}$=8/16/32/128) derived from `SmolLM-135M/360M/1B7` are publicly available.
 - [2025.03.03] The four [MLA checkpoints](https://huggingface.co/collections/fnlp/mha2mla-67c51287dfc6cd46127e1b92) ($d_{kv}$=16/32/64/256) derived from `Llama-2-7B` are publicly available.
 - [2025.02.21] The paper of MHA2MLA is publicly available: https://arxiv.org/abs/2502.14837
@@ -43,7 +43,9 @@ pip install torch==2.4.0 torchvision==0.19.0
 pip install -r requirements.txt
 ```
 
-## MHA2MLA Fine-Tuning
+## MHA2MLA Fine-Tuning with huggingface transformers
+
+> The research presented in our paper was conducted using [nanotron](https://github.com/huggingface/nanotron) framework. Since there are differences between `transformers` and `nanotron`, hyperparameter search might be necessary. For exact reproduction of the paper's results, we recommend using [nanotron](https://github.com/huggingface/nanotron) for fine tuneing which refer to [**README for nanotron**](./src/mha2mla_nt/README.md).
 
 First, prepare three configuration files:
 1. A general configuration file referencing [135M_4GPU.yaml](./configs_hf/rope/135M_4GPU.yaml)
@@ -64,8 +66,6 @@ The available strategies for each method are listed below:
 | :---------: | ---------------- |
 |      2      | $SVD_{split}$ |
 |      7      | $SVD_{joint}$ |
-
-> The research presented in our paper was conducted using [nanotron](https://github.com/huggingface/nanotron) framework. Since there are differences between `transformers` and `nanotron`, hyperparameter search might be necessary. For exact reproduction of the paper's results, we recommend using [nanotron](https://github.com/huggingface/nanotron) for fine tuneing which refer to [README for nanotron](./src/mha2mla_nt/README.md).
 
 Then, use the following command for MLA fine-tuning:
 ```sh
@@ -141,31 +141,44 @@ torchrun --nproc_per_node=4 \
 
 ## Inference
 
-Once prepareded local model checkpoint and [monkey patch file](src/mha2mla/monkey_patch.py), you can perform model inference using the code provided below.
+- Step 1: Download the [**monkey patch file**](src/mha2mla/monkey_patch.py).
+```shell
+wget https://raw.githubusercontent.com/JT-Ushio/MHA2MLA/refs/heads/main/src/mha2mla/monkey_patch.py
+```
+
+- Step 2(Option): For MHA2MLA models using Partial-RoPE 2-nrom method, Download the [**qk_2-norm file**](./utils/). 
+Take `qk_tensor_1.7B.pth` as an example:
+```shell
+wget https://github.com/JT-Ushio/MHA2MLA/raw/refs/heads/main/utils/qk_tensor_1.7B.pth
+```
+
+- Step 3: Download the [MHA2MLA models](https://huggingface.co/collections/fnlp/mha2mla-67c51287dfc6cd46127e1b92) and run inference. 
+Take `fnlp/SmolLM-1B7-MLA-d_kv_16` as an example:
 
 ```python
-import json,os
 import torch
-from transformers import LlamaForCausalLM,AutoTokenizer
-
-model_path = "" # local path
-
-# Monkey Patch
+from transformers import AutoConfig, AutoTokenizer, LlamaForCausalLM
 from monkey_patch import infer_monkey_patch
-with open(os.path.join(model_path,"config.json"),"r") as f:
-    model_config = json.load(f)
-infer_monkey_patch(model_config["RoPE"])
 
-tokenizer = AutoTokenizer.from_pretrained(model_path)
-model = LlamaForCausalLM.from_pretrained(model_path, torch_dtype=torch.bfloat16).cuda()
+model_name = "fnlp/SmolLM-1B7-MLA-d_kv_16"
+
+# Monkey Patch: MHA -> MLA
+config = AutoConfig.from_pretrained(model_name)
+if "RoPE" in config:
+    config.RoPE["qk_tensor_path"] = "qk_tensor_1.7B.pth"  # Configuration for Specific Models
+    infer_monkey_patch(config.RoPE)
+
+tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
+model = LlamaForCausalLM.from_pretrained(model_name, config=config, torch_dtype=torch.bfloat16).cuda()
 
 # Generate
-text = "Please give a brief introduction to the structure of the Transformer."
-inputs = tokenizer(text, return_tensors="pt")
-inputs = {k: v.to(model.device) for k, v in inputs.items()}
-generation_kwargs = {"do_sample": False ,"use_cache":True,"max_new_tokens": 128}
+text = "Which American-born Sinclair won the Nobel Prize for Literature in 1930?"
+inputs = tokenizer(text, return_tensors="pt").to(model.device)
+generation_kwargs = {"do_sample": False, "use_cache": True, "max_new_tokens": 128}
 output = model.generate(**inputs, **generation_kwargs)
-print(tokenizer.batch_decode(output))
+
+print(tokenizer.decode(output[0], skip_special_tokens=True))
+# - Sinclair Lewis
 ```
 
 ## Citation
