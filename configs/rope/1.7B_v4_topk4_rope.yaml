@@ -1,7 +1,0 @@
-partial_rope_version: 4
-top_k_rope_dim: 4
-lask_k_rope_dim: 0
-uniform_start_point: 0
-uniform_step: 8
-qk_tensor_path: ../utils/qk_tensor_1.7B.pth
-n_gqa_group: 1

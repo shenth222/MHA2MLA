@@ -19,13 +19,12 @@ from transformers.modeling_flash_attention_utils import _flash_attention_forward
 from transformers.utils import is_flash_attn_greater_or_equal_2_10
 
 
-from ..mla.NopeIndex import IndexForNope
-from ..mla.svd_low_rank import SvdInit
-from ..mla.utils import apply_activation
+
+from .utils import apply_activation
 
 
 class AutoEncoderV1(nn.Module):
-    # 对k_nope与v低秩分解，不共享cache
+    # Low-rank decomposition of k_nope and v without sharing cache.
 
     def __init__(
         self, config: LlamaConfig, layer_idx: Optional[int], nope_mask: torch.Tensor
@@ -126,7 +125,7 @@ class AutoEncoderV1(nn.Module):
 
 
 class AutoEncoderV2(nn.Module):
-    # 对k_nope与v低秩分解，共享cache
+    # Low-rank decomposition of k_nope and v with shared cache.
 
     def __init__(
         self, config: LlamaConfig, layer_idx: Optional[int], nope_mask: torch.Tensor
@@ -135,7 +134,6 @@ class AutoEncoderV2(nn.Module):
         self.config = config
         self.layer_idx = layer_idx
         self.nope_mask = nope_mask
-        # 为了方便，使用W_down_k与W_down_v共享cache
         self.W_down_k = nn.Linear(
             nope_mask.sum().item() + config.num_key_value_heads * config.head_dim,
             config.AE["low_rank"] * config.num_key_value_heads,
@@ -204,7 +202,7 @@ class AutoEncoderV2(nn.Module):
 
 
 class AutoEncoderV3(nn.Module):
-    # 对k_nope与v低秩分解，共享cache,与v2的区别是W_down_k与W_up_k针对单个head
+    # Low-rank decomposition of k_nope and v with shared cache. The difference from v2 is that W_down_k and W_up_k are specific to individual heads.
 
     def __init__(
         self, config: LlamaConfig, layer_idx: Optional[int], nope_mask: torch.Tensor
@@ -213,7 +211,6 @@ class AutoEncoderV3(nn.Module):
         self.config = config
         self.layer_idx = layer_idx
         self.nope_mask = nope_mask
-        # 为了方便，使用W_down_k与W_down_v共享cache
         self.W_down_k = nn.Linear(
             nope_mask.sum().item() // config.num_key_value_heads + config.head_dim,
             config.AE["low_rank"],
@@ -785,7 +782,6 @@ def custom_load_pretrained_model(
     )
     new_k_r_weight = model.model.layers[0].self_attn.W_k_r.weight
     assert not (old_k_r_weight == new_k_r_weight).all()
-    # 调用原始的加载方法
     return outputs
 
 
@@ -802,7 +798,7 @@ def ae_patch_func_hf(rope_cfg=None):
 
     if rope_cfg is not None:
         # replace apply_rotary_pos_emb function in llama model
-        from ..patch_func_hf import create_custom_apply_rotary_pos_emb_hf
+        from ..partial_rope.patch_func_hf import create_custom_apply_rotary_pos_emb_hf
 
         modeling_llama.apply_rotary_pos_emb = create_custom_apply_rotary_pos_emb_hf(
             rope_cfg
