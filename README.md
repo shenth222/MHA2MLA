@@ -45,7 +45,7 @@ pip install -r requirements.txt
 
 ## MHA2MLA Fine-Tuning with huggingface transformers
 
-> The research presented in our paper was conducted using [nanotron](https://github.com/huggingface/nanotron) framework. Since there are differences between `transformers` and `nanotron`, hyperparameter search might be necessary. For exact reproduction of the paper's results, we recommend using [nanotron](https://github.com/huggingface/nanotron) for fine tuneing which refer to [**README for nanotron**](./src/mha2mla_nt/README.md).
+> The research presented in our paper was conducted using [nanotron](https://github.com/huggingface/nanotron) framework. Since there are differences between `transformers` and `nanotron`, hyperparameter search might be necessary. For exact reproduction of the paper's results, we recommend using nanotron for fine tuneing which refer to [**Our README for MHA2MLA using nanotron**](./src/mha2mla_nt/README.md).
 
 First, prepare three configuration files:
 1. A general configuration file referencing [135M_4GPU.yaml](./configs_hf/rope/135M_4GPU.yaml)
