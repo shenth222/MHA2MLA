@@ -175,6 +175,7 @@ cython_debug/
 wandb/
 /images
 /pj_scripts
+/scripts
 *.whl
 
 # debug setting
