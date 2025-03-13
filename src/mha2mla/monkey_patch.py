@@ -1548,6 +1548,8 @@ def partial_rope_monkey_patch(rope_cfg):
         rope_cfg
     )
     if rope_cfg["partial_rope_version"] == 4:
+        IndexForNope._qk_tensor_cache=torch.load(rope_cfg["qk_tensor_path"])
+        IndexForNope._qk_tensor_path=rope_cfg["qk_tensor_path"]
         modeling_llama.LlamaAttention.forward = custom_forward_LlamaAttention
         modeling_llama.LlamaFlashAttention2.forward = (
             custom_forward_LlamaFlashAttention2
