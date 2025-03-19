@@ -29,7 +29,7 @@ First, prepare a configuration file that can refer to the [MLA-FT configuration]
 
 ```bash
 torchrun --nproc_per_node 4 \
-    ../src/mha2mla/2_norm.py \
+    ../src/mha2mla_nt/run_train.py \
     --config-file ../configs/mla/rope_v4_topk4_svd_method7_rank16.yaml
 ```
 
