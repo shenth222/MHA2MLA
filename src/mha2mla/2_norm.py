@@ -50,6 +50,9 @@ def main():
     training_args, model_args, dataset_args = parser.parse_dict(config)
     # assert config["DataArguments"]["DP"] == int(os.environ.get("WORLD_SIZE", 1)), "DP is not equal to WORLD_SIZE"
 
+    from IPython import embed
+    embed()
+    exit()
     # Trainer
     model, tokenizer = load_tokenizer_and_model(model_args)
     train_dataset = load_dataset(dataset_args, training_args, tokenizer)

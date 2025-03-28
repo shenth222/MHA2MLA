@@ -1,4 +1,4 @@
-checkpoints:
+#checkpoints:
   checkpoint_interval: 1800 # 保存检查点的步数间隔
   checkpoints_path: ../checkpoints/1 # 检查点保存的路径
   checkpoints_path_is_shared_file_system: false # 检查点路径是否在共享文件系统上
@@ -8,8 +8,8 @@ checkpoints:
   load_lr_scheduler: false
   load_optimizer: false
 
-data_stages:
-- data:
+#data_stages:
+  data:
     dataset:
       dataset_folder: # 数据集的路径列表
         - ~/local/smollm1_corpus/fineweb-edu-dedup/
@@ -28,7 +28,7 @@ data_stages:
   name: training stage # 数据阶段名称
   start_training_step: 1 # 开始训练的步数
 
-general:
+#general:
   benchmark_csv_path: null # 基准测试CSV文件路径
   consumed_train_samples: null # 已消耗的训练样本数
   ignore_sanity_checks: true # 是否忽略完整性检查
@@ -37,12 +37,12 @@ general:
   seed: 42 # 随机种子
   step: null # 当前步数
 
-logging:
+#logging:
   iteration_step_info_interval: 1 # 每步记录日志信息的间隔
   log_level: info # 日志级别
   log_level_replica: info # 副本的日志级别
 
-model:
+#model:
   ddp_bucket_cap_mb: 25 # DDP的bucket大小
   dtype: bfloat16 # 数据类型
   init_method:
@@ -69,7 +69,7 @@ model:
     use_cache: true # 是否使用缓存
     vocab_size: 49152 # 词汇表大小
 
-optimizer:
+#optimizer:
   accumulate_grad_in_fp32: true # 是否在FP32中累积梯度
   clip_grad: 1.0 # 梯度裁剪值
   learning_rate_scheduler:
@@ -89,7 +89,7 @@ optimizer:
   weight_decay: 0.01 # 权重衰减
   zero_stage: 0 # ZeRO优化的阶段
 
-parallelism:
+#parallelism:
   dp: 1 # 数据并行度(并行设备数目)
   expert_parallel_size: 1 # 专家并行大小
   pp: 1 # 管道并行度
@@ -100,14 +100,14 @@ parallelism:
   tp_mode: REDUCE_SCATTER # 张量并行模式
   tp_recompute_allgather: true # 张量并行重新计算AllGather
 
-profiler: null # 性能分析器
+#profiler: null # 性能分析器
 
-tokenizer:
+#tokenizer:
   tokenizer_max_length: null # 分词器最大长度
   tokenizer_name_or_path: ~/data/models/HuggingFaceTB/SmolLM-135M # 分词器名称或路径
   tokenizer_revision: null # 分词器版本
 
-tokens:
+#tokens:
   batch_accumulation_per_replica: 1 # 每个副本（设备）的批次累积
   limit_test_batches: 0 # 测试批次限制
   limit_val_batches: 0 # 验证批次限制
@@ -116,6 +116,7 @@ tokens:
   train_steps: 18000 # 训练步骤数
   val_check_interval: -1 # 验证检查间隔
 
+  output_dir: .
 
 # pre_train_steps: 600000
 # GBS = micro_batch_size *  batch_accumulation_per_replica * dp
