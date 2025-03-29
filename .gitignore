@@ -180,3 +180,6 @@ wandb/
 
 # debug setting
 /.vscode
+
+# figure
+*.png
