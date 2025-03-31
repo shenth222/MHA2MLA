@@ -141,3 +141,13 @@ def get_qk_embed_states():
     Get the q and k embed states from the LlamaAttention class.
     """
     return q_embed, k_embed
+
+def clear_qk_states():
+    """
+    Clear the q and k states from the LlamaAttention class.
+    """
+    global q, k, q_embed, k_embed
+    q = []
+    k = []
+    q_embed = []
+    k_embed = []
