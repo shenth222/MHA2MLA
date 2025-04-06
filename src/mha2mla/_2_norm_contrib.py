@@ -16,8 +16,8 @@ SAVE_STATES = True
 if LOAD_STATES:
     SAVE_STATES = False
 
-model_name = "135m" # "135m", "2-7b", "360m"
-path = "/data/shenth/models/SmolLM/135m"
+model_name = "2-7b" # "135m", "2-7b", "360m"
+path = "/data/shenth/models/llama/2-7b-hf"
 
 def load_model(path, config):
     model = LlamaForCausalLM.from_pretrained(path, config=config)
@@ -36,19 +36,19 @@ def load_tokenizer(path):
 
 def make_datasets(data_path, tokenizer, bsz=8):
     dataset = load_dataset(data_path, "ax")
-    # 获取 "test" 集中 "premise" 列的最大长度
-    lengths = [len(premise) for premise in dataset["test"]["premise"]]
-    ml = max(lengths)
+    ml = max(len(tokenizer(x["premise"])["input_ids"]) for x in dataset["test"])
 
-    def preprocess_function(examples):
+    # 对数据进行填充和截断
+    def preprocess_with_padding(examples):
         return tokenizer(
             examples["premise"],
-            max_length=ml,
+            max_length=ml,  # 使用最大长度
             padding="max_length",
             truncation=True,
-            return_tensors="pt")
+            return_tensors="pt"
+        )
 
-    encoded_dataset = dataset["test"].map(preprocess_function, batched=True)
+    encoded_dataset = dataset["test"].map(preprocess_with_padding, batched=True)
     encoded_dataset.set_format(type="torch", columns=["input_ids", "attention_mask"])
     
     # 创建 DataLoader
