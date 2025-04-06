@@ -159,6 +159,7 @@ def make_heatmap_2(states, flag, num_heads, num_layers, model_name):
     fig.write_image(f"{save_dir}/{flag}_states.png", scale=3)
 
 def save_qk_states(states, flag, model_name):
+    # [layer_idx, num_heads(num_key_value_heads), head_dim//2]
     if model_name not in ["135m", "2-7b", "360m"]:
         raise ValueError("model_name should be in [135m, 2-7b, 360m]")
     save_dir = f"./qk_state/{model_name}/"

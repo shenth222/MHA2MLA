@@ -66,8 +66,8 @@ def llama_attn_forward(
     key_states = key_states.view(bsz, q_len, self.num_key_value_heads, self.head_dim).transpose(1, 2)
     value_states = value_states.view(bsz, q_len, self.num_key_value_heads, self.head_dim).transpose(1, 2)
 
-    q.append(query_states.cpu().clone())
-    k.append(key_states.cpu().clone())
+    # q.append(query_states.cpu().clone())
+    # k.append(key_states.cpu().clone())
 
     if position_embeddings is None:
         logger.warning_once(
@@ -82,7 +82,7 @@ def llama_attn_forward(
     query_states, key_states = apply_rotary_pos_emb(query_states, key_states, cos, sin)
 
     q_embed.append(query_states.cpu().clone())
-    k_embed.append(key_states.cpu().clone())
+    
 
     if past_key_value is not None:
         # sin and cos are specific to RoPE models; cache_position needed for the static cache
@@ -92,6 +92,8 @@ def llama_attn_forward(
     key_states = repeat_kv(key_states, self.num_key_value_groups)
     value_states = repeat_kv(value_states, self.num_key_value_groups)
     attn_weights = torch.matmul(query_states, key_states.transpose(2, 3)) / math.sqrt(self.head_dim)
+
+    k_embed.append(key_states.cpu().clone())
 
     if attention_mask is not None:  # no matter the length, we just slice it
         causal_mask = attention_mask[:, :, :, : key_states.shape[-2]]
