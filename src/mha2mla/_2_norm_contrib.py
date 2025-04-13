@@ -8,6 +8,7 @@ import os
 from torch.utils.data import DataLoader
 from datasets import load_dataset
 import plotly.express as px
+import pandas as pd
 import random
 patch_llama_attn()
 
@@ -16,8 +17,8 @@ SAVE_STATES = True
 if LOAD_STATES:
     SAVE_STATES = False
 
-model_name = "2-7b" # "135m", "2-7b", "360m"
-path = "/data/shenth/models/llama/2-7b-hf"
+model_name = "135m" # "135m", "2-7b", "360m"
+path = "/data/shenth/models/SmolLM/135m"
 
 def load_model(path, config):
     model = LlamaForCausalLM.from_pretrained(path, config=config)
@@ -172,16 +173,26 @@ else:
             attn_res_baseline = torch.matmul(q, k.transpose(2, 3)) # [layer_idx, num_heads, 1, 1]
             head_dim = q.shape[-1]
             contribution = []
+            total_diff = []
             for idx in range(head_dim):
                 q_tmp = q.clone()
                 k_tmp = k.clone()
                 q_tmp[:, :, :, idx] = 0
                 k_tmp[:, :, :, idx] = 0
                 attn_res_modified = torch.matmul(q_tmp, k_tmp.transpose(2, 3))
-                contrib = torch.abs((attn_res_baseline - attn_res_modified) / attn_res_baseline) * 100 # [layer_idx, num_heads, 1, 1]
-                contrib = contrib.squeeze(-1).squeeze(-1)
-                contribution.append(contrib)
-            contribution = torch.stack(contribution, dim=-1) # [layer_idx, num_heads, head_dim]
+                ######## normalized ########
+                diff = torch.abs(attn_res_baseline - attn_res_modified).squeeze(-1).squeeze(-1) # [layer_idx, num_heads]
+                total_diff.append(diff)
+            contribution = torch.stack(total_diff, dim=-1) # [layer_idx, num_heads, head_dim]
+            total_diff = torch.stack(total_diff, dim=-1) # [layer_idx, num_heads, head_dim]
+            total_diff = torch.sum(total_diff, dim=-1) # [layer_idx, num_heads]
+            contribution = contribution / total_diff.unsqueeze(-1) # [layer_idx, num_heads, head_dim]
+
+                ######## unnormalized ########
+                # contrib = torch.abs((attn_res_baseline - attn_res_modified) / attn_res_baseline) * 100 # [layer_idx, num_heads, 1, 1]
+                # contrib = contrib.squeeze(-1).squeeze(-1)
+                # contribution.append(contrib)
+            # contribution = torch.stack(contribution, dim=-1) # [layer_idx, num_heads, head_dim]
             return contribution
 
         def norm_contrib(q, k):
@@ -196,6 +207,50 @@ else:
         
         real_contribution = real_contrib(q, k) # [layer_idx, num_heads, head_dim]
         norm_contribution = norm_contrib(q_norm, k_norm) # [layer_idx, num_heads, head_dim]
+        
+        ############ attn_res recovery ############
+        THRESHOLD = 0.9
+        top_r = 4
+        def get_top_r_mask(norm_contrib, topr=4):
+            topr = topr * 2
+            top_indices = torch.topk(norm_contrib, topr, dim=-1).indices # [layer_idx, num_heads, topr]
+            mask = torch.zeros_like(norm_contrib, dtype=torch.bool) # [layer_idx, num_heads, head_dim]
+            mask.scatter_(-1, top_indices, True) # [layer_idx, num_heads, head_dim]
+            return mask
+        
+        mask = get_top_r_mask(norm_contribution, top_r) # [layer_idx, num_heads, head_dim]
+
+        def calculate_recovery_rate(real_contrib, mask):
+            real_contrib = real_contrib * mask # [layer_idx, num_heads, head_dim]
+            recovery_rate = real_contrib.sum(dim=-1) # [layer_idx, num_heads]
+            return recovery_rate
+        
+        recovery_rate = calculate_recovery_rate(real_contribution, mask) # [layer_idx, num_heads]
+        
+        ######### boxplot #########
+        data = {
+            "Layer": [],
+            "Recovery Rate": [],
+        }
+        for layer_idx in range(config.num_hidden_layers):
+            for num_heads in range(config.num_attention_heads):
+                data["Layer"].append(layer_idx)
+                data["Recovery Rate"].append(recovery_rate[layer_idx, num_heads].item())
+                
+        df = pd.DataFrame(data)
+        fig = px.box(
+            df,
+            x="Layer",
+            y="Recovery Rate",
+            title=f"Recovery Rate by Layer of {model_name}",
+            labels={"Layer": "Layer Index", "Recovery Rate": "Recovery Rate"},
+            template="plotly_white",
+            color_discrete_sequence=px.colors.qualitative.Light24[0:config.num_hidden_layers],
+            color="Layer",
+        )
+        attn_recovery_rate_dir = f"./figure/attn_recovery_rate/{model_name}/recovery_rate/"
+        os.makedirs(attn_recovery_rate_dir, exist_ok=True)
+        fig.write_image(f"{attn_recovery_rate_dir}recovery_rate.png", scale=3)
         
         def contrib_heatmap(
                 contribution,
@@ -227,23 +282,23 @@ else:
                 os.makedirs(save_dir, exist_ok=True)
                 fig.write_image(f"{save_dir}/Layer_{layer_idx}_{flag}.png")
 
-        contrib_heatmap(
-            real_contribution,
-            "real_contribution",
-            model_name,
-            f"./figure/norm_contrib/{model_name}/real_contribution/",
-            x_label="num_heads",
-            y_label="head_dim",
-        )
+        # contrib_heatmap(
+        #     real_contribution,
+        #     "real_contribution",
+        #     model_name,
+        #     f"./figure/norm_contrib/{model_name}/real_contribution/",
+        #     x_label="num_heads",
+        #     y_label="head_dim",
+        # )
 
-        contrib_heatmap(
-            norm_contribution,
-            "norm_contribution",
-            model_name,
-            f"./figure/norm_contrib/{model_name}/norm_contribution/",
-            x_label="num_heads",
-            y_label="head_dim",
-        )
+        # contrib_heatmap(
+        #     norm_contribution,
+        #     "norm_contribution",
+        #     model_name,
+        #     f"./figure/norm_contrib/{model_name}/norm_contribution/",
+        #     x_label="num_heads",
+        #     y_label="head_dim",
+        # )
 
     random_one_sample(find_the_longest=True)
 
