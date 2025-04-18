@@ -186,3 +186,6 @@ wandb/
 
 # figure
 *.png
+
+# lm-eval results
+/src/mha2mla/rope_bench/res/*
