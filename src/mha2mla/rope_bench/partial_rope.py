@@ -46,7 +46,7 @@ def get_parser():
     parser.add_argument("--load_path", type=str, help="Path to load qk states")
     parser.add_argument("--save_path", type=str, help="Path to save qk states")
     parser.add_argument("--figure_path", type=str, default="./figure/benchmark/", help="Path to save figure")
-    rope_choices = ["high", "low", "uniform", "2-norm", "accumulate", "high-low"]
+    rope_choices = ["high", "low", "uniform", "2-norm", "accumulate", "high-low", "full-rope"]
     parser.add_argument("--rope_method", type=str, default="norm", choices=rope_choices, help="Partial RoPE method")
     parser.add_argument(
         "--hf_hub_log_args",
@@ -79,7 +79,7 @@ def get_parser():
 
 MODEL_MAP = {
     "135m": "/data/shenth/models/SmolLM/135m",
-    "360m": "/data/shenth/models/SmolLM/135m",
+    "360m": "/data/shenth/models/SmolLM/360m",
     "2-7b": "/data/shenth/models/llama/2-7b-hf",
     "1b": "/data/shenth/models/SmolLM/1b"
 }
@@ -108,7 +108,7 @@ if __name__ == "__main__":
         "partial_rope_version": rope_method,
         "top_k_rope_dim": 4,
         "uniform_start_point": 0,
-        "uniform_step": 1,
+        "uniform_step": 4,
         "last_k_rope_dim": 4,
         "n_gqa_group": config.num_attention_heads / config.num_key_value_heads ,
     }

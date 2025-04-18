@@ -19,7 +19,7 @@
 # 定义参数列表
 MODEL_NAMES=("135m" "360m" "2-7b" "1b")
 TASKS=("winogrande" "mmlu" "arc_challenge" "hellaswag" "openbookqa" "piqa")
-ROPE_METHODS=("high" "uniform" "low" "high-low")
+ROPE_METHODS=("high" "uniform" "low" "high-low" "full-rope")
 BASE_OUTPUT_PATH="./res"
 
 # 遍历所有组合
@@ -27,7 +27,7 @@ for MODEL_NAME in "${MODEL_NAMES[@]}"; do
     for TASK in "${TASKS[@]}"; do
         for ROPE_METHOD in "${ROPE_METHODS[@]}"; do
             # 构造输出路径
-            OUTPUT_PATH="${BASE_OUTPUT_PATH}/${ROPE_METHOD}/${MODEL_NAME}/${TASK}/"
+            OUTPUT_PATH="${BASE_OUTPUT_PATH}/${MODEL_NAME}/${ROPE_METHOD}/${TASK}/"
 
             # 创建输出目录（如果不存在）
             # mkdir -p "$OUTPUT_PATH"
