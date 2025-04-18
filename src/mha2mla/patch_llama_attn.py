@@ -15,9 +15,10 @@ from transformers.utils import (
 logger = logging.get_logger(__name__)
 
 from transformers.models.llama.modeling_llama import (
-    apply_rotary_pos_emb,
+    # apply_rotary_pos_emb,
     repeat_kv,
-    LlamaAttention
+    LlamaAttention,
+    rotate_half
 )
 
 q = []
@@ -25,6 +26,14 @@ k = []
 
 q_embed = []
 k_embed = []
+
+def apply_rotary_pos_emb(q, k, cos, sin, position_ids=None, unsqueeze_dim=1):
+    # Full-RoPE
+    cos = cos.unsqueeze(unsqueeze_dim) # bsz, 1, q_len, head_dim
+    sin = sin.unsqueeze(unsqueeze_dim)
+    q_embed = (q * cos) + (rotate_half(q) * sin) # bsz, num_heads, q_len, head_dim
+    k_embed = (k * cos) + (rotate_half(k) * sin)
+    return q_embed, k_embed
 
 def llama_attn_forward(
     self,
@@ -78,7 +87,11 @@ def llama_attn_forward(
         )
         cos, sin = self.rotary_emb(value_states, position_ids)
     else:
-        cos, sin = position_embeddings
+        cos, sin = position_embeddings # bsz, q_len, head_dim
+    # from IPython import embed
+    # if self.layer_idx == 0:
+    #     embed()
+    # bsz, num_heads, q_len, head_dim
     query_states, key_states = apply_rotary_pos_emb(query_states, key_states, cos, sin)
 
     q_embed.append(query_states.cpu().clone())
