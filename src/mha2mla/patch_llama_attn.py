@@ -29,10 +29,10 @@ k_embed = []
 
 def apply_rotary_pos_emb(q, k, cos, sin, position_ids=None, layer_idx=0, unsqueeze_dim=1):
     # Full-RoPE
-    cos = cos.unsqueeze(unsqueeze_dim) # bsz, 1, q_len, head_dim
+    cos = cos.unsqueeze(unsqueeze_dim) # 1, 1, q_len, head_dim
     sin = sin.unsqueeze(unsqueeze_dim)
     q_embed = (q * cos) + (rotate_half(q) * sin) # bsz, num_heads, q_len, head_dim
-    k_embed = (k * cos) + (rotate_half(k) * sin)
+    k_embed = (k * cos) + (rotate_half(k) * sin) # bsz, num_kv_heads, q_len, head_dim
     # if layer_idx == 0:
     #     embed()
         # qk_tensor: bsz, num_heads, q_len, q_len

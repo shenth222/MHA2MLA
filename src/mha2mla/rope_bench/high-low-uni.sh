@@ -19,7 +19,8 @@
 # 定义参数列表
 MODEL_NAMES=("135m" "360m" "2-7b" "1b")
 TASKS=("winogrande" "mmlu" "arc_challenge" "hellaswag" "openbookqa" "piqa")
-ROPE_METHODS=("high" "uniform" "low" "high-low" "full-rope")
+# ROPE_METHODS=("high" "uniform" "low" "high-low" "full-rope")
+ROPE_METHODS=("2-norm")
 BASE_OUTPUT_PATH="./res"
 
 # 遍历所有组合

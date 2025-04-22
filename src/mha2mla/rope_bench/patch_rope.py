@@ -45,6 +45,15 @@ from transformers.cache_utils import Cache, StaticCache
 from transformers.modeling_flash_attention_utils import _flash_attention_forward
 from transformers.utils import is_flash_attn_greater_or_equal_2_10
 
+def cal_2_norm(states):
+    # bsz, num_heads, q_len, head_dim
+    states = torch.norm(
+        states.reshape(states.shape[0],states.shape[1],states.shape[2],2,-1).transpose(-1,-2),
+        p=2,
+        dim=4,
+    )
+    return states # bsz, num_heads, q_len, head_dim//2
+
 def create_custom_apply_rotary_pos_emb_hf(cfg):
 
     def apply_rotary_pos_emb_v0(q, k, cos, sin, position_ids=None, unsqueeze_dim=1):
@@ -140,23 +149,35 @@ def create_custom_apply_rotary_pos_emb_hf(cfg):
         # retain the subspaces with higher 2-norm score
         # a strong hypothesis is that a unimportant component of key_states is also unimportant in the future
         logger.warning_once(
-            "HIGH-LOW: retain the subspaces with higher 2-norm score"
+            "2-Norm: retain the subspaces with higher 2-norm score"
         )
-        cos = cos.unsqueeze(unsqueeze_dim)
+        cos = cos.unsqueeze(unsqueeze_dim) # bsz, 1, q_len, head_dim
         sin = sin.unsqueeze(unsqueeze_dim)
-        q_embed = (q * cos) + (rotate_half(q) * sin)
-        k_embed = (k * cos) + (rotate_half(k) * sin)
-        
+        q_embed = (q * cos) + (rotate_half(q) * sin) # bsz, num_heads, q_len, head_dim
+        k_embed = (k * cos) + (rotate_half(k) * sin) # bsz, num_kv_heads, q_len, head_dim
+
+        repeat_k = repeat_kv(k, cfg["n_gqa_group"]) # bsz, num_heads, q_len, head_dim
+
+        q_norm = cal_2_norm(q).mean(dim=2) # bsz, num_heads, head_dim//2
+        k_norm = cal_2_norm(repeat_k).mean(dim=2) # bsz, num_heads, head_dim//2
+
+        qk_norm = q_norm * k_norm # bsz, num_heads, head_dim//2
+
+        if cfg["n_gqa_group"] > 1:
+            qk_norm = qk_norm.reshape(
+                qk_norm.size(0),
+                qk_norm.size(1) // cfg["n_gqa_group"],
+                cfg["n_gqa_group"],
+                qk_norm.size(2)
+            )
+            qk_norm = qk_norm.mean(dim=2) # bsz, num_kv_heads, head_dim//2
+
         top_k_dim = cfg["top_k_rope_dim"]
-        topk_indices = torch.topk(qk_tensor[layer_idx], k=top_k_dim, dim=1)[1]
-        mask = torch.zeros_like(qk_tensor[layer_idx])
-        mask.scatter_(1, topk_indices, 1)
-        mask_for_k = (
-            torch.cat((mask, mask), dim=1).unsqueeze(0).unsqueeze(2).to(k.device)
-        )
-        mask_for_q = torch.repeat_interleave(
-            input=mask_for_k, repeats=cfg["n_gqa_group"], dim=1
-        ).to(q.device)
+        _, topk_indices = torch.topk(qk_norm, k=top_k_dim, dim=-1)
+        mask = torch.zeros_like(qk_norm, dtype=torch.float32)
+        mask.scatter_(-1, topk_indices, 1) # bsz, num_kv_heads, head_dim//2
+        mask_for_k = (torch.cat((mask, mask), dim=-1).unsqueeze(2)) # bsz, num_kv_heads, 1, head_dim
+        mask_for_q = torch.repeat_interleave(input=mask_for_k, repeats=cfg["n_gqa_group"], dim=1)
         q_embed = torch.where(mask_for_q == 1, q_embed, q)
         k_embed = torch.where(mask_for_k == 1, k_embed, k)
         return q_embed, k_embed
@@ -185,6 +206,9 @@ def create_custom_apply_rotary_pos_emb_hf(cfg):
         k_embed = torch.cat([k for k in ks if k != []], -1)
         return q_embed, k_embed
 
+    def apply_rotary_pos_emb_v6(q, k, cos, sin, position_ids=None, layer_idx=0, unsqueeze_dim=1):
+        pass
+
     version = cfg["partial_rope_version"]
     version_str2int = {
         "full-rope": 0,
@@ -196,11 +220,11 @@ def create_custom_apply_rotary_pos_emb_hf(cfg):
     }
     if isinstance(version, str):
         version = version_str2int[version]
-    if version == 4:
-        print("not support now")
-        exit()
-        with open(cfg["qk_tensor_path"], "rb") as fin:
-            qk_tensor = torch.load(fin)
+    # if version == 4:
+    #     print("not support now")
+    #     exit()
+    #     with open(cfg["qk_tensor_path"], "rb") as fin:
+    #         qk_tensor = torch.load(fin)
     versions = {
         0: apply_rotary_pos_emb_v0,
         1: apply_rotary_pos_emb_v1,

@@ -17,8 +17,8 @@ SAVE_STATES = True
 if LOAD_STATES:
     SAVE_STATES = False
 
-model_name = "2-7b" # "135m", "2-7b", "360m"
-path = "/data/shenth/models/llama/2-7b-hf"
+model_name = "135m" # "135m", "2-7b", "360m"
+path = "/data/shenth/models/SmolLM/135m"
 
 def load_model(path, config):
     model = LlamaForCausalLM.from_pretrained(path, config=config)

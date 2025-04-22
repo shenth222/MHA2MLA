@@ -110,7 +110,7 @@ if __name__ == "__main__":
         "uniform_start_point": 0,
         "uniform_step": 4,
         "last_k_rope_dim": 4,
-        "n_gqa_group": config.num_attention_heads / config.num_key_value_heads ,
+        "n_gqa_group": config.num_attention_heads // config.num_key_value_heads ,
     }
     patch_partial_rope(rope_cfg)
     # my_model = load_model(model_path, config) # create your model (could be running finetuning with some custom modeling code)
