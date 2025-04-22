@@ -54,6 +54,29 @@ def cal_2_norm(states):
     )
     return states # bsz, num_heads, q_len, head_dim//2
 
+def zero_ablation(q, k):
+    # bsz, num_heads, q_len, head_dim
+    baseline = torch.matmul(q, k.transpose(2,3)) # # bsz, num_heads, q_len, q_len
+    contribution = []
+    _, _, slen, head_dim = q.size()
+    for s_idx in range(slen):
+        q_seq = q[:, :, s_idx, :].unsqueeze(2) # # bsz, num_heads, 1, head_dim
+        k_seq = k[:, :, s_idx, :].unsqueeze(2)
+        diff_by_dim = []
+        for dim_idx in range(head_dim):
+            q_tmp = q_seq.clone()
+            k_tmp = k_seq.clone()
+            q_tmp[:, :, :, dim_idx] = 0
+            k_tmp[:, :, :, dim_idx] = 0
+            res_ablation = torch.matmul(q_tmp, k_tmp.transpose(2, 3)) # bsz, num_heads, 1, 1
+            diff = torch.abs(baseline[:, :, s_idx, s_idx].unsqueeze(-1).unsqueeze(-1) - res_ablation).squeeze(-1).squeeze(-1) # bsz, num_heads
+            diff_by_dim.append(diff)
+        diff_by_dim = torch.stack(diff_by_dim, dim=-1) # bsz, num_heads, head_dim
+        total_diff = torch.sum(diff_by_dim, dim=-1) # bsz, num_heads
+        contribution_by_seq = diff_by_dim / total_diff.unsqueeze(-1) # bsz, num_heads, head_dim
+        contribution.append(contribution_by_seq)
+    return torch.stack(contribution, dim=2) # bsz, num_heads, seq_len, head_dim
+
 def create_custom_apply_rotary_pos_emb_hf(cfg):
 
     def apply_rotary_pos_emb_v0(q, k, cos, sin, position_ids=None, unsqueeze_dim=1):
@@ -157,10 +180,8 @@ def create_custom_apply_rotary_pos_emb_hf(cfg):
         k_embed = (k * cos) + (rotate_half(k) * sin) # bsz, num_kv_heads, q_len, head_dim
 
         repeat_k = repeat_kv(k, cfg["n_gqa_group"]) # bsz, num_heads, q_len, head_dim
-
         q_norm = cal_2_norm(q).mean(dim=2) # bsz, num_heads, head_dim//2
         k_norm = cal_2_norm(repeat_k).mean(dim=2) # bsz, num_heads, head_dim//2
-
         qk_norm = q_norm * k_norm # bsz, num_heads, head_dim//2
 
         if cfg["n_gqa_group"] > 1:
@@ -207,7 +228,35 @@ def create_custom_apply_rotary_pos_emb_hf(cfg):
         return q_embed, k_embed
 
     def apply_rotary_pos_emb_v6(q, k, cos, sin, position_ids=None, layer_idx=0, unsqueeze_dim=1):
-        pass
+        logger.warning_once(
+            "Contribution: retain the subspaces with higher contribution"
+        )
+
+        cos = cos.unsqueeze(unsqueeze_dim) # bsz, 1, q_len, head_dim
+        sin = sin.unsqueeze(unsqueeze_dim)
+        q_embed = (q * cos) + (rotate_half(q) * sin) # bsz, num_heads, q_len, head_dim
+        k_embed = (k * cos) + (rotate_half(k) * sin) # bsz, num_kv_heads, q_len, head_dim
+
+        repeat_k = repeat_kv(k, cfg["n_gqa_group"]) # bsz, num_heads, q_len, head_dim
+
+        contribution = zero_ablation(q, repeat_k) # bsz, num_heads, seq_len, head_dim
+        if cfg["n_gqa_group"] > 1:
+            contribution = contribution.reshape(
+                contribution.size(0),
+                contribution.size(1) // cfg["n_gqa_group"],
+                cfg["n_gqa_group"],
+                contribution.size(2),
+                contribution.size(3)
+            ).mean(dim=2) # bsz, num_kv_heads, seq_len, head_dim
+
+        top_k_dim = cfg["top_k_rope_dim"]
+        _, topk_indices = torch.topk(contribution, k=top_k_dim, dim=-1)
+        mask = torch.zeros_like(contribution, dtype=torch.float32)
+        mask_for_k = mask.scatter_(-1, topk_indices, 1) # bsz, num_kv_heads, seq_len, head_dim
+        mask_for_q = torch.repeat_interleave(input=mask_for_k, repeats=cfg["n_gqa_group"], dim=1)
+        q_embed = torch.where(mask_for_q == 1, q_embed, q)
+        k_embed = torch.where(mask_for_k == 1, k_embed, k)
+        return q_embed, k_embed
 
     version = cfg["partial_rope_version"]
     version_str2int = {
@@ -217,6 +266,7 @@ def create_custom_apply_rotary_pos_emb_hf(cfg):
         "high-low": 3,
         "2-norm": 4,
         "low": 5,
+        "contribution": 6,
     }
     if isinstance(version, str):
         version = version_str2int[version]
@@ -232,6 +282,7 @@ def create_custom_apply_rotary_pos_emb_hf(cfg):
         3: apply_rotary_pos_emb_v3,
         4: apply_rotary_pos_emb_v4,
         5: apply_rotary_pos_emb_v5,
+        6: apply_rotary_pos_emb_v6,
     }
     return versions.get(version, apply_rotary_pos_emb_v0)
 

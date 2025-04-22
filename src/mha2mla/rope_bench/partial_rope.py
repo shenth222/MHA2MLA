@@ -46,7 +46,7 @@ def get_parser():
     parser.add_argument("--load_path", type=str, help="Path to load qk states")
     parser.add_argument("--save_path", type=str, help="Path to save qk states")
     parser.add_argument("--figure_path", type=str, default="./figure/benchmark/", help="Path to save figure")
-    rope_choices = ["high", "low", "uniform", "2-norm", "accumulate", "high-low", "full-rope"]
+    rope_choices = ["high", "low", "uniform", "2-norm", "accumulate", "high-low", "full-rope", "contribution"]
     parser.add_argument("--rope_method", type=str, default="norm", choices=rope_choices, help="Partial RoPE method")
     parser.add_argument(
         "--hf_hub_log_args",
