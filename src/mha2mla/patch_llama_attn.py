@@ -33,8 +33,8 @@ def apply_rotary_pos_emb(q, k, cos, sin, position_ids=None, layer_idx=0, unsquee
     sin = sin.unsqueeze(unsqueeze_dim)
     q_embed = (q * cos) + (rotate_half(q) * sin) # bsz, num_heads, q_len, head_dim
     k_embed = (k * cos) + (rotate_half(k) * sin)
-    if layer_idx == 0:
-        embed()
+    # if layer_idx == 0:
+    #     embed()
         # qk_tensor: bsz, num_heads, q_len, q_len
     return q_embed, k_embed
 

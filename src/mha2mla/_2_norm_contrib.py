@@ -157,7 +157,7 @@ def norm_contrib(q, k):
     q = q.mean(dim=1) # [layer_idx, num_heads, head_dim//2]
     k = k.mean(dim=1)
     res = q * k # [layer_idx, num_heads, head_dim//2]
-    res = torch.repeat_interleave(res, 2, dim=-1) # [layer_idx, num_heads, head_dim]
+    res = torch.concat((res,res), dim=-1) # [layer_idx, num_heads, head_dim]
     return res
 
 def get_top_r_mask(norm_contrib, topr=4):
@@ -264,49 +264,51 @@ else:
         recovery_rate = calculate_recovery_rate(real_contribution, mask) # [layer_idx, num_heads]
         
         ######### boxplot #########
-        data = {
-            "Layer": [],
-            "Recovery Rate": [],
-        }
-        for layer_idx in range(config.num_hidden_layers):
-            for num_heads in range(config.num_attention_heads):
-                data["Layer"].append(layer_idx)
-                data["Recovery Rate"].append(recovery_rate[layer_idx, num_heads].item())
+        # data = {
+        #     "Layer": [],
+        #     "Recovery Rate": [],
+        # }
+        # for layer_idx in range(config.num_hidden_layers):
+        #     for num_heads in range(config.num_attention_heads):
+        #         data["Layer"].append(layer_idx)
+        #         data["Recovery Rate"].append(recovery_rate[layer_idx, num_heads].item())
                 
-        df = pd.DataFrame(data)
-        fig = px.box(
-            df,
-            x="Layer",
-            y="Recovery Rate",
-            title=f"Recovery Rate by Layer of {model_name}",
-            labels={"Layer": "Layer Index", "Recovery Rate": "Recovery Rate"},
-            template="plotly_white",
-            color_discrete_sequence=px.colors.qualitative.Light24[0:config.num_hidden_layers],
-            color="Layer",
+        # df = pd.DataFrame(data)
+        # fig = px.box(
+        #     df,
+        #     x="Layer",
+        #     y="Recovery Rate",
+        #     title=f"Recovery Rate by Layer of {model_name}",
+        #     labels={"Layer": "Layer Index", "Recovery Rate": "Recovery Rate"},
+        #     template="plotly_white",
+        #     color_discrete_sequence=px.colors.qualitative.Light24[0:config.num_hidden_layers],
+        #     color="Layer",
+        # )
+        # attn_recovery_rate_dir = f"./figure/attn_recovery_rate/{model_name}/recovery_rate/"
+        # os.makedirs(attn_recovery_rate_dir, exist_ok=True)
+        # fig.write_image(f"{attn_recovery_rate_dir}recovery_rate.png", scale=3)
+
+        contrib_heatmap(
+            real_contribution,
+            "real_contribution",
+            model_name,
+            f"./figure/norm_contrib/{model_name}/real_contribution/",
+            x_label="num_heads",
+            y_label="head_dim",
+            config = config
         )
-        attn_recovery_rate_dir = f"./figure/attn_recovery_rate/{model_name}/recovery_rate/"
-        os.makedirs(attn_recovery_rate_dir, exist_ok=True)
-        fig.write_image(f"{attn_recovery_rate_dir}recovery_rate.png", scale=3)
 
-        # contrib_heatmap(
-        #     real_contribution,
-        #     "real_contribution",
-        #     model_name,
-        #     f"./figure/norm_contrib/{model_name}/real_contribution/",
-        #     x_label="num_heads",
-        #     y_label="head_dim",
-        # )
+        contrib_heatmap(
+            norm_contribution,
+            "norm_contribution",
+            model_name,
+            f"./figure/norm_contrib/{model_name}/norm_contribution/",
+            x_label="num_heads",
+            y_label="head_dim",
+            config = config
+        )
 
-        # contrib_heatmap(
-        #     norm_contribution,
-        #     "norm_contribution",
-        #     model_name,
-        #     f"./figure/norm_contrib/{model_name}/norm_contribution/",
-        #     x_label="num_heads",
-        #     y_label="head_dim",
-        # )
-
-    # random_one_sample(find_the_longest=True)
+    random_one_sample(find_the_longest=True)
 
     def random_n_samples(n=None):
         recovery_rate_list = []
@@ -417,4 +419,4 @@ else:
         os.makedirs(attn_recovery_rate_dir, exist_ok=True)
         fig.write_image(f"{attn_recovery_rate_dir}recovery_rate_glue.png", scale=3)
     
-    random_n_samples()
+    # random_n_samples()
