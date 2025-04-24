@@ -17,25 +17,32 @@
 # filepath: /data/shenth/work/MHA2MLA/src/mha2mla/rope_bench/run_all.sh
 
 # 定义参数列表
-MODEL_NAMES=("135m" "360m" "2-7b" "1b")
+# MODEL_NAMES=("360m" "2-7b" "1b")
+MODEL_NAMES=("1b")
 TASKS=("winogrande" "mmlu" "arc_challenge" "hellaswag" "openbookqa" "piqa")
+# TASKS=("mmlu" "arc_challenge" "hellaswag" "openbookqa" "piqa")
 # ROPE_METHODS=("high" "uniform" "low" "high-low" "full-rope")
-ROPE_METHODS=("2-norm")
+ROPE_METHODS=("accumulate")
 BASE_OUTPUT_PATH="./res"
+MAX_COMPONENT=false
 
 # 遍历所有组合
 for MODEL_NAME in "${MODEL_NAMES[@]}"; do
     for TASK in "${TASKS[@]}"; do
         for ROPE_METHOD in "${ROPE_METHODS[@]}"; do
             # 构造输出路径
-            OUTPUT_PATH="${BASE_OUTPUT_PATH}/${MODEL_NAME}/${ROPE_METHOD}/${TASK}/"
+            if [ "$ROPE_METHOD" == "accumulate" ]; then
+                OUTPUT_PATH="${BASE_OUTPUT_PATH}/${MODEL_NAME}/${ROPE_METHOD}-"$MAX_COMPONENT"/${TASK}/"
+            else
+                OUTPUT_PATH="${BASE_OUTPUT_PATH}/${MODEL_NAME}/${ROPE_METHOD}/${TASK}/"
+            fi
 
             # 创建输出目录（如果不存在）
             # mkdir -p "$OUTPUT_PATH"
 
             # 执行程序
             echo "Running: model_name=${MODEL_NAME}, task=${TASK}, rope_method=${ROPE_METHOD}, output_path=${OUTPUT_PATH}"
-            python partial_rope.py --model_name "$MODEL_NAME" --task "$TASK" --rope_method "$ROPE_METHOD" --output_path "$OUTPUT_PATH"
+            CUDA_VISIBLE_DEVICES=0 python partial_rope.py --model_name "$MODEL_NAME" --task "$TASK" --rope_method "$ROPE_METHOD" --output_path "$OUTPUT_PATH" --max_component "$MAX_COMPONENT"
         done
     done
 done

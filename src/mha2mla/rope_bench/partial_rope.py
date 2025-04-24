@@ -75,6 +75,22 @@ def get_parser():
         default=False,
         help="If True, shows the the full config of all tasks at the end of the evaluation.",
     )
+    def str2bool(v):
+        if isinstance(v, bool):
+            return v
+        if v.lower() in ("yes", "true", "t", "y", "1"):
+            return True
+        elif v.lower() in ("no", "false", "f", "n", "0"):
+            return False
+        else:
+            raise argparse.ArgumentTypeError("Boolean value expected.")
+    parser.add_argument(
+        "--max_component",
+        type=str2bool,
+        default=False,
+        required=False,
+        help="Set max component in accumulate RoPE (True or False)"
+    )
     return parser
 
 MODEL_MAP = {
@@ -110,7 +126,9 @@ if __name__ == "__main__":
         "uniform_start_point": 0,
         "uniform_step": 4,
         "last_k_rope_dim": 4,
-        "n_gqa_group": config.num_attention_heads // config.num_key_value_heads ,
+        "n_gqa_group": config.num_attention_heads // config.num_key_value_heads,
+        "recovery_rate": 0.9,
+        "max_component": args.max_component
     }
     patch_partial_rope(rope_cfg)
     # my_model = load_model(model_path, config) # create your model (could be running finetuning with some custom modeling code)
@@ -143,7 +161,7 @@ if __name__ == "__main__":
         model_args = f"pretrained={model_path}",
         tasks = [task],
         batch_size = "auto:4",
-        device = "cuda:1",
+        device = "cuda",
         cache_requests = True,
         evaluation_tracker = evaluation_tracker,
         task_manager = task_manager

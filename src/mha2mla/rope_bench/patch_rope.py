@@ -77,6 +77,40 @@ def zero_ablation(q, k):
         contribution.append(contribution_by_seq)
     return torch.stack(contribution, dim=2) # bsz, num_heads, seq_len, head_dim
 
+def find_indices(contribution, threshold, max_dim):
+    # 假设 contribution 的形状为 (bsz, num_kv_heads, seq_len, head_dim)
+
+    # 1. 对最后一维进行降序排序
+    sorted_values, sorted_indices = torch.sort(contribution, dim=-1, descending=True)
+
+    # 2. 计算累加值
+    cumulative_sum = torch.cumsum(sorted_values, dim=-1)
+
+    # 3. 找到满足累加值 >= threshold 的最小索引
+    threshold_mask = cumulative_sum >= threshold
+    valid_indices = torch.argmax(threshold_mask.int(), dim=-1)  # 找到第一个满足条件的索引
+
+    # 4. 如果无法达到 threshold，则选择 max_dim 个最大的索引
+    num_elements = torch.minimum(valid_indices + 1, torch.tensor(max_dim, device=contribution.device))
+
+    # 5. 构造最终的索引掩码
+    # final_mask = torch.zeros_like(contribution, dtype=torch.bool)
+    # for i in range(contribution.size(0)):  # 遍历 batch
+    #     for j in range(contribution.size(1)):  # 遍历 num_kv_heads
+    #         for k in range(contribution.size(2)):  # 遍历 seq_len
+    #             final_mask[i, j, k, sorted_indices[i, j, k, :num_elements[i, j, k]]] = True
+
+    _, _, _, head_dim = contribution.shape
+    arange = torch.arange(head_dim, device=contribution.device).view(1, 1, 1, -1)  # 形状为 (1, 1, 1, head_dim)
+    num_elements_expanded = num_elements.unsqueeze(-1)  # 形状为 (bsz, num_kv_heads, seq_len, 1)
+    mask = arange < num_elements_expanded  # 形状为 (bsz, num_kv_heads, seq_len, head_dim)
+
+    # 根据排序索引还原掩码
+    final_mask = torch.zeros_like(contribution, dtype=torch.bool)
+    final_mask.scatter_(-1, sorted_indices, mask)
+
+    return final_mask
+
 def create_custom_apply_rotary_pos_emb_hf(cfg):
 
     def apply_rotary_pos_emb_v0(q, k, cos, sin, position_ids=None, unsqueeze_dim=1):
@@ -257,6 +291,39 @@ def create_custom_apply_rotary_pos_emb_hf(cfg):
         q_embed = torch.where(mask_for_q == 1, q_embed, q)
         k_embed = torch.where(mask_for_k == 1, k_embed, k)
         return q_embed, k_embed
+    
+    def apply_rotary_pos_emb_v7(q, k, cos, sin, position_ids=None, layer_idx=0, unsqueeze_dim=1):
+        logger.warning_once(
+            "Recovery: retain the subspaces that reaches recovery rate threshold \n" \
+            f"Max component: {cfg['max_component']}"
+        )
+        cos = cos.unsqueeze(unsqueeze_dim) # bsz, 1, q_len, head_dim
+        sin = sin.unsqueeze(unsqueeze_dim)
+        q_embed = (q * cos) + (rotate_half(q) * sin) # bsz, num_heads, q_len, head_dim
+        k_embed = (k * cos) + (rotate_half(k) * sin) # bsz, num_kv_heads, q_len, head_dim
+
+        repeat_k = repeat_kv(k, cfg["n_gqa_group"]) # bsz, num_heads, q_len, head_dim
+
+        contribution = zero_ablation(q, repeat_k) # bsz, num_heads, seq_len, head_dim
+        if cfg["n_gqa_group"] > 1:
+            contribution = contribution.reshape(
+                contribution.size(0),
+                contribution.size(1) // cfg["n_gqa_group"],
+                cfg["n_gqa_group"],
+                contribution.size(2),
+                contribution.size(3)
+            ).mean(dim=2) # bsz, num_kv_heads, seq_len, head_dim
+
+        contribution = torch.nn.functional.softmax(contribution, dim=-1)
+
+        threshold = cfg["recovery_rate"]
+        max_dim = int(math.ceil(k.shape[-1] * 0.2)) if cfg["max_component"] else k.shape[-1]
+
+        mask_for_k = find_indices(contribution, threshold, max_dim)
+        mask_for_q = torch.repeat_interleave(input=mask_for_k, repeats=cfg["n_gqa_group"], dim=1)
+        q_embed = torch.where(mask_for_q == 1, q_embed, q)
+        k_embed = torch.where(mask_for_k == 1, k_embed, k)
+        return q_embed, k_embed
 
     version = cfg["partial_rope_version"]
     version_str2int = {
@@ -267,6 +334,7 @@ def create_custom_apply_rotary_pos_emb_hf(cfg):
         "2-norm": 4,
         "low": 5,
         "contribution": 6,
+        "accumulate": 7,
     }
     if isinstance(version, str):
         version = version_str2int[version]
@@ -283,6 +351,7 @@ def create_custom_apply_rotary_pos_emb_hf(cfg):
         4: apply_rotary_pos_emb_v4,
         5: apply_rotary_pos_emb_v5,
         6: apply_rotary_pos_emb_v6,
+        7: apply_rotary_pos_emb_v7,
     }
     return versions.get(version, apply_rotary_pos_emb_v0)
 
