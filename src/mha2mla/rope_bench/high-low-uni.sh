@@ -18,13 +18,13 @@
 
 # 定义参数列表
 # MODEL_NAMES=("360m" "2-7b" "1b")
-MODEL_NAMES=("1b")
-TASKS=("winogrande" "mmlu" "arc_challenge" "hellaswag" "openbookqa" "piqa")
-# TASKS=("mmlu" "arc_challenge" "hellaswag" "openbookqa" "piqa")
+MODEL_NAMES=("2-7b")
+# TASKS=("winogrande" "mmlu" "arc_challenge" "hellaswag" "openbookqa" "piqa")
+TASKS=("mmlu")
 # ROPE_METHODS=("high" "uniform" "low" "high-low" "full-rope")
-ROPE_METHODS=("accumulate")
+ROPE_METHODS=("contribution")
 BASE_OUTPUT_PATH="./res"
-MAX_COMPONENT=false
+MAX_COMPONENT=true
 
 # 遍历所有组合
 for MODEL_NAME in "${MODEL_NAMES[@]}"; do
@@ -42,7 +42,7 @@ for MODEL_NAME in "${MODEL_NAMES[@]}"; do
 
             # 执行程序
             echo "Running: model_name=${MODEL_NAME}, task=${TASK}, rope_method=${ROPE_METHOD}, output_path=${OUTPUT_PATH}"
-            CUDA_VISIBLE_DEVICES=0 python partial_rope.py --model_name "$MODEL_NAME" --task "$TASK" --rope_method "$ROPE_METHOD" --output_path "$OUTPUT_PATH" --max_component "$MAX_COMPONENT"
+            CUDA_VISIBLE_DEVICES=2 python partial_rope.py --model_name "$MODEL_NAME" --task "$TASK" --rope_method "$ROPE_METHOD" --output_path "$OUTPUT_PATH" --max_component "$MAX_COMPONENT"
         done
     done
 done

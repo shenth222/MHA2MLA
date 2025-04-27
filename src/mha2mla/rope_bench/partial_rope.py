@@ -133,6 +133,17 @@ if __name__ == "__main__":
     patch_partial_rope(rope_cfg)
     # my_model = load_model(model_path, config) # create your model (could be running finetuning with some custom modeling code)
 
+    ### test ###
+    # config = load_config(model_path)
+    # tokenizer = load_tokenizer(model_path)
+    # model = load_model(model_path, config).cuda()
+    # prompt = "Hey, are you conscious? Can you talk to me?"
+    # inputs = tokenizer(prompt, return_tensors="pt")
+    # generate_ids = model.generate(inputs.input_ids.to("cuda"), max_length=30)
+    # outputs = tokenizer.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
+    # print(outputs)
+    # exit()
+
     # instantiate an LM subclass that takes your initialized model and can run
     # - `Your_LM.loglikelihood()`
     # - `Your_LM.loglikelihood_rolling()`
@@ -160,7 +171,7 @@ if __name__ == "__main__":
         model = "hf",
         model_args = f"pretrained={model_path}",
         tasks = [task],
-        batch_size = "auto:4",
+        batch_size = "64", # auto:4
         device = "cuda",
         cache_requests = True,
         evaluation_tracker = evaluation_tracker,

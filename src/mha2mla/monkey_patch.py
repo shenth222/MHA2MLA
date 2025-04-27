@@ -1606,3 +1606,10 @@ def infer_monkey_patch(rope_cfg=None):
 
     if rope_cfg is not None:
         partial_rope_monkey_patch(rope_cfg)
+
+
+"""
+In partial RoPE, although using partial RoPE, but the dimension of query and key is same as full RoPE,
+which means those components without position information are still participate in calculation.
+If they are not important, we consider to ignore them in calculating attn.
+"""

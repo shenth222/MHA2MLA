@@ -56,20 +56,40 @@ def cal_2_norm(states):
 
 def zero_ablation(q, k):
     # bsz, num_heads, q_len, head_dim
-    baseline = torch.matmul(q, k.transpose(2,3)) # # bsz, num_heads, q_len, q_len
+    # baseline = torch.matmul(q, k.transpose(2,3)) # # bsz, num_heads, q_len, q_len
+    # contribution = []
+    # _, _, slen, head_dim = q.size()
+    # for s_idx in range(slen):
+    #     q_seq = q[:, :, s_idx, :].unsqueeze(2) # # bsz, num_heads, 1, head_dim
+    #     k_seq = k[:, :, s_idx, :].unsqueeze(2)
+    #     diff_by_dim = []
+    #     for dim_idx in range(head_dim):
+    #         q_tmp = q_seq.clone()
+    #         k_tmp = k_seq.clone()
+    #         q_tmp[:, :, :, dim_idx] = 0
+    #         k_tmp[:, :, :, dim_idx] = 0
+    #         res_ablation = torch.matmul(q_tmp, k_tmp.transpose(2, 3)) # bsz, num_heads, 1, 1
+    #         diff = torch.abs(baseline[:, :, s_idx, s_idx].unsqueeze(-1).unsqueeze(-1) - res_ablation).squeeze(-1).squeeze(-1) # bsz, num_heads
+    #         diff_by_dim.append(diff)
+    #     diff_by_dim = torch.stack(diff_by_dim, dim=-1) # bsz, num_heads, head_dim
+    #     total_diff = torch.sum(diff_by_dim, dim=-1) # bsz, num_heads
+    #     contribution_by_seq = diff_by_dim / total_diff.unsqueeze(-1) # bsz, num_heads, head_dim
+    #     contribution.append(contribution_by_seq)
+
+    baseline = torch.sum(q * k, dim=-1) # bsz, num_heads, q_len
     contribution = []
     _, _, slen, head_dim = q.size()
     for s_idx in range(slen):
-        q_seq = q[:, :, s_idx, :].unsqueeze(2) # # bsz, num_heads, 1, head_dim
-        k_seq = k[:, :, s_idx, :].unsqueeze(2)
+        q_seq = q[:, :, s_idx:s_idx+1, :] # bsz, num_heads, 1, head_dim
+        k_seq = k[:, :, s_idx:s_idx+1, :]
         diff_by_dim = []
         for dim_idx in range(head_dim):
             q_tmp = q_seq.clone()
             k_tmp = k_seq.clone()
             q_tmp[:, :, :, dim_idx] = 0
             k_tmp[:, :, :, dim_idx] = 0
-            res_ablation = torch.matmul(q_tmp, k_tmp.transpose(2, 3)) # bsz, num_heads, 1, 1
-            diff = torch.abs(baseline[:, :, s_idx, s_idx].unsqueeze(-1).unsqueeze(-1) - res_ablation).squeeze(-1).squeeze(-1) # bsz, num_heads
+            res_ablation = torch.matmul(q_tmp, k_tmp.transpose(2, 3)).squeeze() # bsz, num_heads # sum(q*k)
+            diff = torch.abs(baseline[:, :, s_idx] - res_ablation) # bsz, num_heads
             diff_by_dim.append(diff)
         diff_by_dim = torch.stack(diff_by_dim, dim=-1) # bsz, num_heads, head_dim
         total_diff = torch.sum(diff_by_dim, dim=-1) # bsz, num_heads
@@ -113,7 +133,7 @@ def find_indices(contribution, threshold, max_dim):
 
 def create_custom_apply_rotary_pos_emb_hf(cfg):
 
-    def apply_rotary_pos_emb_v0(q, k, cos, sin, position_ids=None, unsqueeze_dim=1):
+    def apply_rotary_pos_emb_v0(q, k, cos, sin, position_ids=None, layer_idx=0, unsqueeze_dim=1):
         # Full-RoPE
         cos = cos.unsqueeze(unsqueeze_dim)
         sin = sin.unsqueeze(unsqueeze_dim)
@@ -121,7 +141,7 @@ def create_custom_apply_rotary_pos_emb_hf(cfg):
         k_embed = (k * cos) + (rotate_half(k) * sin)
         return q_embed, k_embed
 
-    def apply_rotary_pos_emb_v1(q, k, cos, sin, position_ids=None, unsqueeze_dim=1):
+    def apply_rotary_pos_emb_v1(q, k, cos, sin, position_ids=None, layer_idx=0, unsqueeze_dim=1):
         # retain the fastest-rotating (high-frequency) subspaces
         logger.warning_once(
             "HIGH: retain the fastest-rotating (high-frequency) subspaces"
@@ -156,7 +176,7 @@ def create_custom_apply_rotary_pos_emb_hf(cfg):
         )
         return q_embed, k_embed
 
-    def apply_rotary_pos_emb_v2(q, k, cos, sin, position_ids=None, unsqueeze_dim=1):
+    def apply_rotary_pos_emb_v2(q, k, cos, sin, position_ids=None, layer_idx=0, unsqueeze_dim=1):
         # select subspaces with equidistant intervals
         logger.warning_once(
             "UNIFORM: select subspaces with equidistant intervals"
@@ -172,7 +192,7 @@ def create_custom_apply_rotary_pos_emb_hf(cfg):
         k[..., indices] = k_embed[..., indices]
         return q, k
 
-    def apply_rotary_pos_emb_v3(q, k, cos, sin, position_ids=None, unsqueeze_dim=1):
+    def apply_rotary_pos_emb_v3(q, k, cos, sin, position_ids=None, layer_idx=0, unsqueeze_dim=1):
         # retain the fastest-rotating (high-frequency) subspaces and the slowest-rotating (low-frequency) subspaces
         logger.warning_once(
             "HIGH-LOW: retain the fastest-rotating (high-frequency) subspaces and the slowest-rotating (low-frequency) subspaces"
@@ -237,7 +257,7 @@ def create_custom_apply_rotary_pos_emb_hf(cfg):
         k_embed = torch.where(mask_for_k == 1, k_embed, k)
         return q_embed, k_embed
 
-    def apply_rotary_pos_emb_v5(q, k, cos, sin, position_ids=None, unsqueeze_dim=1):
+    def apply_rotary_pos_emb_v5(q, k, cos, sin, position_ids=None, layer_idx=0, unsqueeze_dim=1):
         # retain the slowest-rotating (low-frequency) subspaces
         cos = cos.unsqueeze(unsqueeze_dim)
         sin = sin.unsqueeze(unsqueeze_dim)
@@ -265,8 +285,10 @@ def create_custom_apply_rotary_pos_emb_hf(cfg):
         logger.warning_once(
             "Contribution: retain the subspaces with higher contribution"
         )
-
-        cos = cos.unsqueeze(unsqueeze_dim) # bsz, 1, q_len, head_dim
+        from IPython import embed
+        if layer_idx == 0:
+            embed()
+        cos = cos.unsqueeze(unsqueeze_dim) #1, 1, q_len, head_dim
         sin = sin.unsqueeze(unsqueeze_dim)
         q_embed = (q * cos) + (rotate_half(q) * sin) # bsz, num_heads, q_len, head_dim
         k_embed = (k * cos) + (rotate_half(k) * sin) # bsz, num_kv_heads, q_len, head_dim
@@ -290,6 +312,8 @@ def create_custom_apply_rotary_pos_emb_hf(cfg):
         mask_for_q = torch.repeat_interleave(input=mask_for_k, repeats=cfg["n_gqa_group"], dim=1)
         q_embed = torch.where(mask_for_q == 1, q_embed, q)
         k_embed = torch.where(mask_for_k == 1, k_embed, k)
+        if layer_idx == 0 and cos[0][0][0][0] != 1:
+            exit()
         return q_embed, k_embed
     
     def apply_rotary_pos_emb_v7(q, k, cos, sin, position_ids=None, layer_idx=0, unsqueeze_dim=1):
@@ -355,5 +379,81 @@ def create_custom_apply_rotary_pos_emb_hf(cfg):
     }
     return versions.get(version, apply_rotary_pos_emb_v0)
 
+def attn_forward(
+    self,
+    hidden_states: torch.Tensor,
+    attention_mask: Optional[torch.Tensor] = None,
+    position_ids: Optional[torch.LongTensor] = None,
+    past_key_value: Optional[Cache] = None,
+    output_attentions: bool = False,
+    use_cache: bool = False,
+    cache_position: Optional[torch.LongTensor] = None,
+    position_embeddings: Optional[Tuple[torch.Tensor, torch.Tensor]] = None,  # will become mandatory in v4.46
+    **kwargs,
+) -> Tuple[torch.Tensor, Optional[torch.Tensor], Optional[Tuple[torch.Tensor]]]:
+    from transformers.models.llama.modeling_llama import apply_rotary_pos_emb
+    bsz, q_len, _ = hidden_states.size()
+
+    query_states = self.q_proj(hidden_states)
+    key_states = self.k_proj(hidden_states)
+    value_states = self.v_proj(hidden_states)
+
+    query_states = query_states.view(bsz, q_len, self.num_heads, self.head_dim).transpose(1, 2)
+    key_states = key_states.view(bsz, q_len, self.num_key_value_heads, self.head_dim).transpose(1, 2)
+    value_states = value_states.view(bsz, q_len, self.num_key_value_heads, self.head_dim).transpose(1, 2)
+
+    if position_embeddings is None:
+        logger.warning_once(
+            "The attention layers in this model are transitioning from computing the RoPE embeddings internally "
+            "through `position_ids` (2D tensor with the indexes of the tokens), to using externally computed "
+            "`position_embeddings` (Tuple of tensors, containing cos and sin). In v4.46 `position_ids` will be "
+            "removed and `position_embeddings` will be mandatory."
+        )
+        cos, sin = self.rotary_emb(value_states, position_ids)
+    else:
+        cos, sin = position_embeddings
+    query_states, key_states = apply_rotary_pos_emb(query_states, key_states, cos, sin, layer_idx=self.layer_idx)
+
+    if past_key_value is not None:
+        # sin and cos are specific to RoPE models; cache_position needed for the static cache
+        cache_kwargs = {"sin": sin, "cos": cos, "cache_position": cache_position}
+        key_states, value_states = past_key_value.update(key_states, value_states, self.layer_idx, cache_kwargs)
+
+    key_states = repeat_kv(key_states, self.num_key_value_groups)
+    value_states = repeat_kv(value_states, self.num_key_value_groups)
+    attn_weights = torch.matmul(query_states, key_states.transpose(2, 3)) / math.sqrt(self.head_dim)
+
+    if attention_mask is not None:  # no matter the length, we just slice it
+        causal_mask = attention_mask[:, :, :, : key_states.shape[-2]]
+        attn_weights = attn_weights + causal_mask
+
+    # upcast attention to fp32
+    attn_weights = nn.functional.softmax(attn_weights, dim=-1, dtype=torch.float32).to(query_states.dtype)
+    attn_weights = nn.functional.dropout(attn_weights, p=self.attention_dropout, training=self.training)
+    attn_output = torch.matmul(attn_weights, value_states)
+
+    if attn_output.size() != (bsz, self.num_heads, q_len, self.head_dim):
+        raise ValueError(
+            f"`attn_output` should be of size {(bsz, self.num_heads, q_len, self.head_dim)}, but is"
+            f" {attn_output.size()}"
+        )
+
+    attn_output = attn_output.transpose(1, 2).contiguous()
+
+    attn_output = attn_output.reshape(bsz, q_len, -1)
+
+    if self.config.pretraining_tp > 1:
+        attn_output = attn_output.split(self.hidden_size // self.config.pretraining_tp, dim=2)
+        o_proj_slices = self.o_proj.weight.split(self.hidden_size // self.config.pretraining_tp, dim=1)
+        attn_output = sum([F.linear(attn_output[i], o_proj_slices[i]) for i in range(self.config.pretraining_tp)])
+    else:
+        attn_output = self.o_proj(attn_output)
+
+    if not output_attentions:
+        attn_weights = None
+
+    return attn_output, attn_weights, past_key_value
+
 def patch_partial_rope(rope_cfg):
     modeling_llama.apply_rotary_pos_emb = create_custom_apply_rotary_pos_emb_hf(rope_cfg)
+    modeling_llama.LlamaAttention.forward = attn_forward
