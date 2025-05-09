@@ -20,9 +20,9 @@
 # MODEL_NAMES=("360m" "2-7b" "1b")
 MODEL_NAMES=("2-7b")
 # TASKS=("winogrande" "mmlu" "arc_challenge" "hellaswag" "openbookqa" "piqa")
-TASKS=("mmlu")
+TASKS=("openbookqa" "piqa")
 # ROPE_METHODS=("high" "uniform" "low" "high-low" "full-rope")
-ROPE_METHODS=("contribution")
+ROPE_METHODS=("accumulate")
 BASE_OUTPUT_PATH="./res"
 MAX_COMPONENT=true
 

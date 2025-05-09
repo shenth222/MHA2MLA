@@ -286,8 +286,8 @@ def create_custom_apply_rotary_pos_emb_hf(cfg):
             "Contribution: retain the subspaces with higher contribution"
         )
         from IPython import embed
-        if layer_idx == 0:
-            embed()
+        # if layer_idx == 0:
+        #     embed()
         cos = cos.unsqueeze(unsqueeze_dim) #1, 1, q_len, head_dim
         sin = sin.unsqueeze(unsqueeze_dim)
         q_embed = (q * cos) + (rotate_half(q) * sin) # bsz, num_heads, q_len, head_dim
@@ -312,8 +312,8 @@ def create_custom_apply_rotary_pos_emb_hf(cfg):
         mask_for_q = torch.repeat_interleave(input=mask_for_k, repeats=cfg["n_gqa_group"], dim=1)
         q_embed = torch.where(mask_for_q == 1, q_embed, q)
         k_embed = torch.where(mask_for_k == 1, k_embed, k)
-        if layer_idx == 0 and cos[0][0][0][0] != 1:
-            exit()
+        # if layer_idx == 0 and cos[0][0][0][0] != 1:
+        #     exit()
         return q_embed, k_embed
     
     def apply_rotary_pos_emb_v7(q, k, cos, sin, position_ids=None, layer_idx=0, unsqueeze_dim=1):
