@@ -3,6 +3,9 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, AutoConfig
 import argparse
 from tqdm import tqdm
 from IPython import embed
+import numpy
+import plotly.express as px
+import os
 
 def get_parser():
     parser = argparse.ArgumentParser(description="CKA test")
@@ -103,8 +106,17 @@ if __name__ == "__main__":
     cka = cka + cka.T - torch.eye(num_layers)
 
     # heatmap
-    
-    embed()
+    data = cka.cpu().numpy()
+    fig = px.imshow(
+        data,
+        labels=dict(x="layers", y="layers", color="Value"),
+        x=list(range(num_layers)),
+        y=list(range(num_layers)),
+        color_continuous_scale=["#80a6c3", "#ffffff", "#da3b46"]
+    )
+    os.makedirs("./figure", exist_ok=True)
+    fig.write_image("./figure/test.png")
+    # embed()
 
 
 
