@@ -146,7 +146,7 @@ with torch.no_grad():
         prompt = dataset.tokenized_prompts[i]
         input_ids = prompt["input_ids"].cuda()
         attention_mask = prompt["attention_mask"].cuda()
-        model(input_ids, attention_mask=attention_mask)
+        model.generate(input_ids, attention_mask=attention_mask, max_new_tokens=128)
         break
 
 
@@ -209,94 +209,13 @@ def linear_cka_centered_torch(kv1: torch.Tensor, kv2: torch.Tensor) -> torch.Ten
 
 import matplotlib.pyplot as plt
 import numpy as np
-
-def plot_tensor(w, ax=None, title=None, x_label="Dims", y_label="Token"):
-    # Prepare the data for plotting
-    x = np.arange(w.shape[0])  # Dims
-    y = np.arange(w.shape[1])  # Seqlen
-    x, y = np.meshgrid(x, y)
-
-    # Use the provided axis or create a new figure and axis
-    if ax is None:
-        fig = plt.figure(figsize=(6, 6))
-        ax = fig.add_subplot(111, projection='3d')
-    else:
-        fig = None
-
-    # Plot the surface
-    surf = ax.plot_surface(x, y, w.T, cmap='coolwarm')
-    ax.xaxis.set_tick_params(pad=-6, size=13)
-    ax.yaxis.set_tick_params(pad=-4, size=13)
-    ax.zaxis.set_tick_params(pad=-3, size=13)
-    
-    # Set title and labels
-    if title is not None:
-        ax.set_title(title, fontsize=15)
-    ax.set_ylabel(x_label, labelpad=-5, fontsize=14)
-    ax.set_xlabel(y_label, labelpad=-1, fontsize=14)
-    ax.set_zlabel('Absolute Activation Value', labelpad=-5, fontsize=14)
-
-    return fig
-
-def plot_vector(w, ax=None, title=None, x_label="Dims", y_label="Value"):
-    # Use the provided axis or create a new figure and axis
-    if ax is None:
-        fig = plt.figure(figsize=(6, 6))
-        ax = fig.add_subplot(111)
-    else:
-        fig = None
-
-    # Plot the vector
-    ax.plot(w)
-    ax.xaxis.set_tick_params(size=16)
-    ax.yaxis.set_tick_params(size=16)
-    if x_label is not None:
-        ax.set_xlabel(x_label, fontsize=14)
-    if y_label is not None:
-        ax.set_ylabel(y_label, fontsize=14)
-    # Set title
-    if title is not None:
-        ax.set_title(title)
-
-    return fig
-
-
-def plot_side_by_side(tensors, titles=None, plot_type='tensor', saved_path = None):
-    """
-    Plot multiple tensors or vectors side by side.
-
-    Args:
-        tensors: List of tensors or vectors to plot.
-        titles: List of titles for each plot (optional).
-        plot_type: Type of plot ('tensor' for 3D tensor, 'vector' for 1D vector).
-    """
-    num_plots = len(tensors)
-    fig, axs = plt.subplots(1, num_plots, figsize=(6 * num_plots + 3, 6), subplot_kw={'projection': '3d'} if plot_type == 'tensor' else {})
-
-    # In case of only one plot, axs won't be an array; make it an array for consistency
-    if num_plots == 1:
-        axs = [axs]
-
-    # Plot each tensor/vector
-    for i, (tensor, ax) in enumerate(zip(tensors, axs)):
-        title = titles[i] if titles is not None else None
-        if plot_type == 'tensor':
-            plot_tensor(tensor, ax=ax, title=title)
-        elif plot_type == 'vector':
-            plot_vector(tensor, ax=ax, title=title)
-        else:
-            raise ValueError("Unsupported plot type. Use 'tensor' or 'vector'.")
-
-    plt.tight_layout()
-    if saved_path is not None:
-        plt.savefig(saved_path)
-    plt.show()
-
 import torch
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import numpy as np
 import seaborn as sns
+import plotly.express as px
+import os
 
 def plot_heatmap(tensor, title="Heatmap", custom_colors=None, colorbar=True, 
                  x_label="", y_label="", font_size=14, tick_font_size=12, interpolation="bilinear"):
@@ -351,6 +270,29 @@ def plot_heatmap(tensor, title="Heatmap", custom_colors=None, colorbar=True,
         cbar.ax.tick_params(labelsize=19)
     plt.savefig(f"{title}.png", bbox_inches='tight')
 
+def make_heatmap(tensor, title="Heatmap", color_continuous_scale=None, colorbar=True, 
+                 x_label="", y_label="", font_size=14, tick_font_size=12, interpolation="bilinear"):
+    if not isinstance(tensor, torch.Tensor):
+        raise TypeError("Input must be a PyTorch tensor.")
+    
+    if tensor.dim() != 2:
+        raise ValueError("Input tensor must be 2D.")
+    
+    # Convert tensor to numpy
+    matrix = tensor.detach().cpu().numpy()
+    fig = px.imshow(
+        matrix,
+        labels=dict(x=x_label, y=y_label, color="Value"),
+        x=list(range(num_layers)),
+        y=list(range(num_layers)),
+        color_continuous_scale=color_continuous_scale,
+        zmin=0,
+        zmax=1
+    )
+    os.makedirs("./figure", exist_ok=True)
+    fig.write_image("./figure/test.png")
+
+
 cka_matrix = torch.zeros(num_layers, num_layers)
 mode = "Key"
 if mode == "Key":
@@ -402,3 +344,5 @@ cmap = sns.diverging_palette(240, 10)
 custom_colors = ["#D93F49", "#E28187", "#EBBFC2", "#D5E1E3", "#AFC9CF", "#8FB4BE"]  
 custom_colors = custom_colors[::-1]  # Reverse the colors for better contrast
 plot_heatmap(cka_matrix, title=f"CKA Matrix ({mode}-Cache)", colorbar=True, x_label="Layer", y_label="Layer", custom_colors=custom_colors)
+color_continuous_scale = [[0,"#80a6c3"], [0.5,"#ffffff"], [1,"#da3b46"]]
+make_heatmap(cka_matrix, title=f"CKA Matrix ({mode}-Cache)", colorbar=True, x_label="Layer", y_label="Layer", color_continuous_scale=color_continuous_scale)
