@@ -1,10 +1,11 @@
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM, AutoConfig
 from IPython import embed
+from loguru import logger
 
 model_name = "/data/shenth/models/llama/2-7b-hf"  # Or any other Llama checkpoint available
 tokenizer = AutoTokenizer.from_pretrained(model_name)
-def load_and_process_model():
+def load_and_process_model(collect_q=False, collect_k=False, collect_v=False):
     model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.bfloat16)
     model = model.eval()
     model = model.cuda()
@@ -12,6 +13,7 @@ def load_and_process_model():
     # We'll collect outputs for all layers in these lists
     collected_k_outputs = []
     collected_v_outputs = []
+    collected_q_outputs = []
     def k_proj_hook(module, input, output):
         """
         module: The layer that produced this output (k_proj).
@@ -27,21 +29,33 @@ def load_and_process_model():
         """
         collected_v_outputs.append(output.detach().cpu())
 
+    def q_proj_hook(module, input, output):
+        """
+        Same logic as k_proj_hook, but for q_proj.
+        """
+        collected_q_outputs.append(output.detach().cpu())
+
+
     num_layers = len(model.model.layers)
     hooks_k = []
     hooks_v = []
+    hooks_q = []
     for layer_idx in range(num_layers):
         # Access the i-th layer
         layer = model.model.layers[layer_idx].self_attn
         
         # Register forward hooks
-        hook_k = layer.k_proj.register_forward_hook(k_proj_hook)
-        hook_v = layer.v_proj.register_forward_hook(v_proj_hook)
-        
-        hooks_k.append(hook_k)
-        hooks_v.append(hook_v)
+        if collect_k:
+            hook_k = layer.k_proj.register_forward_hook(k_proj_hook)
+            hooks_k.append(hook_k)
+        if collect_v:
+            hook_v = layer.v_proj.register_forward_hook(v_proj_hook)
+            hooks_v.append(hook_v)
+        if collect_q:
+            hook_q = layer.q_proj.register_forward_hook(q_proj_hook)
+            hooks_q.append(hook_q)
 
-    return model, hooks_k, hooks_v, collected_k_outputs, collected_v_outputs
+    return model, (hooks_q, hooks_k, hooks_v), (collected_q_outputs, collected_k_outputs, collected_v_outputs)
 
 from datasets import load_dataset
 DATADIR = {
@@ -138,7 +152,7 @@ class Dataset:
 
 dataset = Dataset("ruler/niah_multivalue", tokenizer, 4096, 4, -1, 1)
 
-model, hooks_k, hooks_v, collected_k_outputs, collected_v_outputs = load_and_process_model()
+model, hooks, collected_outputs = load_and_process_model(False, True, False)
 num_layers = len(model.model.layers)
 with torch.no_grad():
     for i in range(dataset.num_samples):
@@ -150,12 +164,13 @@ with torch.no_grad():
         break
 
 
-for hook in hooks_k:
+for hook in hooks[1]:
     hook.remove()
-for hook in hooks_v:
+for hook in hooks[2]:
     hook.remove()
-
-print("Num samles (layers) collected:", len(collected_k_outputs))
+for hook in hooks[0]:
+    hook.remove()
+# print("Num samles (layers) collected:", len(collected_outputs[1]))
 
 import torch
 import torch.nn.functional as F
@@ -296,6 +311,9 @@ def make_heatmap(tensor, title="Heatmap", color_continuous_scale=None, colorbar=
 cka_matrix = torch.zeros(num_layers, num_layers)
 mode = "Key"
 if mode == "Key":
+    collected_k_outputs = collected_outputs[1]
+    if not collected_k_outputs:
+        logger.error("CKA mode is {}, but {} is None".format(mode, mode))
     for i in range(num_layers):
         for j in range(num_layers):
             ki = collected_k_outputs[i]
@@ -311,6 +329,7 @@ if mode == "Key":
             
             del ki, kj
 elif mode == "Value":
+    collected_v_outputs = collected_outputs[2]
     for i in range(num_layers):
         for j in range(num_layers):
             vi = collected_v_outputs[i]
@@ -324,6 +343,8 @@ elif mode == "Value":
             cka_matrix[i, j] = linear_cka_centered_torch(vi, vj)
             print(f"CKA({i}, {j}) = {cka_matrix[i, j]}")
 elif mode == "KV":
+    collected_k_outputs = collected_outputs[1]
+    collected_v_outputs = collected_outputs[2]
     for i in range(num_layers):
         for j in range(num_layers):
             ki = collected_k_outputs[i]
@@ -338,11 +359,51 @@ elif mode == "KV":
             vj = vj.squeeze(0).cuda().float()
             cka_matrix[i, j] = linear_cka_centered_torch(ki, vj)
             print(f"CKA({i}, {j}) = {cka_matrix[i, j]}")
+elif mode == "query":
+    collected_q_outputs = collected_outputs[0]
+    if collected_q_outputs == []:
+        AssertionError
+    for i in range(num_layers):
+        for j in range(num_layers):
+            qi = collected_q_outputs[i]
+            qj = collected_q_outputs[j]
+
+            assert qi.shape == qj.shape
+            assert qi.shape[0] == 1
+
+            qi = qi.squeeze(0).cuda().float()
+            qj = qj.squeeze(0).cuda().float()
+            cka_matrix[i, j] = linear_cka_centered_torch(qi, qj)
+            print(f"CKA({i}, {j}) = {cka_matrix[i, j]}")
 
 
 cmap = sns.diverging_palette(240, 10)
 custom_colors = ["#D93F49", "#E28187", "#EBBFC2", "#D5E1E3", "#AFC9CF", "#8FB4BE"]  
 custom_colors = custom_colors[::-1]  # Reverse the colors for better contrast
-plot_heatmap(cka_matrix, title=f"CKA Matrix ({mode}-Cache)", colorbar=True, x_label="Layer", y_label="Layer", custom_colors=custom_colors)
+plot_heatmap(cka_matrix, title=f"CKA Matrix ({mode}-Cache)-tmp", colorbar=True, x_label="Layer", y_label="Layer", custom_colors=custom_colors)
 color_continuous_scale = [[0,"#80a6c3"], [0.5,"#ffffff"], [1,"#da3b46"]]
-make_heatmap(cka_matrix, title=f"CKA Matrix ({mode}-Cache)", colorbar=True, x_label="Layer", y_label="Layer", color_continuous_scale=color_continuous_scale)
+# make_heatmap(cka_matrix, title=f"CKA Matrix ({mode}-Cache)", colorbar=True, x_label="Layer", y_label="Layer", color_continuous_scale=color_continuous_scale)
+
+# group
+# reverse order
+groups = []
+current_group_idx = []
+LAYER_RELEVANCE = 0.8
+MEAN_LAYER_RELEVANCE = 0.9
+
+for i in range(num_layers-1, -1, -1):
+    if not current_group_idx:
+        current_group_idx.append(i)
+    else:
+        # check
+        is_candidate = all(cka_matrix[i, j] >= LAYER_RELEVANCE for j in current_group_idx)
+        is_member = (sum(cka_matrix[i, j] for j in current_group_idx) / len(current_group_idx)) >= MEAN_LAYER_RELEVANCE
+        if is_candidate and is_member:
+            current_group_idx.append(i)
+        else:
+            groups.append(current_group_idx)
+            current_group_idx = [i]
+if current_group_idx:
+    groups.append(current_group_idx)
+
+print(groups)
