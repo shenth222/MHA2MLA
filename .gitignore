@@ -189,3 +189,6 @@ wandb/
 
 # lm-eval results
 /src/mha2mla/rope_bench/res/*
+
+# HDM res
+/src/HDM/HDM_res/*
