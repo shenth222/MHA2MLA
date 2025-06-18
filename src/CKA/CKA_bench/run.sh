@@ -1,1 +1,1 @@
-CUDA_VISIBLE_DEVICES=3 python cka_bench.py --model_name "2-7b" --task "arc_challenge"  --customized_merge_config "./llama2-7.yaml"
+CUDA_VISIBLE_DEVICES=0 python cka_bench.py --model_name "2-7b" --task "piqa"   --customized_merge_config "./llama2-7-default.yaml"
