@@ -1,0 +1,130 @@
+absl-py==2.2.2
+accelerate==1.6.0
+aiohappyeyeballs==2.6.1
+aiohttp==3.11.18
+aiosignal==1.3.2
+argcomplete==3.5.3
+asttokens==3.0.0
+async-timeout==5.0.1
+attrs==25.3.0
+Brotli @ file:///croot/brotli-split_1736182456865/work
+certifi @ file:///croot/certifi_1745939216646/work/certifi
+chardet==5.2.0
+charset-normalizer @ file:///croot/charset-normalizer_1721748349566/work
+colorama==0.4.6
+contourpy==1.3.2
+cycler==0.12.1
+DataProperty==1.1.0
+datasets==3.6.0
+decorator==5.2.1
+dill==0.3.8
+evaluate==0.4.3
+exceptiongroup==1.2.2
+executing==2.2.0
+filelock @ file:///croot/filelock_1744281381737/work
+fonttools==4.58.0
+frozenlist==1.6.0
+fsspec==2025.3.0
+gmpy2 @ file:///croot/gmpy2_1738085463648/work
+grpcio==1.71.0
+hf-xet==1.1.0
+huggingface-hub==0.31.1
+idna @ file:///croot/idna_1714398848350/work
+imageio==2.37.0
+ipython==8.34.0
+jedi==0.19.2
+Jinja2 @ file:///croot/jinja2_1741710844255/work
+joblib==1.5.0
+jsonlines==4.0.0
+kaleido==0.2.1
+kiwisolver==1.4.8
+lazy_loader==0.4
+-e git+https://github.com/shenth222/lm-evaluation-harness.git@30de2fe103cf377a5c16717253bfb6afd42a367c#egg=lm_eval
+loguru==0.7.3
+lxml==5.4.0
+Markdown==3.8
+MarkupSafe @ file:///croot/markupsafe_1738584038848/work
+matplotlib==3.10.3
+matplotlib-inline==0.1.7
+mbstrdecoder==1.1.4
+mkl-service==2.4.0
+mkl_fft @ file:///io/mkl313/mkl_fft_1730824109137/work
+mkl_random @ file:///io/mkl313/mkl_random_1730823916628/work
+more-itertools==10.7.0
+mpmath @ file:///croot/mpmath_1690848262763/work
+multidict==6.4.3
+multiprocess==0.70.16
+narwhals @ file:///croot/narwhals_1742845957875/work
+networkx @ file:///croot/networkx_1737039604450/work
+nltk==3.9.1
+numexpr==2.10.2
+numpy @ file:///croot/numpy_and_numpy_base_1725470312869/work/dist/numpy-2.0.1-cp310-cp310-linux_x86_64.whl#sha256=120568f3fd675f59e4cb6de79a5c193b4067d90878d8bab2040fda8e3a2df6fa
+packaging==24.2
+pandas==2.2.3
+parso==0.8.4
+pathvalidate==3.2.3
+peft==0.15.2
+pexpect==4.9.0
+pillow @ file:///croot/pillow_1744613067434/work
+pipx==1.7.1
+platformdirs==4.3.6
+plotly @ file:///croot/plotly_1744960868503/work
+portalocker==3.1.1
+prompt_toolkit==3.0.51
+propcache==0.3.1
+protobuf==6.31.1
+psutil==7.0.0
+ptyprocess==0.7.0
+pure_eval==0.2.3
+pyarrow==20.0.0
+pybind11==2.13.6
+Pygments==2.19.1
+pyparsing==3.2.3
+PySocks @ file:///home/builder/ci_310/pysocks_1640793678128/work
+pytablewriter==1.2.1
+python-dateutil==2.9.0.post0
+pytz==2025.2
+PyYAML @ file:///croot/pyyaml_1728657952215/work
+regex==2024.11.6
+requests @ file:///croot/requests_1730999120400/work
+rouge_score==0.1.2
+sacrebleu==2.5.1
+safetensors==0.5.3
+scikit-image==0.25.2
+scikit-learn==1.6.1
+scipy==1.15.2
+seaborn==0.13.2
+six==1.17.0
+sqlitedict==2.1.0
+stack-data==0.6.3
+sympy @ file:///croot/sympy_1738108488918/work
+tabledata==1.3.4
+tabulate==0.9.0
+tcolorpy==0.1.7
+tensorboard==2.19.0
+tensorboard-data-server==0.7.2
+termcolor==3.1.0
+threadpoolctl==3.6.0
+tifffile==2025.5.10
+tokenizers==0.20.3
+tomli==2.2.1
+torch==2.4.0
+torch-dct==0.1.6
+torchaudio==2.4.0
+torchvision==0.19.0
+tqdm==4.67.1
+tqdm-multiprocess==0.0.11
+traitlets==5.14.3
+transformers==4.46.3
+triton==3.0.0
+typepy==1.3.4
+typing_extensions @ file:///croot/typing_extensions_1734714854207/work
+tzdata==2025.2
+urllib3 @ file:///croot/urllib3_1737133630106/work
+userpath==1.9.2
+wcwidth==0.2.13
+Werkzeug==3.1.3
+word2number==1.1
+xxhash==3.5.0
+yarl==1.20.0
+zstandard==0.23.0
