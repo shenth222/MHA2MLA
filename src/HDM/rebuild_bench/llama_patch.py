@@ -199,11 +199,12 @@ def LMLP_forward(self, x):
     # exit()
     up = self.up_proj(x) if hasattr(self, 'up_proj') else x @ ((self.up_w1 @ self.up_h1) * (self.up_w2 @ self.up_h2))
     gate = self.gate_proj(x) if hasattr(self, 'gate_proj') else x @ ((self.gate_w1 @ self.gate_h1) * (self.gate_w2 @ self.gate_h2))
-    down_proj = self.down_proj(self.act_fn(gate * up)) if hasattr(self, 'down_proj') else self.act_fn(gate * up) @ ((self.down_w1 @ self.down_h1) * (self.down_w2 @ self.down_h2)).T
+    down_proj = self.down_proj(self.act_fn(gate) * up) if hasattr(self, 'down_proj') else self.act_fn(gate * up) @ ((self.down_w1 @ self.down_h1) * (self.down_w2 @ self.down_h2)).T
     # down_proj = self.down_proj(self.act_fn(self.gate_proj(x)) * self.up_proj(x))
     del up, gate
     torch.cuda.empty_cache()
     return down_proj
+    # return self.down_proj(self.act_fn(self.gate_proj(x)) * self.up_proj(x))
 
 def enable_llama_patch():
     LlamaForCausalLM.rebuild_weight = rebuild_weight
