@@ -2,7 +2,7 @@ import torch
 import sys
 sys.path.append("/data/shenth/work/MHA2MLA/src")
 from HDM.utils import load_HDM_res, load_model
-from llama_patch import enable_patch
+from llama_patch import enable_llama_patch
 from transformers import AutoConfig, AutoTokenizer
 import lm_eval
 from lm_eval.utils import setup_logging, simple_parse_args_string
@@ -12,8 +12,9 @@ from lm_eval.utils import (
     make_table,
     simple_parse_args_string,
 )
-from lm_patch import enable_simple_evaluate_patch, simple_evaluate
+from lm_patch import simple_evaluate
 import json
+from loguru import logger
 
 def mean_merge(input_layers: list):
     tensor = sum(input_layers)
@@ -48,7 +49,7 @@ if __name__ == "__main__":
     # outputs = tokenizer.batch_decode(res, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
     # print(outputs)
 
-    enable_simple_evaluate_patch()
+    enable_llama_patch()
     # initialize logging
     setup_logging("INFO") # optional, but recommended; or you can set up logging yourself
 
@@ -58,7 +59,9 @@ if __name__ == "__main__":
     # torch.cuda.memory._record_memory_history()
     results = simple_evaluate( # call simple_evaluate
         model = "hf",
-        model_args = f"pretrained=/data/shenth/models/llama/2-7b-hf",
+        model_args = {"pretrained": "/data/shenth/models/llama/2-7b-hf",
+                      "attn_implementation": "eager"
+        },
         tasks = ["piqa"],
         batch_size = "64", # auto:4
         device = "cuda",
@@ -66,6 +69,8 @@ if __name__ == "__main__":
         task_manager = task_manager
     )
     # torch.cuda.memory._dump_snapshot(f"{model_name}-{label}-xkv.pickle")
+    mem = torch.cuda.max_memory_allocated() /1024 /1024 /1024
+    logger.info(f"Max memory: {mem}GB")
 
     if results is not None:
         print(make_table(results))
@@ -73,3 +78,7 @@ if __name__ == "__main__":
             print(make_table(results, "groups"))
 
     
+    # 23.686293601989746GB
+    # QKVO 21.686293601989746GB
+    # 49.24 UPG 4096->512 18.639540672302246GB
+    # 49.51 UPG 11008->512 18.639540672302246GB

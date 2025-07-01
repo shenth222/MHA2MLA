@@ -224,8 +224,19 @@ def simple_evaluate(
         eval_logger.info("Using pre-initialized model")
         lm = model
 
-    from IPython import embed
+    # lm.model.rebuild_weight(32, "Q", lm.model.dtype)
+    # lm.model.rebuild_weight(32, "K", lm.model.dtype)
+    # from IPython import embed
     # embed()
+    # lm.model.merge_layer(32, "Q", "h1", "svd", 512, lm.model.dtype)
+    # lm.model.merge_layer(32, "K", "h1", "svd", 512, lm.model.dtype)
+    # embed()
+    # lm.model.rebuild_weight(32, "V", lm.model.dtype)
+    # lm.model.rebuild_weight(32, "O", lm.model.dtype)
+    # s = list(range(8,24))
+    lm.model.rebuild_weight(32, "U", 4096, lm.model.dtype)
+    lm.model.rebuild_weight(32, "D", 4096, lm.model.dtype)
+    lm.model.rebuild_weight(32, "G", 4096, lm.model.dtype)
 
     if use_cache is not None:
         eval_logger.info(f"Using cache at {use_cache + '_rank' + str(lm.rank) + '.db'}")
@@ -383,6 +394,3 @@ def simple_evaluate(
         return results
     else:
         return None
-
-def enable_simple_evaluate_patch():
-    lm_eval.evaluator.simple_evaluate = simple_evaluate

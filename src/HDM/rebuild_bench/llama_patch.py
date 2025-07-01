@@ -1,6 +1,6 @@
 # patch for post init, deleting origin weight, using HDM res
 # LlamaModel -> post_init -> LlamaForCasualLM -> post_init
-from transformers.models.llama.modeling_llama import LlamaForCausalLM, LlamaModel, LlamaPreTrainedModel, LlamaAttention, apply_rotary_pos_emb, repeat_kv
+from transformers.models.llama.modeling_llama import LlamaForCausalLM, LlamaModel, LlamaPreTrainedModel, LlamaAttention, apply_rotary_pos_emb, repeat_kv, LlamaMLP
 from torch import nn
 from transformers.models.llama.configuration_llama import LlamaConfig
 from typing import Optional, Tuple
@@ -10,22 +10,104 @@ from loguru import logger
 import math
 import torch
 import torch.nn.functional as F
+import sys
+sys.path.append("/data/shenth/work/MHA2MLA/src")
+from HDM.utils import load_HDM_res
 
-def rebuild_weight(self, num_layers, w1, h1, w2, h2, mode="Q"):
-    logger.info(f"Rebuild {mode} weight")
+def mean_merge(input_layers: list):
+    tensor = sum(input_layers)
+    return tensor / len(input_layers)
+
+def svd_merge(input_layers: list):
+    rank = 64
+    row, col = input_layers[0].shape
+    tensor = torch.cat(input_layers, dim=1)
+    U, S, Vt = torch.linalg.svd(tensor, full_matrices=False)
+    U = U[:, :rank]
+    S = S[:rank]
+    Vt = Vt[:rank, :]
+    kernel = U @ torch.diag_embed(S)
+    v = torch.split(Vt, col, dim=1)
+    return 
+
+def merge_layer(self, strategy, mode, factor, merge_impl="mean", rank=512, dtype=torch.float16):
+    logger.info(f"Merge {mode} weight")
+    factors = ["h1", "h2"]
+    if factor not in factors: logger.error(f"No *_{factor} weight")
     attn = ["Q", "K", "V", "O"]
     mlp = ["U", "D", "G"]
+    mode_map = {
+        "Q": "q",
+        "K": "k",
+        "V": "v",
+        "O": "o",
+        "U": "up",
+        "D": "down",
+        "G": "gate"
+    }
+    if mode not in attn and mode not in mlp: logger.error(f"No {mode}_* weight")
+    module = "self_attn" if mode in attn else "mlp"
+    impl = ["mean", "svd"]
+    if merge_impl not in impl: logger.error(f"No {merge_impl} impl for merge")
+    if type(strategy) is int:
+        strategy = list(range(strategy))
+    _, h1, _, h2 = load_HDM_res("../HDM_res", mode=mode, rank=rank)
+    commond = f"""
+tensor = {merge_impl}_merge({factor}).to(dtype).cuda()
+    """
+    exec(commond)
+    for layer_idx in strategy:
+        logger.info(f"Merge layer {layer_idx} {module} {mode} weight")
+        commond = f"""
+del self.model.layers[layer_idx].{module}.{mode_map[mode]}_{factor}
+torch.cuda.empty_cache()
+self.model.layers[layer_idx].{module}.{mode_map[mode]}_{factor} = tensor
+        """
+        exec(commond)
+
+
+def rebuild_weight(self, strategy, mode="Q", rank=512, dtype=torch.float16):
+    logger.info(f"Rebuild {mode} weight")
+    w1, h1, w2, h2 = load_HDM_res("../HDM_res", mode=mode, rank=rank)
+    assert w1 is not None, f"Fail to load HDM weights"
+    attn = ["Q", "K", "V", "O"]
+    mlp = ["U", "D", "G"]
+    mode_map = {
+        "Q": "q",
+        "K": "k",
+        "V": "v",
+        "O": "o",
+        "U": "up",
+        "D": "down",
+        "G": "gate"
+    }
+    if type(strategy) is int:
+        strategy = list(range(strategy))
     if mode in attn:
-        for layer_idx in range(num_layers):
-            logger.info(f"building layer {layer_idx} {mode} weight")
+        for layer_idx in strategy:
+            logger.info(f"building layer {layer_idx} attn {mode} weight")
             commond = f"""
-del self.model.layers[layer_idx].self_attn.{mode.lower()}_proj
-self.model.layers[layer_idx].self_attn.{mode.lower()}_w1 = w1[layer_idx].cuda()
-self.model.layers[layer_idx].self_attn.{mode.lower()}_h1 = h1[layer_idx].cuda()
-self.model.layers[layer_idx].self_attn.{mode.lower()}_w2 = w2[layer_idx].cuda()
-self.model.layers[layer_idx].self_attn.{mode.lower()}_h2 = h2[layer_idx].cuda()
+del self.model.layers[layer_idx].self_attn.{mode_map[mode]}_proj
+torch.cuda.empty_cache()
+self.model.layers[layer_idx].self_attn.{mode_map[mode]}_w1 = w1[layer_idx].to(dtype).cuda()
+self.model.layers[layer_idx].self_attn.{mode_map[mode]}_h1 = h1[layer_idx].to(dtype).cuda()
+self.model.layers[layer_idx].self_attn.{mode_map[mode]}_w2 = w2[layer_idx].to(dtype).cuda()
+self.model.layers[layer_idx].self_attn.{mode_map[mode]}_h2 = h2[layer_idx].to(dtype).cuda()
             """
             exec(commond)
+    elif mode in mlp:
+        for layer_idx in strategy:
+            logger.info(f"building layer {layer_idx} mlp {mode} weight")
+            commond = f"""
+del self.model.layers[layer_idx].mlp.{mode_map[mode]}_proj
+torch.cuda.empty_cache()
+self.model.layers[layer_idx].mlp.{mode_map[mode]}_w1 = w1[layer_idx].to(dtype).cuda()
+self.model.layers[layer_idx].mlp.{mode_map[mode]}_h1 = h1[layer_idx].to(dtype).cuda()
+self.model.layers[layer_idx].mlp.{mode_map[mode]}_w2 = w2[layer_idx].to(dtype).cuda()
+self.model.layers[layer_idx].mlp.{mode_map[mode]}_h2 = h2[layer_idx].to(dtype).cuda()
+            """
+            exec(commond)
+    torch.cuda.empty_cache()
 
 def LA_forward(
     self,
@@ -51,9 +133,11 @@ def LA_forward(
     else:
         key_states = hidden_states @ ((self.k_w1 @ self.k_h1) * (self.k_w2 @ self.k_h2)).T
 
-        
-    value_states = self.v_proj(hidden_states)
-
+    if hasattr(self, 'v_proj'):
+        value_states = self.v_proj(hidden_states)
+    else:
+        value_states = hidden_states @ ((self.v_w1 @ self.v_h1) * (self.v_w2 @ self.v_h2)).T
+    
     query_states = query_states.view(bsz, q_len, self.num_heads, self.head_dim).transpose(1, 2)
     key_states = key_states.view(bsz, q_len, self.num_key_value_heads, self.head_dim).transpose(1, 2)
     value_states = value_states.view(bsz, q_len, self.num_key_value_heads, self.head_dim).transpose(1, 2)
@@ -98,18 +182,31 @@ def LA_forward(
 
     attn_output = attn_output.reshape(bsz, q_len, -1)
 
-    if self.config.pretraining_tp > 1:
-        attn_output = attn_output.split(self.hidden_size // self.config.pretraining_tp, dim=2)
-        o_proj_slices = self.o_proj.weight.split(self.hidden_size // self.config.pretraining_tp, dim=1)
-        attn_output = sum([F.linear(attn_output[i], o_proj_slices[i]) for i in range(self.config.pretraining_tp)])
-    else:
+    if hasattr(self, 'o_proj'):
         attn_output = self.o_proj(attn_output)
+    else:
+        attn_output = attn_output @ ((self.o_w1 @ self.o_h1) * (self.o_w2 @ self.o_h2)).T
+    
 
     if not output_attentions:
         attn_weights = None
 
     return attn_output, attn_weights, past_key_value
 
-def enable_patch():
+def LMLP_forward(self, x):
+    # from IPython import embed
+    # embed()
+    # exit()
+    up = self.up_proj(x) if hasattr(self, 'up_proj') else x @ ((self.up_w1 @ self.up_h1) * (self.up_w2 @ self.up_h2))
+    gate = self.gate_proj(x) if hasattr(self, 'gate_proj') else x @ ((self.gate_w1 @ self.gate_h1) * (self.gate_w2 @ self.gate_h2))
+    down_proj = self.down_proj(self.act_fn(gate * up)) if hasattr(self, 'down_proj') else self.act_fn(gate * up) @ ((self.down_w1 @ self.down_h1) * (self.down_w2 @ self.down_h2)).T
+    # down_proj = self.down_proj(self.act_fn(self.gate_proj(x)) * self.up_proj(x))
+    del up, gate
+    torch.cuda.empty_cache()
+    return down_proj
+
+def enable_llama_patch():
     LlamaForCausalLM.rebuild_weight = rebuild_weight
     LlamaAttention.forward = LA_forward
+    LlamaMLP.forward = LMLP_forward
+    LlamaForCausalLM.merge_layer = merge_layer
