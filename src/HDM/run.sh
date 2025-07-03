@@ -1,1 +1,1 @@
-CUDA_VISIBLE_DEVICES=2 python weight_hdm.py --mode G
+CUDA_VISIBLE_DEVICES=3 python weight_hdm.py --mode V --rank 256

@@ -14,7 +14,7 @@ sys.path.append("/data/shenth/work/MHA2MLA/src/")
 from CKA.cka_utils import linear_cka_centered_torch
 
 MODE = ["Q", "K", "V", "O", "U", "D", "G"]
-RANK = 4096
+# RANK = 256
 
 def HDM_for_weight(model, mode="Q", rank=32):
     assert mode in MODE, f"current mode: {mode} is not in MODE: {MODE}"
@@ -93,6 +93,7 @@ def cossim_by_layer(input):
 def get_parser():
     parser = argparse.ArgumentParser(description="Benchmark for cka")
     parser.add_argument("--mode", type=str, required=True, choices=MODE, help="Q/K/V/O which?")
+    parser.add_argument("--rank", type=int, required=True)
     return parser
 
 def make_heatmap(tensor, title, color_continuous_scale=None, x_label="Layer", y_label="Layer", fig_path="./figure/cka/", file_name="", zmin=0, zmax=1):
@@ -118,6 +119,7 @@ if __name__ == "__main__":
     config._attn_implementation = "eager"
     model = load_model(config)
     mode = args.mode
+    RANK = args.rank
     W1, H1, W2, H2 = HDM_for_weight(model, mode, RANK)
     save_HDM_res(W1, H1, W2, H2, mode=mode, rank=RANK)
 
