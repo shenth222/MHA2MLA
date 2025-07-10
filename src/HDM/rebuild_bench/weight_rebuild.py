@@ -12,7 +12,7 @@ from lm_eval.utils import (
     make_table,
     simple_parse_args_string,
 )
-from lm_patch import simple_evaluate
+from lm_patch import simple_evaluate, set_rebuild_commond
 import json
 from loguru import logger
 
@@ -55,6 +55,7 @@ if __name__ == "__main__":
 
     task_manager = lm_eval.tasks.TaskManager()
 
+    set_rebuild_commond(32, ["Q", "K"], 32)
     # models.huggingface: 594
     # torch.cuda.memory._record_memory_history()
     results = simple_evaluate( # call simple_evaluate
@@ -62,7 +63,7 @@ if __name__ == "__main__":
         model_args = {"pretrained": "/data/shenth/models/llama/2-7b-hf",
                       "attn_implementation": "eager"
         },
-        tasks = ["piqa"],
+        tasks = ["mmlu"],
         batch_size = "64", # auto:4
         device = "cuda",
         cache_requests = True,

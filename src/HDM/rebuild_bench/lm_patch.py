@@ -27,6 +27,14 @@ from lm_eval.evaluator import evaluate
 
 eval_logger = logging.getLogger(__name__)
 
+lm_patch_rebuild_commond = ""
+
+def set_rebuild_commond(num_layers, mode, rank):
+    global lm_patch_rebuild_commond
+    # lm.model.rebuild_weight(32, "Q", 512, lm.model.dtype)
+    for m in mode:
+        lm_patch_rebuild_commond += f"\nlm.model.rebuild_weight({num_layers}, \"{m}\", {rank}, lm.model.dtype)"
+
 @positional_deprecated
 def simple_evaluate(
     model,
@@ -224,19 +232,20 @@ def simple_evaluate(
         eval_logger.info("Using pre-initialized model")
         lm = model
 
-    # lm.model.rebuild_weight(32, "Q", lm.model.dtype)
-    # lm.model.rebuild_weight(32, "K", lm.model.dtype)
+    exec(lm_patch_rebuild_commond)
+    # lm.model.rebuild_weight(32, "Q", 512, lm.model.dtype)
+    # lm.model.rebuild_weight(32, "K", 512, lm.model.dtype)
     # from IPython import embed
     # embed()
-    # lm.model.merge_layer(32, "Q", "h1", "svd", 512, lm.model.dtype)
-    # lm.model.merge_layer(32, "K", "h1", "svd", 512, lm.model.dtype)
+    # lm.model.merge_layer(32, "Q", "h1", "mean", 512, lm.model.dtype)
+    # lm.model.merge_layer(32, "K", "h1", "mean", 512, lm.model.dtype)
     # embed()
-    # lm.model.rebuild_weight(32, "V", lm.model.dtype)
-    # lm.model.rebuild_weight(32, "O", lm.model.dtype)
+    # lm.model.rebuild_weight(32, "V", 512, lm.model.dtype)
+    # lm.model.rebuild_weight(32, "O", 512, lm.model.dtype)
     # s = list(range(8,24))
-    lm.model.rebuild_weight(32, "U", 4096, lm.model.dtype)
-    lm.model.rebuild_weight(32, "D", 4096, lm.model.dtype)
-    lm.model.rebuild_weight(32, "G", 4096, lm.model.dtype)
+    # lm.model.rebuild_weight(32, "U", 512, lm.model.dtype)
+    # lm.model.rebuild_weight(32, "D", 512, lm.model.dtype)
+    # lm.model.rebuild_weight(32, "G", 512, lm.model.dtype)
 
     if use_cache is not None:
         eval_logger.info(f"Using cache at {use_cache + '_rank' + str(lm.rank) + '.db'}")
